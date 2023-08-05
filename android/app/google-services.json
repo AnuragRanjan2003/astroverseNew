@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "76643529369",
+    "project_id": "astroverse-5f2ae",
+    "storage_bucket": "astroverse-5f2ae.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:76643529369:android:3595acd92164d482c23e08",
+        "android_client_info": {
+          "package_name": "com.example.astroverse"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "76643529369-6fdd2g4hpnesna0laa4uhnvs8g7t1cm9.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAza2x8DDFbHJ7qRjpnPddZi9SpKq5aP4E"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "76643529369-6fdd2g4hpnesna0laa4uhnvs8g7t1cm9.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
