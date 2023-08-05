@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 
 abstract class ProjectTextStyles {
   TextStyle get body;
+
   TextStyle get bodyBold;
 
   TextStyle get header;
@@ -10,9 +11,12 @@ abstract class ProjectTextStyles {
   TextStyle get onButton;
 
   TextStyle get small;
+
   TextStyle get smallBold;
 
   TextStyle get subtitle;
+
+  TextStyle get lightBody;
 }
 
 class TextStylesLight implements ProjectTextStyles {
@@ -26,7 +30,9 @@ class TextStylesLight implements ProjectTextStyles {
 
   @override
   TextStyle get onButton => const TextStyle(
-      color: ProjectColors.primary, fontSize: 18, fontWeight: FontWeight.w600);
+      color: ProjectColors.background,
+      fontSize: 15,
+      fontWeight: FontWeight.w600);
 
   @override
   TextStyle get small => const TextStyle(
@@ -34,14 +40,27 @@ class TextStylesLight implements ProjectTextStyles {
 
   @override
   TextStyle get subtitle =>
-      const TextStyle(color: ProjectColors.primary, fontSize: 16 );
+      const TextStyle(color: ProjectColors.primary, fontSize: 16);
 
   @override
-  TextStyle get bodyBold => const TextStyle(color: ProjectColors.primary, fontSize: 16 , fontWeight: FontWeight.w600);
+  TextStyle get bodyBold => const TextStyle(
+      color: ProjectColors.primary, fontSize: 16, fontWeight: FontWeight.w600);
 
   @override
   TextStyle get smallBold => const TextStyle(
       color: ProjectColors.primary, fontSize: 14, fontWeight: FontWeight.w600);
+
+  @override
+  TextStyle get lightBody =>
+      const TextStyle(color: ProjectColors.onBackground, fontSize: 16);
+
+  TextStyle coloredBody(Color color) => TextStyle(color: color, fontSize: 16);
+
+  TextStyle coloredBodyBold(Color color) =>
+      TextStyle(color: color, fontSize: 16, fontWeight: FontWeight.w600);
+
+  TextStyle coloredSmall(Color color) =>
+      TextStyle(color: color, fontSize: 14, fontWeight: FontWeight.w400);
 }
 
 class TextStyleDark implements ProjectTextStyles {
@@ -57,9 +76,7 @@ class TextStyleDark implements ProjectTextStyles {
 
   @override
   TextStyle get onButton => const TextStyle(
-      color: ProjectColors.background,
-      fontSize: 16,
-      fontWeight: FontWeight.w600);
+      color: ProjectColors.primary, fontSize: 16, fontWeight: FontWeight.w600);
 
   @override
   TextStyle get small => const TextStyle(
@@ -72,11 +89,18 @@ class TextStyleDark implements ProjectTextStyles {
       const TextStyle(color: ProjectColors.background, fontSize: 14);
 
   @override
-  TextStyle get bodyBold => const TextStyle(color: ProjectColors.background, fontSize: 16 , fontWeight: FontWeight.w600);
+  TextStyle get bodyBold => const TextStyle(
+      color: ProjectColors.background,
+      fontSize: 16,
+      fontWeight: FontWeight.w600);
 
   @override
-  TextStyle get smallBold =>const TextStyle(
+  TextStyle get smallBold => const TextStyle(
       color: ProjectColors.background,
       fontSize: 14,
       fontWeight: FontWeight.w600);
+
+  @override
+  TextStyle get lightBody =>
+      const TextStyle(color: ProjectColors.onBackground, fontSize: 16);
 }

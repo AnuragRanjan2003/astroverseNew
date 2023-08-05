@@ -1,29 +1,31 @@
-import 'package:astroverse/components/named_box.dart';
 import 'package:astroverse/controllers/auth_controller.dart';
-import 'package:astroverse/res/colors/project_colors.dart';
-import 'package:astroverse/res/decor/button_decor.dart';
-import 'package:astroverse/res/dims/global.dart';
-import 'package:astroverse/res/strings/user_login_strings.dart';
-import 'package:astroverse/res/textStyles/text_styles.dart';
-import 'package:astroverse/utils/resource.dart';
+import 'package:astroverse/models/user.dart';
+import 'package:astroverse/routes/routes.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get/get.dart';
 
-import '../../../routes/routes.dart';
+import '../../../components/named_box.dart';
+import '../../../res/colors/project_colors.dart';
+import '../../../res/decor/button_decor.dart';
+import '../../../res/dims/global.dart';
+import '../../../res/strings/user_signup_strings.dart';
+import '../../../res/textStyles/text_styles.dart';
 
-class UserLoginScreenPortrait extends StatelessWidget {
+class UserSignUpPortrait extends StatelessWidget {
   final BoxConstraints cons;
 
-  const UserLoginScreenPortrait({super.key, required this.cons});
+  const UserSignUpPortrait({super.key, required this.cons});
 
   @override
   Widget build(BuildContext context) {
-    final AuthController auth = Get.find();
     final double wd = cons.maxWidth;
     final double ht = cons.maxHeight;
     final TextEditingController email = TextEditingController();
     final TextEditingController password = TextEditingController();
+    final TextEditingController name = TextEditingController();
+    final AuthController auth = Get.find();
+
     return Scaffold(
       backgroundColor: ProjectColors.background,
       body: SingleChildScrollView(
@@ -33,7 +35,7 @@ class UserLoginScreenPortrait extends StatelessWidget {
           padding: const EdgeInsets.only(
               right: GlobalDims.horizontalPadding,
               left: GlobalDims.horizontalPadding,
-              bottom: 0,
+              bottom: 10,
               top: GlobalDims.verticalPaddingExtra),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -45,20 +47,20 @@ class UserLoginScreenPortrait extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        UserLoginStrings.title,
+                        UserSignUpStrings.title,
                         style: TextStylesLight().header,
                       ),
                       const SizedBox(
                         height: 20,
                       ),
                       Text(
-                        UserLoginStrings.subTitle,
+                        UserSignUpStrings.subTitle,
                         style: TextStylesLight().subtitle,
                       ),
                     ],
                   )),
               Expanded(
-                  flex: 2,
+                  flex: 3,
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -68,7 +70,15 @@ class UserLoginScreenPortrait extends StatelessWidget {
                           controller: email,
                           nameStyle: TextStylesLight().bodyBold),
                       const SizedBox(
-                        height: 20,
+                        height: 10,
+                      ),
+                      NamedBox(
+                          name: "Username",
+                          hint: "Enter your username",
+                          controller: name,
+                          nameStyle: TextStylesLight().bodyBold),
+                      const SizedBox(
+                        height: 10,
                       ),
                       NamedBox(
                         name: "Password",
@@ -85,32 +95,18 @@ class UserLoginScreenPortrait extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
                       MaterialButton(
-                          onPressed: () {
-                            if (auth.loading.isTrue) return;
-                            if (email.value.text.isNotEmpty &&
-                                password.value.text.isNotEmpty) {
-                              auth.loginUser(
-                                  email.value.text,
-                                  password.value.text,
-                                  (p) => updateUI(p, context));
-                            }
-                          },
-                          shape: ButtonDecors.filled,
-                          color: ProjectColors.main,
-                          padding: const EdgeInsets.symmetric(vertical: 12),
-                          child: Obx(() {
-                            if (auth.loading.isFalse) {
-                              return Text("Log In",
-                                  style: TextStylesLight().onButton);
-                            } else {
-                              return const SizedBox(
-                                  height: 20,
-                                  width: 20,
-                                  child: CircularProgressIndicator(
-                                    color: ProjectColors.background,
-                                  ));
-                            }
-                          })),
+                        onPressed: () {
+                          if(email.value.text.isEmpty || password.value.text.isEmpty || name.value.text.isEmpty) return;
+                          auth.pass.value = password.value.text;
+                          final User user = User(
+                              name.value.text, email.value.text, "", 0, "");
+                          Get.toNamed(Routes.moreProfile, arguments: user);
+                        },
+                        shape: ButtonDecors.filled,
+                        color: ProjectColors.main,
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        child: Text("Next", style: TextStylesLight().onButton),
+                      ),
                       const SizedBox(
                         height: 15,
                       ),
@@ -138,39 +134,28 @@ class UserLoginScreenPortrait extends StatelessWidget {
                       ),
                     ],
                   )),
-              Expanded(
-                  flex: 1,
-                  child: Column(
-                    children: [
-                      Text(
-                        UserLoginStrings.signup,
-                        style: TextStylesLight().small,
-                      ),
-                      TextButton(
-                        onPressed: () {
-                          Get.toNamed(Routes.userSignup);
-                        },
-                        child: Text(
-                          "Sign Up",
-                          style: TextStylesLight().bodyBold,
-                          textAlign: TextAlign.start,
-                        ),
-                      )
-                    ],
-                  )),
+              Column(
+                children: [
+                  Text(
+                    UserSignUpStrings.signup,
+                    style: TextStylesLight().small,
+                  ),
+                  TextButton(
+                    onPressed: () {
+                      Get.toNamed(Routes.userLogin);
+                    },
+                    child: Text(
+                      "Log In",
+                      style: TextStylesLight().bodyBold,
+                      textAlign: TextAlign.start,
+                    ),
+                  )
+                ],
+              ),
             ],
           ),
         ),
       ),
     );
-  }
-
-  void updateUI(Resource<dynamic> p, BuildContext context) {
-    if (p.isSuccess) {
-      Get.toNamed(Routes.main);
-    } else {
-      p = p as Failure<dynamic>;
-      Get.snackbar("Error", p.error);
-    }
   }
 }

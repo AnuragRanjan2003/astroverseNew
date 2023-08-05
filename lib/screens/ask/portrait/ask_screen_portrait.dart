@@ -1,3 +1,4 @@
+import 'package:astroverse/controllers/auth_controller.dart';
 import 'package:astroverse/res/colors/project_colors.dart';
 import 'package:astroverse/res/decor/button_decor.dart';
 import 'package:astroverse/res/dims/global.dart';
@@ -15,6 +16,7 @@ class AskScreenPortrait extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final auth = Get.put(AuthController());
     final double wd = cons.maxWidth;
     final double ht = cons.maxHeight;
     return Scaffold(
@@ -52,7 +54,7 @@ class AskScreenPortrait extends StatelessWidget {
                   shape: ButtonDecors.outlined,
                   child: Text(
                     "User",
-                    style: TextStylesLight().onButton,
+                    style: TextStyleDark().onButton,
                   )),
               const SizedBox(
                 height: 20,
