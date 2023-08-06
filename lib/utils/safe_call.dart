@@ -17,6 +17,21 @@ class SafeCall {
   Future<Resource<T>> fireStoreCall<T>(Future<T?> Function() task ) async {
     try {
       var res = await task();
+      if(res!=null) {
+        return Success(res);
+      } else {
+        return Failure("returned null");
+      }
+    } on FirebaseException catch (e) {
+      return Failure(e.message.toString());
+    } catch (e) {
+      return Failure(e.toString());
+    }
+  }
+
+  Future<Resource<T>> storageCall<T>(Future<T?> Function() task) async{
+    try {
+      var res = await task();
       if (res != null) return Success(res);
       return Failure("returned null");
     } on FirebaseException catch (e) {

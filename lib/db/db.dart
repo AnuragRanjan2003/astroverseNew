@@ -13,10 +13,10 @@ class Database {
         toFirestore: (user, options) => user.toJson(),
       );
 
-  Future<Resource<UserCredential>> saveUserData(models.User user) async =>
-    await SafeCall().fireStoreCall<UserCredential>(() async {
-      await _userCollection.doc(user.uid).set(user);
-    });
+  Future<Resource<void>> saveUserData(models.User user) async =>
+    await SafeCall().fireStoreCall<void>(() async =>
+      await _userCollection.doc(user.uid).set(user)
+    );
 
 
   Stream<DocumentSnapshot<models.User>> getUserStream(String id) =>

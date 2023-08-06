@@ -7,7 +7,7 @@ class User {
   final String name;
   final String email;
   String image;
-  final String uid;
+  String uid;
   int plan;
 
   User(this.name, this.email, this.image, this.plan, this.uid);

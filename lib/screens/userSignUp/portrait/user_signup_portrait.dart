@@ -142,7 +142,7 @@ class UserSignUpPortrait extends StatelessWidget {
                   ),
                   TextButton(
                     onPressed: () {
-                      Get.toNamed(Routes.userLogin);
+                      Get.back();
                     },
                     child: Text(
                       "Log In",
