@@ -22,7 +22,7 @@ abstract class ProjectTextStyles {
 class TextStylesLight implements ProjectTextStyles {
   @override
   TextStyle get body =>
-      const TextStyle(color: ProjectColors.primary, fontSize: 16);
+      const TextStyle(color: ProjectColors.onBackground, fontSize: 16);
 
   @override
   TextStyle get header => const TextStyle(
@@ -30,21 +30,21 @@ class TextStylesLight implements ProjectTextStyles {
 
   @override
   TextStyle get onButton => const TextStyle(
-      color: ProjectColors.background,
+      color: ProjectColors.onBackground,
       fontSize: 15,
       fontWeight: FontWeight.w600);
 
   @override
   TextStyle get small => const TextStyle(
-      color: ProjectColors.primary, fontSize: 14, fontWeight: FontWeight.w400);
+      color: ProjectColors.onBackground, fontSize: 14, fontWeight: FontWeight.w400);
 
   @override
   TextStyle get subtitle =>
-      const TextStyle(color: ProjectColors.primary, fontSize: 16);
+      const TextStyle(color: ProjectColors.onBackground, fontSize: 16);
 
   @override
   TextStyle get bodyBold => const TextStyle(
-      color: ProjectColors.primary, fontSize: 16, fontWeight: FontWeight.w600);
+      color: ProjectColors.onBackground, fontSize: 16, fontWeight: FontWeight.w600);
 
   @override
   TextStyle get smallBold => const TextStyle(
@@ -76,7 +76,7 @@ class TextStyleDark implements ProjectTextStyles {
 
   @override
   TextStyle get onButton => const TextStyle(
-      color: ProjectColors.primary, fontSize: 16, fontWeight: FontWeight.w600);
+      color: ProjectColors.background, fontSize: 16, fontWeight: FontWeight.w600);
 
   @override
   TextStyle get small => const TextStyle(

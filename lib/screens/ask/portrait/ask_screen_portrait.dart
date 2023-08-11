@@ -50,23 +50,23 @@ class AskScreenPortrait extends StatelessWidget {
               ),
               MaterialButton(
                   onPressed: () => navigateToUserLogin(),
-                  padding: const EdgeInsets.symmetric(vertical: 14),
+                  padding: const EdgeInsets.symmetric(vertical: 15),
                   shape: ButtonDecors.outlined,
                   child: Text(
                     "User",
-                    style: TextStyleDark().onButton,
+                    style: TextStylesLight().onButton,
                   )),
               const SizedBox(
-                height: 20,
+                height: 15,
               ),
               MaterialButton(
                 onPressed: () {},
-                padding: const EdgeInsets.symmetric(vertical: 14),
+                padding: const EdgeInsets.symmetric(vertical: 15),
                 color: ProjectColors.main,
                 shape: ButtonDecors.filled,
                 child: Text(
                   "Astrologer",
-                  style: TextStylesLight().onButton,
+                  style: TextStyleDark().onButton,
                 ),
               )
             ],

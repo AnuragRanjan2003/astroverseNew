@@ -14,7 +14,7 @@ class Auth {
 
   Future<Resource<UserCredential>> signupWithEmail(
           models.User user, String password) async =>
-      await SafeCall().fireStoreCall<UserCredential>(() async =>
+      await SafeCall().authCall<UserCredential>(() async =>
           await mAuth.createUserWithEmailAndPassword(
               email: user.email, password: password));
 }

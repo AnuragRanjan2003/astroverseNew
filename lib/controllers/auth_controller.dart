@@ -25,6 +25,7 @@ class AuthController extends GetxController {
   void onInit() {
     final fUser = FirebaseAuth.instance.currentUser;
     if (fUser != null) startListeningToUser(fUser.uid);
+    super.onInit();
   }
 
   loginUser(String email, String password,
@@ -46,6 +47,7 @@ class AuthController extends GetxController {
 
   startListeningToUser(String uid) {
     _sub = _repo.getUserStream(uid).listen((event) {
+      debugPrint(event.data().toString());
       if (event.data() != null) user.value = event.data()!;
     });
   }
@@ -57,7 +59,7 @@ class AuthController extends GetxController {
     if (image.value != null) path = image.value!.path;
     loading.value = true;
     _repo.createUser(user, password).then((event) {
-      print(event.toString());
+      debugPrint(event.toString());
       if (event.isSuccess) {
         event = event as Success<UserCredential>;
         user.uid = event.data.user!.uid;
@@ -71,8 +73,8 @@ class AuthController extends GetxController {
               saveData(user, (p0) {
                 loading.value = false;
                 updateUI(p0);
-              });
-            }else{
+              }, (event as Success<UserCredential>).data);
+            } else {
               loading.value = false;
             }
           });
@@ -81,7 +83,7 @@ class AuthController extends GetxController {
           saveData(user, (p0) {
             loading.value = false;
             updateUI(p0);
-          });
+          }, event.data);
         }
       } else {
         loading.value = false;
@@ -98,17 +100,16 @@ class AuthController extends GetxController {
     super.onClose();
   }
 
-  void saveData(
-      models.User user, void Function(Resource<void>) updateUI) {
+  void saveData(models.User user, void Function(Resource<void>) updateUI,
+      UserCredential event) {
     _repo.saveUserData(user).then((value) {
       loading.value = false;
       updateUI(value);
-      if (value.isSuccess) {
-        value = value as Success<UserCredential>;
-        value.data.user ?? startListeningToUser(value.data.user!.uid);
+      if (value is Success) {
+        if(event.user!=null) startListeningToUser(event.user!.uid);
         error.value = null;
       } else {
-        value = value as Failure<void>;
+        value = value as Failure;
         error.value = value.error;
       }
     });

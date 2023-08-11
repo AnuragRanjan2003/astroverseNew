@@ -1,4 +1,5 @@
 import 'package:astroverse/components/named_box.dart';
+import 'package:astroverse/components/underlined_box.dart';
 import 'package:astroverse/controllers/auth_controller.dart';
 import 'package:astroverse/res/colors/project_colors.dart';
 import 'package:astroverse/res/decor/button_decor.dart';
@@ -27,138 +28,126 @@ class UserLoginScreenPortrait extends StatelessWidget {
     return Scaffold(
       backgroundColor: ProjectColors.background,
       body: SingleChildScrollView(
-        child: Container(
-          height: ht,
-          width: wd,
-          padding: const EdgeInsets.only(
-              right: GlobalDims.horizontalPadding,
-              left: GlobalDims.horizontalPadding,
-              bottom: 0,
-              top: GlobalDims.verticalPaddingExtra),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            mainAxisAlignment: MainAxisAlignment.end,
-            children: [
-              Expanded(
-                  flex: 2,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        UserLoginStrings.title,
-                        style: TextStylesLight().header,
-                      ),
-                      const SizedBox(
-                        height: 20,
-                      ),
-                      Text(
-                        UserLoginStrings.subTitle,
-                        style: TextStylesLight().subtitle,
-                      ),
-                    ],
-                  )),
-              Expanded(
-                  flex: 2,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      NamedBox(
-                          name: "Email",
-                          hint: "Enter your Email",
-                          controller: email,
-                          nameStyle: TextStylesLight().bodyBold),
-                      const SizedBox(
-                        height: 20,
-                      ),
-                      NamedBox(
-                        name: "Password",
-                        hint: "Enter your Password",
-                        controller: password,
-                        nameStyle: TextStylesLight().bodyBold,
-                        password: true,
-                      ),
-                    ],
-                  )),
-              Expanded(
-                  flex: 1,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      MaterialButton(
+        child: SafeArea(
+          child: Container(
+            height: ht*0.98,
+            width: wd,
+            padding: const EdgeInsets.only(
+                right: GlobalDims.horizontalPadding,
+                left: GlobalDims.horizontalPadding,
+                bottom: 0,
+                top: GlobalDims.verticalPaddingExtra),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                const Expanded(
+                    flex: 2,
+                    child: SizedBox()),
+                Expanded(
+                    flex: 2,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        UnderLinedBox(
+                            hint: "Enter your Email",
+                            controller: email,
+                            style: TextStylesLight().body),
+                        const SizedBox(
+                          height: 20,
+                        ),
+                        UnderLinedBox(
+                          hint: "Enter your Password",
+                          controller: password,
+                          style: TextStylesLight().body,
+                          password: true,
+                        ),
+                        SizedBox(height: ht*0.05,),
+                      ],
+                    )),
+                Expanded(
+                    flex: 1,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        MaterialButton(
+                            onPressed: () {
+                              if (auth.loading.isTrue) return;
+                              if (email.value.text.isNotEmpty &&
+                                  password.value.text.isNotEmpty) {
+                                auth.loginUser(
+                                    email.value.text,
+                                    password.value.text,
+                                    (p) => updateUI(p, context));
+                              }
+                            },
+                            shape: ButtonDecors.filled,
+                            color: ProjectColors.main,
+                            padding: const EdgeInsets.symmetric(vertical: 15),
+                            child: Obx(() {
+                              if (auth.loading.isFalse) {
+                                return Text("Log In",
+                                    style: TextStyleDark().onButton);
+                              } else {
+                                return const SizedBox(
+                                    height: 20,
+                                    width: 20,
+                                    child: CircularProgressIndicator(
+                                      color: ProjectColors.background,
+                                      strokeWidth: 2.0,
+                                    ));
+                              }
+                            })),
+                        const SizedBox(
+                          height: 15,
+                        ),
+                        MaterialButton(
+                          onPressed: () {},
+                          shape: ButtonDecors.outlined,
+                          padding: const EdgeInsets.symmetric(vertical: 15),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              const FaIcon(
+                                FontAwesomeIcons.google,
+                                color: ProjectColors.onBackground,
+                                size: 18,
+                              ),
+                              const SizedBox(
+                                width: 10,
+                              ),
+                              Text(
+                                "Google",
+                                style: TextStylesLight().onButton,
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    )),
+                Expanded(
+                    flex: 1,
+                    child: Column(
+                      children: [
+                        Text(
+                          UserLoginStrings.signup,
+                          style: TextStylesLight().small,
+                        ),
+                        TextButton(
                           onPressed: () {
-                            if (auth.loading.isTrue) return;
-                            if (email.value.text.isNotEmpty &&
-                                password.value.text.isNotEmpty) {
-                              auth.loginUser(
-                                  email.value.text,
-                                  password.value.text,
-                                  (p) => updateUI(p, context));
-                            }
+                            Get.toNamed(Routes.userSignup);
                           },
-                          shape: ButtonDecors.filled,
-                          color: ProjectColors.main,
-                          padding: const EdgeInsets.symmetric(vertical: 12),
-                          child: Obx(() {
-                            if (auth.loading.isFalse) {
-                              return Text("Log In",
-                                  style: TextStylesLight().onButton);
-                            } else {
-                              return const SizedBox(
-                                  height: 20,
-                                  width: 20,
-                                  child: CircularProgressIndicator(
-                                    color: ProjectColors.background,
-                                  ));
-                            }
-                          })),
-                      const SizedBox(
-                        height: 15,
-                      ),
-                      MaterialButton(
-                        onPressed: () {},
-                        shape: ButtonDecors.outlined,
-                        padding: const EdgeInsets.symmetric(vertical: 12),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            const FaIcon(
-                              FontAwesomeIcons.google,
-                              color: ProjectColors.primary,
-                              size: 18,
-                            ),
-                            const SizedBox(
-                              width: 10,
-                            ),
-                            Text(
-                              "Google",
-                              style: TextStyleDark().onButton,
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  )),
-              Expanded(
-                  flex: 1,
-                  child: Column(
-                    children: [
-                      Text(
-                        UserLoginStrings.signup,
-                        style: TextStylesLight().small,
-                      ),
-                      TextButton(
-                        onPressed: () {
-                          Get.toNamed(Routes.userSignup);
-                        },
-                        child: Text(
-                          "Sign Up",
-                          style: TextStylesLight().bodyBold,
-                          textAlign: TextAlign.start,
-                        ),
-                      )
-                    ],
-                  )),
-            ],
+                          child: Text(
+                            "Sign Up",
+                            style: TextStylesLight().bodyBold,
+                            textAlign: TextAlign.start,
+                          ),
+                        )
+                      ],
+                    )),
+              ],
+            ),
           ),
         ),
       ),

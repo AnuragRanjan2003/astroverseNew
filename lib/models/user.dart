@@ -9,10 +9,18 @@ class User {
   String image;
   String uid;
   int plan;
+  final bool astro;
+  final String phNo;
 
-  User(this.name, this.email, this.image, this.plan, this.uid);
+  User(this.name, this.email, this.image, this.plan, this.uid, this.astro,
+      this.phNo);
 
   factory User.fromJson(json) => _$UserFromJson(json);
 
   Map<String, dynamic> toJson() => _$UserToJson(this);
+
+  @override
+  String toString() {
+    return "User($name , $email , $image , $uid , $plan , $astro , $phNo)";
+  }
 }

@@ -4,7 +4,7 @@ class Resource<T> {
 
   Resource(this._data, this._error);
 
-  bool get isSuccess => _data != null;
+  bool get isSuccess => _data != null ;
 
   bool get isFailure => _error != null;
 }

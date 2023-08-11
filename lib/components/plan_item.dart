@@ -17,7 +17,7 @@ class PlanItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final Color _color = getColor(selected!=plan.type);
+    final Color color = getColor(selected!=plan.type);
     return InkWell(
       onTap: () {
         onChange(plan.type);
@@ -27,29 +27,29 @@ class PlanItem extends StatelessWidget {
               const EdgeInsets.only(top: 20, bottom: 20, left: 25, right: 25),
           constraints: const BoxConstraints(minWidth: 140),
           decoration: BoxDecoration(
-            borderRadius: const BorderRadius.all(Radius.circular(10)),
-            border: Border.all(color: _color)
+            borderRadius: const BorderRadius.all(Radius.circular(5)),
+            border: Border.all(color: color)
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
                 plan.name,
-                style: TextStylesLight().coloredBodyBold(_color),
+                style: TextStylesLight().coloredBodyBold(color),
               ),
               const SizedBox(
                 height: 10,
               ),
               Text(
                 "Rs ${plan.price.floor()}",
-                style: TextStylesLight().coloredBody(_color),
+                style: TextStylesLight().coloredBody(color),
               ),
               const SizedBox(
                 height: 10,
               ),
               Text(
                 plan.content,
-                style: TextStylesLight().coloredSmall(_color),
+                style: TextStylesLight().coloredSmall(color),
                 overflow: TextOverflow.visible,
               )
             ],

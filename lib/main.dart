@@ -1,4 +1,5 @@
 import 'package:astroverse/firebase_options.dart';
+import 'package:astroverse/res/colors/project_colors.dart';
 import 'package:astroverse/routes/routes.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
@@ -22,7 +23,7 @@ class MyApp extends StatelessWidget {
       getPages: AppRoutes.getPages,
       theme: ThemeData(
         fontFamily: 'Poppins',
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+        colorScheme: ColorScheme.fromSeed(seedColor: ProjectColors.primary),
         useMaterial3: true,
       ),
     );

@@ -9,12 +9,11 @@ import 'package:astroverse/res/dims/global.dart';
 import 'package:astroverse/res/img/images.dart';
 import 'package:astroverse/res/textStyles/text_styles.dart';
 import 'package:astroverse/routes/routes.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 
-import '../../../db/plans.dart';
+import '../../../db/plans_db.dart';
 import '../../../utils/resource.dart';
 
 class MoreProfilePortrait extends StatelessWidget {
@@ -33,119 +32,122 @@ class MoreProfilePortrait extends StatelessWidget {
     return Scaffold(
       backgroundColor: ProjectColors.background,
       body: SingleChildScrollView(
-        child: Container(
-          width: wd,
-          height: ht,
-          padding: const EdgeInsets.only(
-              right: GlobalDims.horizontalPadding,
-              left: GlobalDims.horizontalPadding,
-              top: GlobalDims.verticalPaddingExtra),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Text(
-                "One Last\nStep",
-                style: TextStylesLight().header,
-              ),
-              Center(
-                child: Stack(
-                  children: [
-                    ClipRRect(
-                      borderRadius: const BorderRadius.all(Radius.circular(50)),
-                      child: Obx(() {
-                        if (auth.image.value == null) {
-                          return Image(
-                            image: ProjectImages.man,
-                            fit: BoxFit.fill,
-                            height: ht * 0.2,
-                          );
-                        } else {
-                          return Image.file(
-                            File(auth.image.value!.path),
-                            fit: BoxFit.fill,
-                            height: ht * 0.2,
-                          );
-                        }
-                      }),
-                    ),
-                    Positioned(
-                      bottom: 0,
-                      right: 0,
-                      child: FloatingActionButton.small(
-                        backgroundColor: ProjectColors.main,
-                        onPressed: () async {
-                          final file = await ImagePicker()
-                              .pickImage(source: ImageSource.gallery);
-                          auth.image.value = file;
-                        },
-                        shape: const RoundedRectangleBorder(
-                            borderRadius:
-                                BorderRadius.all(Radius.circular(60))),
-                        child: const Icon(
-                          Icons.add,
-                          size: 20,
+        child: SafeArea(
+          child: Container(
+            width: wd,
+            padding: const EdgeInsets.only(
+                right: GlobalDims.horizontalPadding,
+                left: GlobalDims.horizontalPadding,
+                top: GlobalDims.verticalPaddingExtra),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Text(
+                  "One Last\nStep",
+                  style: TextStylesLight().header,
+                ),
+                Center(
+                  child: Stack(
+                    children: [
+                      ClipRRect(
+                        borderRadius: const BorderRadius.all(Radius.circular(50)),
+                        child: Obx(() {
+                          if (auth.image.value == null) {
+                            return Image(
+                              image: ProjectImages.man,
+                              fit: BoxFit.fill,
+                              height: ht * 0.2,
+                            );
+                          } else {
+                            return Image.file(
+                              File(auth.image.value!.path),
+                              fit: BoxFit.fill,
+                              height: ht * 0.2,
+                            );
+                          }
+                        }),
+                      ),
+                      Positioned(
+                        bottom: 0,
+                        right: 0,
+                        child: FloatingActionButton.small(
+                          backgroundColor: ProjectColors.main,
+                          onPressed: () async {
+                            final file = await ImagePicker()
+                                .pickImage(source: ImageSource.gallery);
+                            auth.image.value = file;
+                          },
+                          shape: const RoundedRectangleBorder(
+                              borderRadius:
+                                  BorderRadius.all(Radius.circular(60))),
+                          child: const Icon(
+                            Icons.add,
+                            color: ProjectColors.background,
+                            size: 20,
+                          ),
                         ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
-              ),
-              const SizedBox(
-                height: 20,
-              ),
-              Text(
-                "Choose a plan",
-                style: TextStylesLight().bodyBold,
-              ),
-              SizedBox(
-                height: ht * 0.03,
-              ),
-              SizedBox(
-                height: ht * 0.27,
-                child: Obx(() => Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
-                    children: List.generate(
-                      Plans.plans.length,
-                      (index) => PlanItem(
-                          plan: Plans.plans[index],
-                          selected: auth.selectedPlan.value,
-                          onChange: (e) {
-                            auth.selectedPlan.value = e;
-                          }),
-                    ))),
-              ),
-              SizedBox(
-                height: ht * 0.05,
-              ),
-              MaterialButton(
-                onPressed: () {
-                  if (auth.loading.isTrue) return;
-                  user.plan = auth.selectedPlan.value;
-                  auth.createUserWithEmail(user, password, (p0) {
-                    updateUI(p0);
-                  });
-                },
-                padding: const EdgeInsets.symmetric(vertical: 10),
-                color: ProjectColors.main,
-                shape: ButtonDecors.filled,
-                child: Obx(() {
-                  if (auth.loading.isFalse) {
-                    return Text(
-                      "Create Account",
-                      style: TextStylesLight().onButton,
-                    );
-                  } else {
-                    return const SizedBox(
-                      height: 20,
-                      width: 20,
-                      child: CircularProgressIndicator(
-                        color: ProjectColors.background,
-                      ),
-                    );
-                  }
-                }),
-              )
-            ],
+                const SizedBox(
+                  height: 20,
+                ),
+                Text(
+                  "Choose a plan",
+                  style: TextStylesLight().bodyBold,
+                ),
+                SizedBox(
+                  height: ht * 0.03,
+                ),
+                SizedBox(
+                  height: ht * 0.27,
+                  child: Obx(() => Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceAround,
+                      children: List.generate(
+                        Plans.plans.length,
+                        (index) => PlanItem(
+                            plan: Plans.plans[index],
+                            selected: auth.selectedPlan.value,
+                            onChange: (e) {
+                              auth.selectedPlan.value = e;
+                            }),
+                      ))),
+                ),
+                SizedBox(
+                  height: ht * 0.05,
+                ),
+                MaterialButton(
+                  onPressed: () {
+                    if (auth.loading.isTrue) return;
+                    user.plan = auth.selectedPlan.value;
+                    auth.createUserWithEmail(user, password, (p0) {
+                      updateUI(p0);
+                    });
+                  },
+                  padding: const EdgeInsets.symmetric(vertical: 15),
+                  color: ProjectColors.main,
+                  shape: ButtonDecors.filled,
+                  child: Obx(() {
+                    if (auth.loading.isFalse) {
+                      return Text(
+                        "Create Account",
+                        style: TextStyleDark().onButton,
+                      );
+                    } else {
+                      return const SizedBox(
+                        height: 20,
+                        width: 20,
+                        child: CircularProgressIndicator(
+                          color: ProjectColors.background,
+                          strokeWidth: 2.0,
+                        ),
+                      );
+                    }
+                  }),
+                )
+              ],
+            ),
           ),
         ),
       ),
@@ -153,7 +155,7 @@ class MoreProfilePortrait extends StatelessWidget {
   }
 
   updateUI(Resource p) {
-    if (p.isSuccess) {
+    if (p is Success ) {
       Get.toNamed(Routes.main);
     } else {
       Get.snackbar("Error", (p as Failure<void>).error);

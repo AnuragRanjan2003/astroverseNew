@@ -9,16 +9,10 @@ class Storage {
   final _profileImage =
       FirebaseStorage.instance.ref(BackEndStrings.profileImage);
 
-    Future<Resource<String>> storeProfileImage(
-          File file, String id) async =>
-      await SafeCall().storageCall<String>(
-          () async {
-            final res = await _profileImage.child(id).putFile(file);
-            if(res!=null){
-              final x =  await _profileImage.child(id).getDownloadURL();
-              return x;
-            }else{
-              return null;
-            }
-          });
+  Future<Resource<String>> storeProfileImage(File file, String id) async =>
+      await SafeCall().storageCall<String>(() async {
+        await _profileImage.child(id).putFile(file);
+        final x = await _profileImage.child(id).getDownloadURL();
+        return x;
+      });
 }
