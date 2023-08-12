@@ -4,10 +4,12 @@ import 'dart:io';
 import 'package:astroverse/models/user.dart' as models;
 import 'package:astroverse/repo/auth_repo.dart';
 import 'package:astroverse/res/strings/backend_strings.dart';
+import 'package:astroverse/routes/routes.dart';
 import 'package:astroverse/utils/resource.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 
@@ -20,20 +22,25 @@ class AuthController extends GetxController {
   final _repo = AuthRepo();
   Rxn<XFile> image = Rxn();
   Rx<int> selectedPlan = 0.obs;
+  Rx<bool> emailVerified = false.obs;
+  Timer? _timer;
+  Timer? _resendTimerInstance;
+  Rx<int> resendTimer = 60.obs;
 
   @override
   void onInit() {
     final fUser = FirebaseAuth.instance.currentUser;
     if (fUser != null) startListeningToUser(fUser.uid);
+    if (fUser != null) emailVerified.value = _repo.checkIfEmailVerified();
     super.onInit();
   }
 
   loginUser(String email, String password,
-      void Function(Resource<UserCredential>) updateUI) {
+      void Function(Resource<UserCredential>,bool) updateUI) {
     loading.value = true;
     _repo.loginUser(email, password).then((value) {
       loading.value = false;
-      updateUI(value);
+      updateUI(value,_repo.checkIfEmailVerified());
       if (value.isSuccess) {
         value = value as Success<UserCredential>;
         value.data.user ?? startListeningToUser(value.data.user!.uid);
@@ -97,6 +104,8 @@ class AuthController extends GetxController {
   @override
   void onClose() {
     _sub?.cancel();
+    _timer?.cancel();
+    _resendTimerInstance?.cancel();
     super.onClose();
   }
 
@@ -106,7 +115,7 @@ class AuthController extends GetxController {
       loading.value = false;
       updateUI(value);
       if (value is Success) {
-        if(event.user!=null) startListeningToUser(event.user!.uid);
+        if (event.user != null) startListeningToUser(event.user!.uid);
         error.value = null;
       } else {
         value = value as Failure;
@@ -114,4 +123,48 @@ class AuthController extends GetxController {
       }
     });
   }
+
+  sendVerificationEmail() {
+    resendTimer.value = 60;
+    startResendCountdown();
+    _repo.sendEmailVerificationEmail().then((value) {
+      debugPrint("res value is success on email sent : ${value.isSuccess}");
+      if (value.isSuccess) {
+        Get.snackbar("Email", (value as Success<String>).data);
+        startEmailVerificationCheck(() {
+          debugPrint("email verified");
+        });
+      } else {
+        Get.snackbar("Email Error", (value as Failure).error);
+      }
+    });
+  }
+
+  startEmailVerificationCheck(void Function() onVerified) {
+    _timer = Timer.periodic(const Duration(seconds: 3), (timer) {
+      emailVerified.value = _repo.checkIfEmailVerified();
+      debugPrint("checking email verification");
+      if (emailVerified.value==true) {
+        onVerified();
+        timer.cancel();
+        _timer?.cancel();
+        Get.offAllNamed(Routes.main);
+      }
+    });
+  }
+
+  startResendCountdown() {
+    int value = 60;
+    _resendTimerInstance = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (resendTimer.value == 0) {
+        timer.cancel();
+      } else {
+        value = value-1;
+        resendTimer.value = value;
+        debugPrint(resendTimer.value.toString());
+      }
+    });
+  }
+
+
 }

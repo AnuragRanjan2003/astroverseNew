@@ -1,4 +1,3 @@
-import 'package:astroverse/components/named_box.dart';
 import 'package:astroverse/components/underlined_box.dart';
 import 'package:astroverse/controllers/auth_controller.dart';
 import 'package:astroverse/res/colors/project_colors.dart';
@@ -30,7 +29,7 @@ class UserLoginScreenPortrait extends StatelessWidget {
       body: SingleChildScrollView(
         child: SafeArea(
           child: Container(
-            height: ht*0.98,
+            height: ht * 0.98,
             width: wd,
             padding: const EdgeInsets.only(
                 right: GlobalDims.horizontalPadding,
@@ -41,9 +40,7 @@ class UserLoginScreenPortrait extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
-                const Expanded(
-                    flex: 2,
-                    child: SizedBox()),
+                const Expanded(flex: 2, child: SizedBox()),
                 Expanded(
                     flex: 2,
                     child: Column(
@@ -63,7 +60,9 @@ class UserLoginScreenPortrait extends StatelessWidget {
                           style: TextStylesLight().body,
                           password: true,
                         ),
-                        SizedBox(height: ht*0.05,),
+                        SizedBox(
+                          height: ht * 0.05,
+                        ),
                       ],
                     )),
                 Expanded(
@@ -79,7 +78,7 @@ class UserLoginScreenPortrait extends StatelessWidget {
                                 auth.loginUser(
                                     email.value.text,
                                     password.value.text,
-                                    (p) => updateUI(p, context));
+                                    (p, b) => updateUI(p, b, context));
                               }
                             },
                             shape: ButtonDecors.filled,
@@ -154,9 +153,13 @@ class UserLoginScreenPortrait extends StatelessWidget {
     );
   }
 
-  void updateUI(Resource<dynamic> p, BuildContext context) {
+  void updateUI(Resource<dynamic> p, bool b, BuildContext context) {
     if (p.isSuccess) {
-      Get.toNamed(Routes.main);
+      if (b == false) {
+        Get.toNamed(Routes.emailVerify);
+      } else {
+        Get.toNamed(Routes.main);
+      }
     } else {
       p = p as Failure<dynamic>;
       Get.snackbar("Error", p.error);
