@@ -123,9 +123,18 @@ class MoreProfilePortrait extends StatelessWidget {
                     if (user == null) return;
                     if (auth.loading.isTrue) return;
                     user.plan = auth.selectedPlan.value;
-                    auth.createUserWithEmail(user, password, (p0) {
+                    debugPrint(user.toString());
+                    if(user.uid.isEmpty) {
+                      auth.createUserWithEmail(user, password, (p0) {
                       updateUI(p0);
                     });
+                    }else{
+                      auth.saveGoogleData(user, (value) {
+                        if(value is Success<void>){
+                          debugPrint("user done");
+                        }
+                      });
+                    }
                   },
                   padding: const EdgeInsets.symmetric(vertical: 15),
                   color: ProjectColors.main,

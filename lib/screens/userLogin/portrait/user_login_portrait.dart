@@ -3,12 +3,14 @@ import 'package:astroverse/controllers/auth_controller.dart';
 import 'package:astroverse/res/colors/project_colors.dart';
 import 'package:astroverse/res/decor/button_decor.dart';
 import 'package:astroverse/res/dims/global.dart';
+import 'package:astroverse/res/img/images.dart';
 import 'package:astroverse/res/strings/user_login_strings.dart';
 import 'package:astroverse/res/textStyles/text_styles.dart';
 import 'package:astroverse/utils/resource.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get/get.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 
 import '../../../routes/routes.dart';
 
@@ -20,6 +22,7 @@ class UserLoginScreenPortrait extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final AuthController auth = Get.find();
+    GoogleSignIn().signOut();
     final double wd = cons.maxWidth;
     final double ht = cons.maxHeight;
     final TextEditingController email = TextEditingController();
@@ -40,7 +43,14 @@ class UserLoginScreenPortrait extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
-                const Expanded(flex: 2, child: SizedBox()),
+                const Expanded(
+                    flex: 2,
+                    child: SizedBox(
+                      child: Image(
+                        image: ProjectImages.login,
+                        fit: BoxFit.cover,
+                      ),
+                    )),
                 Expanded(
                     flex: 2,
                     child: Column(
@@ -102,19 +112,18 @@ class UserLoginScreenPortrait extends StatelessWidget {
                           height: 15,
                         ),
                         MaterialButton(
-                          onPressed: () {},
+                          onPressed: () {
+                            auth.signInWithGoogle((p0) {});
+                          },
                           shape: ButtonDecors.outlined,
-                          padding: const EdgeInsets.symmetric(vertical: 15),
+                          padding: const EdgeInsets.symmetric(vertical: 12),
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              const FaIcon(
-                                FontAwesomeIcons.google,
-                                color: ProjectColors.onBackground,
-                                size: 18,
-                              ),
-                              const SizedBox(
-                                width: 10,
+                              const Image(
+                                image: ProjectImages.googleIcon,
+                                height: 28,
+                                width: 32,
                               ),
                               Text(
                                 "Google",
@@ -132,6 +141,7 @@ class UserLoginScreenPortrait extends StatelessWidget {
                         Text(
                           UserLoginStrings.signup,
                           style: TextStylesLight().small,
+                          textAlign: TextAlign.center,
                         ),
                         TextButton(
                           onPressed: () {
@@ -158,11 +168,20 @@ class UserLoginScreenPortrait extends StatelessWidget {
       if (b == false) {
         Get.toNamed(Routes.emailVerify);
       } else {
-        Get.toNamed(Routes.main);
+        Get.offAllNamed(Routes.main);
       }
     } else {
       p = p as Failure<dynamic>;
       Get.snackbar("Error", p.error);
+    }
+  }
+
+  void googleUpdateUI(Resource<UserCredential> value) {
+    if (value.isSuccess) {
+      debugPrint("got user");
+      debugPrint((value as Success<UserCredential>).data.user?.toString());
+    } else {
+      debugPrint((value as Failure<UserCredential>).error);
     }
   }
 }

@@ -44,6 +44,8 @@ dependencies:
   firebase_storage: ^11.2.5
   image_picker: ^1.0.2
   google_nav_bar: ^5.0.6
+  google_sign_in: ^6.1.4
+  glassmorphism: ^3.0.0
 
 dev_dependencies:
   flutter_test:

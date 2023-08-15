@@ -35,4 +35,8 @@ class AuthRepo {
       await _auth.sendVerificationEmail();
 
   bool checkIfEmailVerified() => _auth.checkEmailVerified();
+
+  Future<Resource<UserCredential>> signInWithGoogle() async => await _auth.signInWithGoogle();
+
+  Future<bool> checkForUserData(String uid) async => await _db.checkForUserData(uid);
 }

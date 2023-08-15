@@ -1,6 +1,7 @@
 import 'package:astroverse/utils/resource.dart';
 import 'package:astroverse/utils/safe_call.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 
 import '../models/user.dart' as models;
 
@@ -33,4 +34,18 @@ class Auth {
     mAuth.currentUser?.reload();
     return mAuth.currentUser!.emailVerified;
   }
+
+  Future<Resource<UserCredential>> signInWithGoogle() async =>
+      await SafeCall().authCall<UserCredential>(() async {
+        final GoogleSignInAccount? googleAccount =
+            await GoogleSignIn().signIn();
+        final GoogleSignInAuthentication? googleAuth =
+            await googleAccount?.authentication;
+        final credential = GoogleAuthProvider.credential(
+            idToken: googleAuth?.idToken, accessToken: googleAuth?.accessToken);
+
+        return await mAuth.signInWithCredential(credential);
+      });
+
+
 }

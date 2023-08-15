@@ -61,6 +61,10 @@ class TextStylesLight implements ProjectTextStyles {
 
   TextStyle coloredSmall(Color color) =>
       TextStyle(color: color, fontSize: 14, fontWeight: FontWeight.w400);
+
+  TextStyle coloredSmallThick(Color color) =>
+      TextStyle(color: color, fontSize: 14, fontWeight: FontWeight.w500);
+
 }
 
 class TextStyleDark implements ProjectTextStyles {

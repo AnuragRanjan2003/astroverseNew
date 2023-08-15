@@ -1,12 +1,11 @@
 import 'package:astroverse/components/underlined_box.dart';
 import 'package:astroverse/controllers/auth_controller.dart';
 import 'package:astroverse/models/user.dart';
+import 'package:astroverse/res/img/images.dart';
 import 'package:astroverse/routes/routes.dart';
 import 'package:flutter/material.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get/get.dart';
 
-import '../../../components/named_box.dart';
 import '../../../res/colors/project_colors.dart';
 import '../../../res/decor/button_decor.dart';
 import '../../../res/dims/global.dart';
@@ -32,33 +31,22 @@ class UserSignUpPortrait extends StatelessWidget {
       body: SingleChildScrollView(
         child: SafeArea(
           child: Container(
-            height: ht*0.95,
+            height: ht * 0.95,
             width: wd,
             padding: const EdgeInsets.only(
-                right: GlobalDims.horizontalPadding,
-                left: GlobalDims.horizontalPadding,
-                bottom: 10,),
+              right: GlobalDims.horizontalPadding,
+              left: GlobalDims.horizontalPadding,
+              bottom: 10,
+            ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
-                Expanded(
+                const Expanded(
                     flex: 2,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          UserSignUpStrings.title,
-                          style: TextStylesLight().header,
-                        ),
-                        const SizedBox(
-                          height: 20,
-                        ),
-                        Text(
-                          UserSignUpStrings.subTitle,
-                          style: TextStylesLight().subtitle,
-                        ),
-                      ],
+                    child: Image(
+                      image: ProjectImages.signup,
+                      fit: BoxFit.cover,
                     )),
                 Expanded(
                     flex: 2,
@@ -86,10 +74,11 @@ class UserSignUpPortrait extends StatelessWidget {
                           style: TextStylesLight().body,
                           password: true,
                         ),
-                        SizedBox(height: ht*0.04,),
+                        SizedBox(
+                          height: ht * 0.04,
+                        ),
                       ],
                     )),
-
                 Expanded(
                     flex: 1,
                     child: Column(
@@ -97,10 +86,12 @@ class UserSignUpPortrait extends StatelessWidget {
                       children: [
                         MaterialButton(
                           onPressed: () {
-                            if(email.value.text.isEmpty || password.value.text.isEmpty || name.value.text.isEmpty) return;
+                            if (email.value.text.isEmpty ||
+                                password.value.text.isEmpty ||
+                                name.value.text.isEmpty) return;
                             auth.pass.value = password.value.text;
-                            final User user = User(
-                                name.value.text, email.value.text, "", 0, "",false,"");
+                            final User user = User(name.value.text,
+                                email.value.text, "", 0, "", false, "");
                             Get.toNamed(Routes.moreProfile, arguments: user);
                           },
                           shape: ButtonDecors.filled,
@@ -112,19 +103,18 @@ class UserSignUpPortrait extends StatelessWidget {
                           height: 10,
                         ),
                         MaterialButton(
-                          onPressed: () {},
+                          onPressed: () {
+                            auth.signUpWithGoogle();
+                          },
                           shape: ButtonDecors.outlined,
-                          padding: const EdgeInsets.symmetric(vertical: 15),
+                          padding: const EdgeInsets.symmetric(vertical: 12),
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              const FaIcon(
-                                FontAwesomeIcons.google,
-                                color: ProjectColors.onBackground,
-                                size: 18,
-                              ),
-                              const SizedBox(
-                                width: 10,
+                              const Image(
+                                image: ProjectImages.googleIcon,
+                                height: 28,
+                                width: 32,
                               ),
                               Text(
                                 "Google",

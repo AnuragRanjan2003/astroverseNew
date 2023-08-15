@@ -11,6 +11,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import 'package:image_picker/image_picker.dart';
 
 class AuthController extends GetxController {
@@ -30,20 +31,27 @@ class AuthController extends GetxController {
   @override
   void onInit() {
     final fUser = FirebaseAuth.instance.currentUser;
-    if (fUser != null) startListeningToUser(fUser.uid);
-    if (fUser != null) emailVerified.value = _repo.checkIfEmailVerified();
+    if (fUser != null &&
+        fUser.providerData.any((element) => element.providerId == "password")) {
+      startListeningToUser(fUser.uid);
+      emailVerified.value = _repo.checkIfEmailVerified();
+    }
+
     super.onInit();
   }
 
   loginUser(String email, String password,
-      void Function(Resource<UserCredential>,bool) updateUI) {
+      void Function(Resource<UserCredential>, bool) updateUI) {
     loading.value = true;
     _repo.loginUser(email, password).then((value) {
       loading.value = false;
-      updateUI(value,_repo.checkIfEmailVerified());
+      updateUI(value, _repo.checkIfEmailVerified());
       if (value.isSuccess) {
         value = value as Success<UserCredential>;
-        value.data.user ?? startListeningToUser(value.data.user!.uid);
+        value.data.user ??
+            startListeningToUser(
+              value.data.user!.uid,
+            );
         error.value = null;
       } else {
         value = value as Failure<UserCredential>;
@@ -54,7 +62,7 @@ class AuthController extends GetxController {
 
   startListeningToUser(String uid) {
     _sub = _repo.getUserStream(uid).listen((event) {
-      debugPrint(event.data().toString());
+      debugPrint("user:${event.data()}");
       if (event.data() != null) user.value = event.data()!;
     });
   }
@@ -115,7 +123,9 @@ class AuthController extends GetxController {
       loading.value = false;
       updateUI(value);
       if (value is Success) {
-        if (event.user != null) startListeningToUser(event.user!.uid);
+        if (event.user != null) {
+          startListeningToUser(event.user!.uid);
+        }
         error.value = null;
       } else {
         value = value as Failure;
@@ -144,7 +154,7 @@ class AuthController extends GetxController {
     _timer = Timer.periodic(const Duration(seconds: 3), (timer) {
       emailVerified.value = _repo.checkIfEmailVerified();
       debugPrint("checking email verification");
-      if (emailVerified.value==true) {
+      if (emailVerified.value == true) {
         onVerified();
         timer.cancel();
         _timer?.cancel();
@@ -159,12 +169,110 @@ class AuthController extends GetxController {
       if (resendTimer.value == 0) {
         timer.cancel();
       } else {
-        value = value-1;
+        value = value - 1;
         resendTimer.value = value;
         debugPrint(resendTimer.value.toString());
       }
     });
   }
 
+  signInWithGoogle(void Function(Resource<UserCredential>) updateUI) {
+    _repo.signInWithGoogle().then((value) {
+      if (value.isSuccess) {
+        value = value as Success<UserCredential>;
+        _repo.checkForUserData(value.data.user!.uid).then((it) {
+          if (it == false) {
+            _showError(
+              "No Record Found",
+              "No user record found\n.Please sign up.",
+            );
+            GoogleSignIn().signOut();
+          } else {
+            startListeningToUser(
+              (value as Success<UserCredential>).data.user!.uid,
+            );
+            Get.offAndToNamed(Routes.main);
+          }
+        });
+      } else {
+        _showError("Error", (value as Failure<UserCredential>).error);
+      }
+    });
+  }
 
+  signUpWithGoogle() {
+    _repo.signInWithGoogle().then((value) {
+      if (value.isSuccess) {
+        value = value as Success<UserCredential>;
+        _repo.checkForUserData(value.data.user!.uid).then((it) {
+          if (it == false) {
+            final cred = (value as Success<UserCredential>).data.user!;
+
+            final user = models.User(
+                cred.displayName.toString(),
+                cred.email.toString(),
+                cred.photoURL.toString(),
+                0,
+                cred.uid,
+                false,
+                cred.phoneNumber.toString());
+
+            Get.toNamed(Routes.moreProfile, arguments: user);
+          } else {
+            _showError("Error", "user already exists");
+          }
+        });
+      } else {
+        _showError("Error", (value as Failure<UserCredential>).error);
+      }
+    });
+  }
+
+  void saveGoogleData(
+      models.User user,
+      void Function(
+        Resource<void> value,
+      ) updateUI) {
+    loading.value = true;
+    user.plan = selectedPlan.value;
+    if (image.value != null) {
+      _repo.storeProfileImage(File(image.value!.path), user.uid).then((value) {
+        if (value.isSuccess) {
+          user.image = (value as Success<String>).data;
+          _saveDataFromGoogle(user, (p0) {
+            if (p0 is Success<void>) {
+              debugPrint("saved data");
+            }
+          });
+        } else {
+          _showError("error", (value as Failure<String>).error);
+        }
+      });
+    }
+  }
+
+  _saveDataFromGoogle(
+      models.User user, void Function(Resource<void>) updateUI) {
+    _repo.saveUserData(user).then((value) {
+      loading.value = false;
+      updateUI(value);
+      if (value is Success) {
+        startListeningToUser(user.uid);
+        Get.offAndToNamed(Routes.main);
+      } else {
+        value = value as Failure;
+        error.value = value.error;
+      }
+    });
+  }
+
+  _onNoUserEmailLogin() {}
+
+  _onNoUserGoogleLogin() {
+    Get.snackbar("no record found", "Please signup");
+  }
+
+  _showError(String title, String msg) {
+    Get.snackbar(title, msg);
+  }
 }
