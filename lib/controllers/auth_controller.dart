@@ -29,12 +29,18 @@ class AuthController extends GetxController {
   Rx<int> resendTimer = 60.obs;
 
   @override
-  void onInit() {
+  void onInit() async {
     final fUser = FirebaseAuth.instance.currentUser;
-    if (fUser != null &&
-        fUser.providerData.any((element) => element.providerId == "password")) {
-      startListeningToUser(fUser.uid);
-      emailVerified.value = _repo.checkIfEmailVerified();
+    if (fUser != null) {
+      final res = await _repo.checkForUserData(fUser.uid);
+      if (res == true) {
+        startListeningToUser(fUser.uid);
+        emailVerified.value = _repo.checkIfEmailVerified();
+        if (emailVerified.value == true) {
+          // TODO( change to offAndToNamed)
+          Get.toNamed(Routes.main);
+        }
+      }
     }
 
     super.onInit();

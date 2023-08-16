@@ -1,10 +1,11 @@
 import 'package:astroverse/controllers/auth_controller.dart';
 import 'package:astroverse/res/colors/project_colors.dart';
-import 'package:astroverse/res/dims/global.dart';
 import 'package:astroverse/res/textStyles/text_styles.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_nav_bar/google_nav_bar.dart';
+
+import '../../discover/discover_screen.dart';
 
 class MainScreenPortrait extends StatelessWidget {
   final BoxConstraints cons;
@@ -13,9 +14,12 @@ class MainScreenPortrait extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final PageController pageController = PageController(initialPage: 0);
     final double wd = cons.maxWidth;
     final double ht = cons.maxHeight;
+
     final AuthController auth = Get.find();
+
     final tabs = [
       GButton(
         icon: Icons.home_outlined,
@@ -39,19 +43,30 @@ class MainScreenPortrait extends StatelessWidget {
         padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 20),
       ),
     ];
+
     return Scaffold(
       backgroundColor: ProjectColors.background,
-      extendBody: true,
       appBar: AppBar(
-        leadingWidth: 40,
-        backgroundColor: Colors.lightBlue.withAlpha(40),
+        leadingWidth: 50,
+        backgroundColor: ProjectColors.background,
         leading: GestureDetector(
-          onTap: (){ debugPrint("profile");},
-          child: Obx(() => Image(
-                image: NetworkImage(auth.user.value!.image),
-                width: 30,
-                height: 30,
-              )),
+          onTap: () {
+            debugPrint("profile");
+          },
+          child: IconButton(
+            iconSize: 40,
+            icon: Obx(() => ClipRRect(
+              borderRadius: const BorderRadius.all(Radius.circular(20)),
+              child: Image(
+                image: NetworkImage(auth.user.value!.image ),
+                height: 50,
+                fit: BoxFit.fill,
+              ),
+            )),
+            onPressed: (){
+              debugPrint("profile");
+            },
+          ),
         ),
         title: Obx(() => Text(
               auth.user.value!.name,
@@ -60,23 +75,37 @@ class MainScreenPortrait extends StatelessWidget {
       ),
       bottomNavigationBar: Container(
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+        color: ProjectColors.background,
         child: GNav(
-          backgroundColor: ProjectColors.background.withAlpha(0),
+          backgroundColor: Colors.transparent,
           gap: 10,
+          onTabChange: (e) {
+            pageController.animateToPage(e,
+                duration: const Duration(milliseconds: 200),
+                curve: Curves.linear);
+          },
           tabs: tabs,
           activeColor: Colors.lightBlue,
-          tabBackgroundColor: Colors.lightBlue .withAlpha(70),
+          tabBackgroundColor: Colors.white,
         ),
       ),
-      body: SingleChildScrollView(
-        child: SafeArea(
-          child: Container(
+      body: SafeArea(
+        child: SizedBox(
             width: wd,
-            child: Column(
-              children: [],
-            ),
-          ),
-        ),
+            height: ht * 0.9,
+            child: PageView(
+              controller: pageController,
+              physics: NeverScrollableScrollPhysics(),
+              children: const [
+                DiscoverScreen(color: ProjectColors.background),
+                DiscoverScreen(
+                  color: Colors.grey,
+                ),
+                DiscoverScreen(
+                  color: Colors.green,
+                ),
+              ],
+            )),
       ),
     );
   }
