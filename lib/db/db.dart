@@ -1,3 +1,4 @@
+import 'package:astroverse/models/item.dart';
 import 'package:astroverse/models/user.dart' as models;
 import 'package:astroverse/res/strings/backend_strings.dart';
 import 'package:astroverse/utils/resource.dart';
@@ -13,12 +14,29 @@ class Database {
         toFirestore: (user, options) => user.toJson(),
       );
 
+  final _itemCollection = FirebaseFirestore.instance
+      .collection(BackEndStrings.itemsCollection)
+      .withConverter<Item>(
+        fromFirestore: (snapshot, options) => Item.fromJson(snapshot.data()!),
+        toFirestore: (item, options) => item.toJson(),
+      );
+
   Future<Resource<void>> saveUserData(models.User user) async =>
       await SafeCall().fireStoreCall<void>(
           () async => await _userCollection.doc(user.uid).set(user));
 
+  Future<Resource<void>> saveItemData(Item item) async =>
+      await SafeCall().fireStoreCall<void>(
+          () async => await _itemCollection.doc(item.id).set(item));
+
   Stream<DocumentSnapshot<models.User>> getUserStream(String id) =>
       _userCollection.doc(id).snapshots();
+
+  getMoreItems(DocumentSnapshot ds, List<String> cat) =>
+      _itemCollection.startAfterDocument(ds).limit(20).where(
+        "category",
+        whereIn: [cat],
+      );
 
   Future<bool> checkForUserData(String uid) async {
     final res =

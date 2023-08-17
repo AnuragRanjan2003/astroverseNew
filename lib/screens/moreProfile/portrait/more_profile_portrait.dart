@@ -30,6 +30,7 @@ class MoreProfilePortrait extends StatelessWidget {
     final models.User? user = args;
     final String password = auth.pass.value;
     if (user == null) Get.snackbar("Error", "unknown error occurred");
+    debugPrint(user?.toString());
     return Scaffold(
       backgroundColor: ProjectColors.background,
       body: SingleChildScrollView(

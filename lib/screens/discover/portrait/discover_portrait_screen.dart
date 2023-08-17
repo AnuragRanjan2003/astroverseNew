@@ -11,7 +11,6 @@ class DiscoverScreenPortrait extends StatelessWidget {
   Widget build(BuildContext context) {
     final ht = cons.maxHeight;
     final wd = cons.maxWidth;
-    final pageController = PageController(initialPage: 0);
     return DefaultTabController(
       length: 2,
       child: Scaffold(

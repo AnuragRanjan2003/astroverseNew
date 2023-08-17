@@ -215,13 +215,14 @@ class AuthController extends GetxController {
             final cred = (value as Success<UserCredential>).data.user!;
 
             final user = models.User(
-                cred.displayName.toString(),
-                cred.email.toString(),
-                cred.photoURL.toString(),
+                _parseValueForModel(cred.displayName),
+                _parseValueForModel(cred.email),
+                _parseValueForModel(cred.photoURL),
                 0,
-                cred.uid,
+                _parseValueForModel(cred.uid),
                 false,
-                cred.phoneNumber.toString());
+                _parseValueForModel(cred.phoneNumber),
+                "");
 
             Get.toNamed(Routes.moreProfile, arguments: user);
           } else {
@@ -280,5 +281,10 @@ class AuthController extends GetxController {
 
   _showError(String title, String msg) {
     Get.snackbar(title, msg);
+  }
+
+  String _parseValueForModel(String? s) {
+    if (s == null) return "";
+    return s;
   }
 }

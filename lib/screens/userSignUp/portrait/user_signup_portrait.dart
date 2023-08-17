@@ -91,7 +91,7 @@ class UserSignUpPortrait extends StatelessWidget {
                                 name.value.text.isEmpty) return;
                             auth.pass.value = password.value.text;
                             final User user = User(name.value.text,
-                                email.value.text, "", 0, "", false, "");
+                                email.value.text, "", 0, "", false, "","");
                             Get.toNamed(Routes.moreProfile, arguments: user);
                           },
                           shape: ButtonDecors.filled,

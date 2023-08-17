@@ -2,6 +2,7 @@ import 'package:astroverse/screens/ask/ask_screen.dart';
 import 'package:astroverse/screens/emailverfication/email_verification_screen.dart';
 import 'package:astroverse/screens/main/main_screen.dart';
 import 'package:astroverse/screens/moreProfile/more_profile_screen.dart';
+import 'package:astroverse/screens/profile/profile_screen.dart';
 import 'package:astroverse/screens/userLogin/user_login_screen.dart';
 import 'package:astroverse/screens/userSignUp/user_sign_up_screen.dart';
 import 'package:get/get.dart';
@@ -13,6 +14,7 @@ class Routes {
   static const moreProfile = '/more_profile';
   static const emailVerify = '/email_verify';
   static const ask = '/';
+  static const profile = '/profile';
 }
 
 class AppRoutes {
@@ -40,6 +42,10 @@ class AppRoutes {
         GetPage(
           name: Routes.emailVerify,
           page: () => const EmailVerificationScreen(),
-        )
+        ),
+        GetPage(
+          name: Routes.profile,
+          page: () => const ProfileScreen(),
+        ),
       ];
 }

@@ -1,6 +1,8 @@
 import 'package:astroverse/controllers/auth_controller.dart';
 import 'package:astroverse/res/colors/project_colors.dart';
 import 'package:astroverse/res/textStyles/text_styles.dart';
+import 'package:astroverse/routes/routes.dart';
+import 'package:astroverse/screens/mart_screen/mart_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_nav_bar/google_nav_bar.dart';
@@ -59,12 +61,11 @@ class MainScreenPortrait extends StatelessWidget {
               borderRadius: const BorderRadius.all(Radius.circular(20)),
               child: Image(
                 image: NetworkImage(auth.user.value!.image ),
-                height: 50,
                 fit: BoxFit.fill,
               ),
             )),
             onPressed: (){
-              debugPrint("profile");
+              Get.toNamed(Routes.profile);
             },
           ),
         ),
@@ -75,7 +76,7 @@ class MainScreenPortrait extends StatelessWidget {
       ),
       bottomNavigationBar: Container(
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
-        color: ProjectColors.background,
+        color: Colors.transparent,
         child: GNav(
           backgroundColor: Colors.transparent,
           gap: 10,
@@ -95,12 +96,10 @@ class MainScreenPortrait extends StatelessWidget {
             height: ht * 0.9,
             child: PageView(
               controller: pageController,
-              physics: NeverScrollableScrollPhysics(),
+              physics: const NeverScrollableScrollPhysics(),
               children: const [
                 DiscoverScreen(color: ProjectColors.background),
-                DiscoverScreen(
-                  color: Colors.grey,
-                ),
+                MartScreen(),
                 DiscoverScreen(
                   color: Colors.green,
                 ),
