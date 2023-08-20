@@ -17,6 +17,7 @@ import 'package:image_picker/image_picker.dart';
 class AuthController extends GetxController {
   Rxn<models.User> user = Rxn<models.User>();
   Rx<bool> loading = false.obs;
+  Rx<bool> userLoading = false.obs;
   Rxn<String> error = Rxn<String>();
   StreamSubscription<DocumentSnapshot<models.User>>? _sub;
   Rx<String> pass = "".obs;
@@ -67,8 +68,11 @@ class AuthController extends GetxController {
   }
 
   startListeningToUser(String uid) {
+    userLoading.value = true;
     _sub = _repo.getUserStream(uid).listen((event) {
       debugPrint("user:${event.data()}");
+      userLoading.value = false;
+      debugPrint("user loading : ${loading.value}");
       if (event.data() != null) user.value = event.data()!;
     });
   }

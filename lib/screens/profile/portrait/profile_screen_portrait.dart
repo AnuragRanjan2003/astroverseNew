@@ -11,7 +11,7 @@ class ProfileScreenPortrait extends StatelessWidget {
   Widget build(BuildContext context) {
     final wd = cons.maxWidth;
     final ht = cons.maxHeight;
-    final AuthController auth = Get.find();
+    final AuthController auth = Get.put(AuthController());
     return Scaffold(
       body: SingleChildScrollView(
         child: SafeArea(

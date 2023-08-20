@@ -6,6 +6,7 @@ import 'package:astroverse/screens/mart_screen/mart_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_nav_bar/google_nav_bar.dart';
+import 'package:shimmer/shimmer.dart';
 
 import '../../discover/discover_screen.dart';
 
@@ -51,28 +52,20 @@ class MainScreenPortrait extends StatelessWidget {
       appBar: AppBar(
         leadingWidth: 50,
         backgroundColor: ProjectColors.background,
-        leading: GestureDetector(
-          onTap: () {
-            debugPrint("profile");
-          },
-          child: IconButton(
-            iconSize: 40,
-            icon: Obx(() => ClipRRect(
-              borderRadius: const BorderRadius.all(Radius.circular(20)),
-              child: Image(
-                image: NetworkImage(auth.user.value!.image ),
-                fit: BoxFit.fill,
-              ),
-            )),
-            onPressed: (){
-              Get.toNamed(Routes.profile);
-            },
-          ),
-        ),
-        title: Obx(() => Text(
-              auth.user.value!.name,
-              style: TextStylesLight().body,
-            )),
+        leading: Obx(() {
+          if (auth.userLoading.isFalse) {
+            return profileImage(auth);
+          } else {
+            return loadingShimmer(profileImagePlaceholder());
+          }
+        }),
+        title: Obx(() {
+          if (auth.userLoading.isFalse) {
+            return nameText(auth);
+          } else {
+            return loadingShimmer(nameTextPlaceHolder());
+          }
+        }),
       ),
       bottomNavigationBar: Container(
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
@@ -107,5 +100,58 @@ class MainScreenPortrait extends StatelessWidget {
             )),
       ),
     );
+  }
+
+  Text nameText(AuthController auth) {
+    return Text(
+      auth.user.value!.name,
+      style: TextStylesLight().body,
+    );
+  }
+
+  Container nameTextPlaceHolder() {
+    return Container(
+      decoration: const BoxDecoration(color: Colors.white,borderRadius: BorderRadius.all(Radius.circular(20))),
+      child: const Text(
+        "             ",
+      ),
+    );
+  }
+
+  IconButton profileImage(AuthController auth) {
+    return IconButton(
+      iconSize: 40,
+      icon: ClipRRect(
+        borderRadius: const BorderRadius.all(Radius.circular(20)),
+        child: Image(
+          image: NetworkImage(auth.user.value!.image),
+          fit: BoxFit.fill,
+        ),
+      ),
+      onPressed: () {
+        Get.toNamed(Routes.profile);
+      },
+    );
+  }
+
+  IconButton profileImagePlaceholder() {
+    return IconButton(
+      iconSize: 40,
+      icon: ClipRRect(
+          borderRadius: const BorderRadius.all(Radius.circular(20)),
+          child: Container(
+            color: Colors.white,
+          )),
+      onPressed: () {
+        Get.toNamed(Routes.profile);
+      },
+    );
+  }
+
+  Widget loadingShimmer(Widget child) {
+    return Shimmer.fromColors(
+        baseColor: Colors.grey.shade200,
+        highlightColor: Colors.grey.shade100,
+        child: child);
   }
 }
