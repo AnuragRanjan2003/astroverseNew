@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 
 import '../../../components/underlined_box.dart';
 import '../../../controllers/auth_controller.dart';
+import '../../../models/user.dart';
 import '../../../res/colors/project_colors.dart';
 import '../../../res/decor/button_decor.dart';
 import '../../../res/img/images.dart';
@@ -81,7 +82,9 @@ class AstroSignUpPortrait extends StatelessWidget {
                             if (email.value.text.isEmpty ||
                                 password.value.text.isEmpty ||
                                 name.value.text.isEmpty) return;
-                            Get.toNamed(Routes.emailVerify);
+                            final user = User(name.value.text,email.value.text,"",0,"",true,"","");
+                            auth.pass.value = password.value.text;
+                            Get.toNamed(Routes.astroSelectPlan,arguments: user);
                           },
                           shape: ButtonDecors.filled,
                           color: ProjectColors.main,

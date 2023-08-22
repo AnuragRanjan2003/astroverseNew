@@ -1,5 +1,6 @@
 import 'package:astroverse/screens/ask/ask_screen.dart';
 import 'package:astroverse/screens/astroLogIn/astro_login_screen.dart';
+import 'package:astroverse/screens/astroSelectPlan/astro_select_plan.dart';
 import 'package:astroverse/screens/astroSignUp/astro_signup_screen.dart';
 import 'package:astroverse/screens/emailverfication/email_verification_screen.dart';
 import 'package:astroverse/screens/main/main_screen.dart';
@@ -19,6 +20,7 @@ class Routes {
   static const profile = '/profile';
   static const astroLogin = '/astro_login';
   static const astroSignUp = '/astro_signup';
+  static const astroSelectPlan = '/astro_select_plan';
 }
 
 class AppRoutes {
@@ -58,6 +60,10 @@ class AppRoutes {
         GetPage(
           name: Routes.astroSignUp,
           page: () => const AstroSignUpScreen(),
+        ),
+        GetPage(
+          name: Routes.astroSelectPlan,
+          page: () => const AstroSelectPlan(),
         ),
       ];
 }

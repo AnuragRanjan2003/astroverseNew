@@ -144,7 +144,7 @@ class AuthController extends GetxController {
     });
   }
 
-  sendVerificationEmail() {
+  sendVerificationEmail( void Function() onVerified ) {
     resendTimer.value = 60;
     startResendCountdown();
     _repo.sendEmailVerificationEmail().then((value) {
@@ -152,6 +152,7 @@ class AuthController extends GetxController {
       if (value.isSuccess) {
         Get.snackbar("Email", (value as Success<String>).data);
         startEmailVerificationCheck(() {
+          onVerified();
           debugPrint("email verified");
         });
       } else {
@@ -165,6 +166,7 @@ class AuthController extends GetxController {
       emailVerified.value = _repo.checkIfEmailVerified();
       debugPrint("checking email verification");
       if (emailVerified.value == true) {
+        debugPrint("email verified");
         onVerified();
         timer.cancel();
         _timer?.cancel();

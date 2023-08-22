@@ -18,7 +18,31 @@ class EmailVerificationPortrait extends StatelessWidget {
     final double ht = cons.maxHeight;
     final double wd = cons.maxWidth;
     final AuthController auth = Get.find();
-    auth.sendVerificationEmail();
+    auth.sendVerificationEmail(
+      () {
+        auth.emailVerified.value = true;
+      },
+    );
+
+    return Obx(() {
+      if (auth.emailVerified.isFalse) {
+        return buildView(wd, ht, auth);
+      } else {
+        return buildCentre();
+      }
+    });
+  }
+
+  Scaffold buildCentre() => Scaffold(
+        body: Center(
+          child: Text(
+            "Email verified",
+            style: TextStylesLight().bodyBold,
+          ),
+        ),
+      );
+
+  Scaffold buildView(double wd, double ht, AuthController auth) {
     return Scaffold(
         backgroundColor: ProjectColors.background,
         body: SingleChildScrollView(
@@ -64,7 +88,7 @@ class EmailVerificationPortrait extends StatelessWidget {
                   Obx(() => Text(
                         toTime(auth.resendTimer.value),
                         style: TextStylesLight().bodyBold,
-                    textAlign: TextAlign.center,
+                        textAlign: TextAlign.center,
                       )),
                   const SizedBox(
                     height: 10,
@@ -72,7 +96,11 @@ class EmailVerificationPortrait extends StatelessWidget {
                   Obx(() => MaterialButton(
                         onPressed: auth.resendTimer.value == 0
                             ? () {
-                                auth.sendVerificationEmail();
+                                auth.sendVerificationEmail(
+                                  () {
+                                    auth.emailVerified.value = true;
+                                  },
+                                );
                               }
                             : null,
                         disabledColor: ProjectColors.onBackground,
