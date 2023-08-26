@@ -41,7 +41,7 @@ class PlanItem extends StatelessWidget {
                 height: 10,
               ),
               Text(
-                "Rs ${plan.price.floor()}",
+                "₹ ${plan.price.floor()}",
                 style: TextStylesLight().coloredBody(color),
               ),
               const SizedBox(

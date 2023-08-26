@@ -14,6 +14,7 @@ import '../../../routes/routes.dart';
 
 class AstroSignUpPortrait extends StatelessWidget {
   final BoxConstraints cons;
+
   const AstroSignUpPortrait({super.key, required this.cons});
 
   @override
@@ -30,7 +31,7 @@ class AstroSignUpPortrait extends StatelessWidget {
           child: Container(
             width: wd,
             padding: GlobalDims.defaultScreenPadding,
-            height: ht*0.97,
+            height: ht * 0.97,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               mainAxisAlignment: MainAxisAlignment.end,
@@ -82,9 +83,19 @@ class AstroSignUpPortrait extends StatelessWidget {
                             if (email.value.text.isEmpty ||
                                 password.value.text.isEmpty ||
                                 name.value.text.isEmpty) return;
-                            final user = User(name.value.text,email.value.text,"",0,"",true,"","");
+                            final user = User(
+                              name.value.text,
+                              email.value.text,
+                              "",
+                              0,
+                              "",
+                              true,
+                              "",
+                              "",
+                            );
                             auth.pass.value = password.value.text;
-                            Get.toNamed(Routes.astroSelectPlan,arguments: user);
+                            Get.toNamed(Routes.phoneAuth,
+                                arguments: user);
                           },
                           shape: ButtonDecors.filled,
                           color: ProjectColors.main,

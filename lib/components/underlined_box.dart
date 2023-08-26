@@ -7,7 +7,10 @@ class UnderLinedBox extends StatelessWidget {
   final String hint;
   final TextStyle  style;
   final bool password;
-  const UnderLinedBox({super.key, required this.controller, required this.hint, required this.style, this.password = false});
+  final String? prefix;
+  final int? maxLen;
+  final TextInputType? type;
+  const UnderLinedBox({super.key, required this.controller, required this.hint, required this.style, this.password = false, this.prefix, this.maxLen, this.type});
 
   @override
   Widget build(BuildContext context) {
@@ -15,7 +18,10 @@ class UnderLinedBox extends StatelessWidget {
       style: style,
       controller: controller,
       obscureText: password,
-      decoration: TextFieldDecors().underlined(hint)
+      keyboardType: type,
+      textAlign: TextAlign.center,
+      maxLength: maxLen,
+      decoration: TextFieldDecors().underlined(hint,prefix)
     );
   }
 }

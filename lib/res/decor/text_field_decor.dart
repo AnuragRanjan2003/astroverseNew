@@ -1,4 +1,5 @@
 import 'package:astroverse/res/colors/project_colors.dart';
+import 'package:astroverse/res/textStyles/text_styles.dart';
 import 'package:flutter/material.dart';
 
 class TextFieldDecors {
@@ -11,7 +12,9 @@ class TextFieldDecors {
         focusedBorder: _defaultFocusedBorder,
       );
 
-  InputDecoration underlined(String hint) => InputDecoration(
+  InputDecoration underlined(String hint , String? prefix) => InputDecoration(
+    prefixText: prefix,
+    prefixStyle: TextStylesLight().bodyBold,
     contentPadding:
     const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
     hintText: hint,

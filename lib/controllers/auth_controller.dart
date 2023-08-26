@@ -28,6 +28,7 @@ class AuthController extends GetxController {
   Timer? _timer;
   Timer? _resendTimerInstance;
   Rx<int> resendTimer = 60.obs;
+  Rx<int> astroPlanSelected = Rx(0);
 
   @override
   void onInit() async {
@@ -39,6 +40,7 @@ class AuthController extends GetxController {
         emailVerified.value = _repo.checkIfEmailVerified();
         if (emailVerified.value == true) {
           // TODO( change to offAndToNamed)
+          return;
           Get.toNamed(Routes.main);
         }
       }
