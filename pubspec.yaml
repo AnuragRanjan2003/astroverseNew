@@ -47,6 +47,7 @@ dependencies:
   google_sign_in: ^6.1.4
   glassmorphism: ^3.0.0
   shimmer: ^3.0.0
+  flutter_otp_text_field: ^1.1.1
 
 dev_dependencies:
   flutter_test:

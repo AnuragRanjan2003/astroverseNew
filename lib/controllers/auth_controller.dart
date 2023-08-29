@@ -129,6 +129,49 @@ class AuthController extends GetxController {
     super.onClose();
   }
 
+  createUserWithEmailForAstro(
+      models.User user, String password, void Function(Resource) updateUI) {
+    user.plan = selectedPlan.value;
+    if(user.plan<2) user.plan = 2;
+    String path = BackEndStrings.defaultImage;
+    if (image.value != null) path = image.value!.path;
+    loading.value = true;
+    _repo.createUser(user, password).then((event) {
+      debugPrint(event.toString());
+      if (event.isSuccess) {
+        event = event as Success<UserCredential>;
+        user.uid = event.data.user!.uid;
+        if (image.value != null) {
+          _repo
+              .storeProfileImage(File(path), event.data.user!.uid)
+              .then((task) {
+            if (task.isSuccess) {
+              debugPrint("image uploaded");
+              user.image = (task as Success<String>).data;
+              saveData(user, (p0) {
+                loading.value = false;
+                updateUI(p0);
+              }, (event as Success<UserCredential>).data);
+            } else {
+              loading.value = false;
+            }
+          });
+        } else {
+          user.image = BackEndStrings.defaultImage;
+          saveData(user, (p0) {
+            loading.value = false;
+            updateUI(p0);
+          }, event.data);
+        }
+      } else {
+        loading.value = false;
+        event = event as Failure<UserCredential>;
+        error.value = event.error;
+        updateUI(event);
+      }
+    });
+  }
+
   void saveData(models.User user, void Function(Resource<void>) updateUI,
       UserCredential event) {
     _repo.saveUserData(user).then((value) {

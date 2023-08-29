@@ -49,16 +49,23 @@ class AstroSignUpPortrait extends StatelessWidget {
                       mainAxisAlignment: MainAxisAlignment.end,
                       children: [
                         UnderLinedBox(
-                            hint: "Enter your Email",
-                            controller: email,
-                            style: TextStylesLight().body),
+                          hint: "Enter your Email",
+                          controller: email,
+                          style: TextStylesLight().body,
+                          prefix: const Icon(
+                            Icons.email_outlined,
+                            size: 20,
+                            color: Colors.black54,
+                          ),
+                        ),
                         const SizedBox(
                           height: 17,
                         ),
                         UnderLinedBox(
                             hint: "Enter your username",
                             controller: name,
-                            style: TextStylesLight().body),
+                            style: TextStylesLight().body,
+                            prefix: const Icon(Icons.person_outlined)),
                         const SizedBox(
                           height: 17,
                         ),
@@ -67,6 +74,10 @@ class AstroSignUpPortrait extends StatelessWidget {
                           controller: password,
                           style: TextStylesLight().body,
                           password: true,
+                          prefix: const Icon(
+                            Icons.lock_outline,
+                            size: 20,
+                          ),
                         ),
                         SizedBox(
                           height: ht * 0.04,
@@ -87,15 +98,15 @@ class AstroSignUpPortrait extends StatelessWidget {
                               name.value.text,
                               email.value.text,
                               "",
-                              0,
+                              2,
                               "",
                               true,
                               "",
                               "",
                             );
+                            debugPrint(" sent : ${user.toString()}");
                             auth.pass.value = password.value.text;
-                            Get.toNamed(Routes.phoneAuth,
-                                arguments: user);
+                            Get.toNamed(Routes.upiScreen, arguments: user);
                           },
                           shape: ButtonDecors.filled,
                           color: ProjectColors.main,

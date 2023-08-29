@@ -16,7 +16,7 @@ class AskScreenPortrait extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final auth = Get.put(AuthController());
+    final AuthController auth = Get.put(AuthController());
     final double wd = cons.maxWidth;
     final double ht = cons.maxHeight;
     return Scaffold(

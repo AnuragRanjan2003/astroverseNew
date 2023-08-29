@@ -1,3 +1,6 @@
+import 'dart:developer';
+
+import 'package:astroverse/utils/phone_auth_callbacks.dart';
 import 'package:astroverse/utils/resource.dart';
 import 'package:astroverse/utils/safe_call.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -47,5 +50,34 @@ class Auth {
         return await mAuth.signInWithCredential(credential);
       });
 
+  Future<void> sendOtp(PhoneAuthCallbacks callbacks, String number) async {
+      return await mAuth.verifyPhoneNumber(
+        phoneNumber: number,
+        verificationCompleted: (p) => callbacks.onVerificationComplete(p),
+        verificationFailed: (error) => callbacks.onVerificationFailed(error),
+        codeSent: (verificationId, forceResendingToken) =>
+            callbacks.onCodeSent(verificationId, forceResendingToken),
+        codeAutoRetrievalTimeout: (verificationId) =>
+            callbacks.codeAutoRetrievalTimeout(verificationId),
+        forceResendingToken: callbacks.resendToken
+      );}
 
+  Future<bool> checkOtp(PhoneAuthCredential cred) async {
+    try {
+      final res = await mAuth.signInWithCredential(cred);
+      if (res.user != null) {
+        await res.user!.delete();
+        await mAuth.signOut();
+        return true;
+      } else {
+        return false;
+      }
+    } on FirebaseAuthException catch (e) {
+      log(e.toString(), name: "PHONE AUTH");
+      return false;
+    } catch (e) {
+      log(e.toString(), name: "PHONE AUTH");
+      return false;
+    }
+  }
 }

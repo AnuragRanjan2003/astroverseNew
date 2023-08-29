@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:astroverse/db/storage.dart';
 import 'package:astroverse/models/user.dart' as models;
+import 'package:astroverse/utils/phone_auth_callbacks.dart';
 import 'package:astroverse/utils/resource.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -31,12 +32,19 @@ class AuthRepo {
   Stream<DocumentSnapshot<models.User>> getUserStream(String id) =>
       _db.getUserStream(id);
 
-   Future<Resource<String>> sendEmailVerificationEmail() async =>
+  Future<Resource<String>> sendEmailVerificationEmail() async =>
       await _auth.sendVerificationEmail();
 
   bool checkIfEmailVerified() => _auth.checkEmailVerified();
 
-  Future<Resource<UserCredential>> signInWithGoogle() async => await _auth.signInWithGoogle();
+  Future<Resource<UserCredential>> signInWithGoogle() async =>
+      await _auth.signInWithGoogle();
 
-  Future<bool> checkForUserData(String uid) async => await _db.checkForUserData(uid);
+  Future<bool> checkForUserData(String uid) async =>
+      await _db.checkForUserData(uid);
+
+  Future<void> sendOtp(PhoneAuthCallbacks callbacks ,  String number) async =>
+      await _auth.sendOtp(callbacks,number);
+
+  Future<bool> checkOTP(PhoneAuthCredential cred) async => await _auth.checkOtp(cred);
 }
