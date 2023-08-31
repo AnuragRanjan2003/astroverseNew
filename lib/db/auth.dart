@@ -46,12 +46,11 @@ class Auth {
             await googleAccount?.authentication;
         final credential = GoogleAuthProvider.credential(
             idToken: googleAuth?.idToken, accessToken: googleAuth?.accessToken);
-
         return await mAuth.signInWithCredential(credential);
       });
 
   Future<void> sendOtp(PhoneAuthCallbacks callbacks, String number) async {
-      return await mAuth.verifyPhoneNumber(
+    return await mAuth.verifyPhoneNumber(
         phoneNumber: number,
         verificationCompleted: (p) => callbacks.onVerificationComplete(p),
         verificationFailed: (error) => callbacks.onVerificationFailed(error),
@@ -59,8 +58,8 @@ class Auth {
             callbacks.onCodeSent(verificationId, forceResendingToken),
         codeAutoRetrievalTimeout: (verificationId) =>
             callbacks.codeAutoRetrievalTimeout(verificationId),
-        forceResendingToken: callbacks.resendToken
-      );}
+        forceResendingToken: callbacks.resendToken);
+  }
 
   Future<bool> checkOtp(PhoneAuthCredential cred) async {
     try {
@@ -79,5 +78,10 @@ class Auth {
       log(e.toString(), name: "PHONE AUTH");
       return false;
     }
+  }
+
+  Future<void> logOut() async {
+    await mAuth.signOut();
+    await GoogleSignIn().signOut();
   }
 }

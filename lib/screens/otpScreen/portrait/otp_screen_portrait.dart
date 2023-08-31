@@ -28,11 +28,12 @@ class OtpScreenPortrait extends StatelessWidget {
     final AuthController auth = Get.find();
     final wd = cons.maxWidth;
     final ht = cons.maxHeight;
-    final PhoneDataParcel parcel = Get.arguments;
-    final models.User? user = parcel.user;
-    final String code = parcel.code;
-    final String number = parcel.number;
-    final callbacks = parcel.callbacks;
+    final PhoneDataParcel dataParcel = Get.arguments;
+    final models.User? user = dataParcel.parcel.data;
+    final bool google = dataParcel.parcel.google;
+    final String code = dataParcel.code;
+    final String number = dataParcel.number;
+    final callbacks = dataParcel.callbacks;
     log(user.toString(), name: "USER");
     log(code.toString(), name: "CODE");
     if (user == null) Get.snackbar("Error", "unexpected error");
@@ -101,17 +102,23 @@ class OtpScreenPortrait extends StatelessWidget {
                                                     .toString());
                                         controller.checkOtp(cred, () {
                                           user!.phNo = number;
-                                          auth.createUserWithEmailForAstro(
-                                              user, auth.pass.value, (p0) {
-                                            if (p0 is Success) {
-                                              Get.toNamed(
-                                                Routes.emailVerify,
-                                              );
-                                            } else {
-                                              log((p0 as Failure).error,
-                                                  name: "CREATE USER");
-                                            }
-                                          });
+                                          if (!google) {
+                                            auth.createUserWithEmailForAstro(
+                                                user, auth.pass.value, (p0) {
+                                              if (p0 is Success) {
+                                                Get.toNamed(
+                                                  Routes.emailVerify,
+                                                );
+                                              } else {
+                                                log((p0 as Failure).error,
+                                                    name: "CREATE USER");
+                                              }
+                                            });
+                                          } else {
+                                            auth.saveGoogleData(user, (value) {
+                                              log("saved" , name: "SAVE DATA");
+                                            },user.astro);
+                                          }
                                         }, () {
                                           controller.verifyOtpLoading.value =
                                               false;

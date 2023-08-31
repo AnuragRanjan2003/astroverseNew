@@ -1,4 +1,5 @@
 import 'dart:developer' as dev;
+import 'dart:developer';
 
 import 'package:astroverse/components/underlined_box.dart';
 import 'package:astroverse/controllers/phone_auth_controller.dart';
@@ -8,6 +9,7 @@ import 'package:astroverse/res/decor/button_decor.dart';
 import 'package:astroverse/res/dims/global.dart';
 import 'package:astroverse/res/img/images.dart';
 import 'package:astroverse/routes/routes.dart';
+import 'package:astroverse/screens/astroSignUp/portrait/astro_signup_portrait.dart';
 import 'package:astroverse/utils/otp_phone_callbacks.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -25,14 +27,18 @@ class PhoneAuthPortrait extends StatelessWidget {
     final wd = cons.maxWidth;
     final ht = cons.maxHeight;
     final PhoneAuthController controller = Get.find();
+    log("${Get.arguments}" ,name: "PARCEL");
+    final Parcel parcel = Get.arguments;
+
     final models.User? user;
-    user = Get.arguments;
+    user = parcel.data;
+    final bool google = parcel.google;
     debugPrint(user.toString());
     dev.log("user got : ${user.toString()}", name: "USER");
     if (user == null) Get.snackbar("Error", "unexpected error");
     late OTPPhoneCallbacks callbacks;
     return Scaffold(
-      backgroundColor:  Colors.blue.shade50,
+      backgroundColor: Colors.blue.shade50,
       body: SingleChildScrollView(
         child: SizedBox(
           width: wd,
@@ -50,7 +56,7 @@ class PhoneAuthPortrait extends StatelessWidget {
                 flex: 2,
                 child: Container(
                   padding: const EdgeInsets.symmetric(
-                      horizontal: GlobalDims.horizontalPadding,vertical: 20),
+                      horizontal: GlobalDims.horizontalPadding, vertical: 20),
                   decoration: const BoxDecoration(
                       color: ProjectColors.background,
                       borderRadius: BorderRadius.only(
@@ -86,16 +92,18 @@ class PhoneAuthPortrait extends StatelessWidget {
                                     controller.phone.value = number;
                                     callbacks = OTPPhoneCallbacks(
                                       (code) {
-                                        controller.sendOtpLoading.value =
-                                            false;
+                                        controller.sendOtpLoading.value = false;
 
                                         Get.toNamed(Routes.otpScreen,
-                                            arguments: PhoneDataParcel(code,
-                                                user, number, callbacks));
+                                            arguments: PhoneDataParcel(
+                                                code,
+                                                Parcel(
+                                                    data: user, google: google),
+                                                number,
+                                                callbacks));
                                       },
                                       (error) {
-                                        controller.sendOtpLoading.value =
-                                            false;
+                                        controller.sendOtpLoading.value = false;
                                         controller.verifyOtpLoading.value =
                                             false;
                                       },
@@ -110,12 +118,14 @@ class PhoneAuthPortrait extends StatelessWidget {
                                     "Send OTP",
                                     style: TextStyleDark().onButton,
                                   )
-                                : const SizedBox(height: 20,width: 20,
-                                  child: CircularProgressIndicator(
+                                : const SizedBox(
+                                    height: 20,
+                                    width: 20,
+                                    child: CircularProgressIndicator(
                                       color: Colors.white,
                                       strokeWidth: 2.0,
                                     ),
-                                ),
+                                  ),
                           ))
                     ],
                   ),
@@ -136,9 +146,9 @@ class PhoneAuthPortrait extends StatelessWidget {
 
 class PhoneDataParcel {
   final String code;
-  final models.User? user;
+  final Parcel parcel;
   final String number;
   final OTPPhoneCallbacks callbacks;
 
-  PhoneDataParcel(this.code, this.user, this.number, this.callbacks);
+  PhoneDataParcel(this.code, this.parcel, this.number, this.callbacks);
 }

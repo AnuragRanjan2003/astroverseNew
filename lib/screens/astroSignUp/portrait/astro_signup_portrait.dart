@@ -1,6 +1,7 @@
 import 'package:astroverse/res/dims/global.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 
 import '../../../components/underlined_box.dart';
 import '../../../controllers/auth_controller.dart';
@@ -25,6 +26,7 @@ class AstroSignUpPortrait extends StatelessWidget {
     final TextEditingController password = TextEditingController();
     final TextEditingController name = TextEditingController();
     final AuthController auth = Get.find();
+    GoogleSignIn().signOut();
     return Scaffold(
       body: SingleChildScrollView(
         child: SafeArea(
@@ -106,7 +108,8 @@ class AstroSignUpPortrait extends StatelessWidget {
                             );
                             debugPrint(" sent : ${user.toString()}");
                             auth.pass.value = password.value.text;
-                            Get.toNamed(Routes.upiScreen, arguments: user);
+                            Get.toNamed(Routes.upiScreen,
+                                arguments: Parcel(data: user, google: false));
                           },
                           shape: ButtonDecors.filled,
                           color: ProjectColors.main,
@@ -118,7 +121,10 @@ class AstroSignUpPortrait extends StatelessWidget {
                         ),
                         MaterialButton(
                           onPressed: () {
-                            auth.signUpWithGoogle();
+                            auth.signUpWithGoogle((p0) {
+                              Get.toNamed(Routes.upiScreen,
+                                  arguments: Parcel(data: p0, google: true));
+                            },true);
                           },
                           shape: ButtonDecors.outlined,
                           padding: const EdgeInsets.symmetric(vertical: 12),
@@ -164,4 +170,11 @@ class AstroSignUpPortrait extends StatelessWidget {
       ),
     );
   }
+}
+
+class Parcel {
+  dynamic data;
+  final bool google;
+
+  Parcel({required this.data, required this.google});
 }

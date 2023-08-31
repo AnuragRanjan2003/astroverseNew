@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:astroverse/components/underlined_box.dart';
 import 'package:astroverse/controllers/auth_controller.dart';
 import 'package:astroverse/res/colors/project_colors.dart';
@@ -113,7 +115,11 @@ class UserLoginScreenPortrait extends StatelessWidget {
                         ),
                         MaterialButton(
                           onPressed: () {
-                            auth.signInWithGoogle((p0) {});
+                            auth.signInWithGoogle((p0) {
+                              if(p0.isSuccess){
+                                log(" login successful" , name: "GOOGLE");
+                              }
+                            });
                           },
                           shape: ButtonDecors.outlined,
                           padding: const EdgeInsets.symmetric(vertical: 12),

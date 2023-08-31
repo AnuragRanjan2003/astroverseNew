@@ -47,4 +47,6 @@ class AuthRepo {
       await _auth.sendOtp(callbacks,number);
 
   Future<bool> checkOTP(PhoneAuthCredential cred) async => await _auth.checkOtp(cred);
+
+  Future<void> logOut() async => await _auth.logOut();
 }

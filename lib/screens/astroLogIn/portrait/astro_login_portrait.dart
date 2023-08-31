@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:astroverse/res/dims/global.dart';
 import 'package:astroverse/utils/resource.dart';
 import 'package:flutter/material.dart';
@@ -103,7 +105,11 @@ class AstroLogInPortrait extends StatelessWidget {
                         height: 15,
                       ),
                       MaterialButton(
-                        onPressed: () {},
+                        onPressed: () {
+                          auth.signInWithGoogle((p0) {
+                            log("login successful" , name: "GOOGLE");
+                          });
+                        },
                         shape: ButtonDecors.outlined,
                         padding: const EdgeInsets.symmetric(vertical: 12),
                         child: Row(

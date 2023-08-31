@@ -104,7 +104,7 @@ class UserSignUpPortrait extends StatelessWidget {
                         ),
                         MaterialButton(
                           onPressed: () {
-                            auth.signUpWithGoogle();
+                            auth.signUpWithGoogle((p0){Get.toNamed(Routes.moreProfile , arguments: p0);},false);
                           },
                           shape: ButtonDecors.outlined,
                           padding: const EdgeInsets.symmetric(vertical: 12),

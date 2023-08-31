@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:developer';
 import 'dart:io';
 
 import 'package:astroverse/models/user.dart' as models;
@@ -79,8 +80,8 @@ class AuthController extends GetxController {
     });
   }
 
-  createUserWithEmail(
-      models.User user, String password, void Function(Resource) updateUI) {
+  createUserWithEmail(models.User user, String password,
+      void Function(Resource) updateUI) {
     user.plan = selectedPlan.value;
     String path = BackEndStrings.defaultImage;
     if (image.value != null) path = image.value!.path;
@@ -129,10 +130,10 @@ class AuthController extends GetxController {
     super.onClose();
   }
 
-  createUserWithEmailForAstro(
-      models.User user, String password, void Function(Resource) updateUI) {
+  createUserWithEmailForAstro(models.User user, String password,
+      void Function(Resource) updateUI) {
     user.plan = selectedPlan.value;
-    if(user.plan<2) user.plan = 2;
+    if (user.plan < 2) user.plan = 2;
     String path = BackEndStrings.defaultImage;
     if (image.value != null) path = image.value!.path;
     loading.value = true;
@@ -189,7 +190,7 @@ class AuthController extends GetxController {
     });
   }
 
-  sendVerificationEmail( void Function() onVerified ) {
+  sendVerificationEmail(void Function() onVerified) {
     resendTimer.value = 60;
     startResendCountdown();
     _repo.sendEmailVerificationEmail().then((value) {
@@ -233,7 +234,7 @@ class AuthController extends GetxController {
     });
   }
 
-  signInWithGoogle(void Function(Resource<UserCredential>) updateUI) {
+  signInWithGoogle(void Function(Resource<UserCredential> ) updateUI) {
     _repo.signInWithGoogle().then((value) {
       if (value.isSuccess) {
         value = value as Success<UserCredential>;
@@ -257,7 +258,7 @@ class AuthController extends GetxController {
     });
   }
 
-  signUpWithGoogle() {
+  signUpWithGoogle(void Function(models.User) onComplete , bool astro) {
     _repo.signInWithGoogle().then((value) {
       if (value.isSuccess) {
         value = value as Success<UserCredential>;
@@ -269,13 +270,12 @@ class AuthController extends GetxController {
                 _parseValueForModel(cred.displayName),
                 _parseValueForModel(cred.email),
                 _parseValueForModel(cred.photoURL),
-                0,
+                astro?2:0,
                 _parseValueForModel(cred.uid),
-                false,
+                astro,
                 _parseValueForModel(cred.phoneNumber),
                 "");
-
-            Get.toNamed(Routes.moreProfile, arguments: user);
+            onComplete(user);
           } else {
             _showError("Error", "user already exists");
           }
@@ -286,13 +286,13 @@ class AuthController extends GetxController {
     });
   }
 
-  void saveGoogleData(
-      models.User user,
+  void saveGoogleData(models.User user,
       void Function(
-        Resource<void> value,
-      ) updateUI) {
+          Resource<void> value,
+          ) updateUI , bool astro) {
     loading.value = true;
     user.plan = selectedPlan.value;
+    if(astro && selectedPlan.value<2) user.plan = 2;
     if (image.value != null) {
       _repo.storeProfileImage(File(image.value!.path), user.uid).then((value) {
         if (value.isSuccess) {
@@ -306,11 +306,19 @@ class AuthController extends GetxController {
           _showError("error", (value as Failure<String>).error);
         }
       });
+    } else {
+      log("no image selected", name: "SAVE DATA");
+      user.image = BackEndStrings.defaultImage;
+      _saveDataFromGoogle(user, (p0) {
+        if (p0 is Success<void>) {
+          debugPrint("saved data");
+        }
+      });
     }
   }
 
-  _saveDataFromGoogle(
-      models.User user, void Function(Resource<void>) updateUI) {
+  _saveDataFromGoogle(models.User user,
+      void Function(Resource<void>) updateUI) {
     _repo.saveUserData(user).then((value) {
       loading.value = false;
       updateUI(value);
@@ -321,6 +329,12 @@ class AuthController extends GetxController {
         value = value as Failure;
         error.value = value.error;
       }
+    });
+  }
+
+  void logOut() {
+    _repo.logOut().then((value) {
+      Get.offAllNamed(Routes.ask);
     });
   }
 

@@ -8,8 +8,14 @@ import '../models/user.dart';
 
 class NamePlate extends StatelessWidget {
   final User user;
+  final void Function() onLogOut;
+  final void Function() onEdit;
 
-  const NamePlate({super.key, required this.user});
+  const NamePlate(
+      {super.key,
+      required this.user,
+      required this.onLogOut,
+      required this.onEdit});
 
   @override
   Widget build(BuildContext context) {
@@ -24,13 +30,18 @@ class NamePlate extends StatelessWidget {
                 borderRadius: const BorderRadius.all(Radius.circular(30)),
                 child: Image.network(user.image, width: 120),
               ),
-              IconButton(
-                  onPressed: () {},
-                  icon: const FaIcon(
-                    FontAwesomeIcons.pen,
-                    color: Colors.lightBlue,
-                    size: 20,
-                  ))),
+              Column(
+                children: [
+                  ElevatedButton(
+                    onPressed: onEdit,
+                    child: const Text("Edit"),
+                  ),
+                  ElevatedButton(
+                    onPressed: onLogOut,
+                    child: const Text("logout"),
+                  ),
+                ],
+              )),
           const SizedBox(
             height: 25,
           ),
@@ -60,13 +71,9 @@ class NamePlate extends StatelessWidget {
                 user.plan.toString(),
                 style: TextStylesLight().small,
               ),
-              IconButton(
+              ElevatedButton(
                 onPressed: () {},
-                icon: const FaIcon(
-                  FontAwesomeIcons.link,
-                  color: Colors.lightBlue,
-                  size: 20,
-                ),
+                child: const Text("upgrade"),
               )),
         ],
       ),
