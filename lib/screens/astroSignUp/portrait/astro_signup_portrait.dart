@@ -100,7 +100,7 @@ class AstroSignUpPortrait extends StatelessWidget {
                               name.value.text,
                               email.value.text,
                               "",
-                              2,
+                              0,
                               "",
                               true,
                               "",
@@ -122,9 +122,20 @@ class AstroSignUpPortrait extends StatelessWidget {
                         MaterialButton(
                           onPressed: () {
                             auth.signUpWithGoogle((p0) {
-                              Get.toNamed(Routes.upiScreen,
-                                  arguments: Parcel(data: p0, google: true));
-                            },true);
+                              auth.saveGoogleData(
+                                  p0,
+                                  (value) {
+                                    Get.toNamed(Routes.upiScreen,
+                                        arguments:
+                                            Parcel(data: p0, google: true));
+                                  },
+                                  true,
+                                  () {
+                                    Get.toNamed(Routes.upiScreen,
+                                        arguments:
+                                        Parcel(data: p0, google: true));
+                                  });
+                            }, true);
                           },
                           shape: ButtonDecors.outlined,
                           padding: const EdgeInsets.symmetric(vertical: 12),

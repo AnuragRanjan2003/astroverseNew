@@ -2,6 +2,8 @@ import 'package:astroverse/res/colors/project_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
+import '../../../controllers/auth_controller.dart';
+
 class MartScreenPortrait extends StatelessWidget {
   final BoxConstraints cons;
 
@@ -9,9 +11,11 @@ class MartScreenPortrait extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final AuthController auth = Get.find();
     return Scaffold(
       backgroundColor: ProjectColors.background,
-      floatingActionButton: FloatingActionButton(
+      floatingActionButton: (auth.user.value?.astro == true)
+          ? FloatingActionButton(
         onPressed: _postItemScreen,
         backgroundColor: Colors.lightBlue.withAlpha(150),
         elevation: 0,
@@ -19,19 +23,19 @@ class MartScreenPortrait extends StatelessWidget {
           Icons.add,
           color: Colors.white,
         ),
-      ),
+      ):null,
       body: SingleChildScrollView(
         child: SafeArea(
           child: Container(
               child: const Column(
-            children: [],
-          )),
+                children: [],
+              )),
         ),
       ),
     );
   }
 
-  _postItemScreen(){
+  _postItemScreen() {
     debugPrint("add item");
     return;
     // TODO(go to add item screen)

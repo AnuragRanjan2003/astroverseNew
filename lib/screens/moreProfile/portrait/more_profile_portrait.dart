@@ -134,7 +134,9 @@ class MoreProfilePortrait extends StatelessWidget {
                         if(value is Success<void>){
                           debugPrint("user done");
                         }
-                      },false);
+                      },false , (){
+                        Get.offAndToNamed(Routes.main);
+                      });
                     }
                   },
                   padding: const EdgeInsets.symmetric(vertical: 15),

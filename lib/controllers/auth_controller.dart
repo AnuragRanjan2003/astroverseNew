@@ -40,8 +40,6 @@ class AuthController extends GetxController {
         startListeningToUser(fUser.uid);
         emailVerified.value = _repo.checkIfEmailVerified();
         if (emailVerified.value == true) {
-          // TODO( change to offAndToNamed)
-          return;
           Get.toNamed(Routes.main);
         }
       }
@@ -82,7 +80,7 @@ class AuthController extends GetxController {
 
   createUserWithEmail(models.User user, String password,
       void Function(Resource) updateUI) {
-    user.plan = selectedPlan.value;
+    user.plan = 0;
     String path = BackEndStrings.defaultImage;
     if (image.value != null) path = image.value!.path;
     loading.value = true;
@@ -132,8 +130,7 @@ class AuthController extends GetxController {
 
   createUserWithEmailForAstro(models.User user, String password,
       void Function(Resource) updateUI) {
-    user.plan = selectedPlan.value;
-    if (user.plan < 2) user.plan = 2;
+    user.plan = 0;
     String path = BackEndStrings.defaultImage;
     if (image.value != null) path = image.value!.path;
     loading.value = true;
@@ -270,7 +267,7 @@ class AuthController extends GetxController {
                 _parseValueForModel(cred.displayName),
                 _parseValueForModel(cred.email),
                 _parseValueForModel(cred.photoURL),
-                astro?2:0,
+                  0,
                 _parseValueForModel(cred.uid),
                 astro,
                 _parseValueForModel(cred.phoneNumber),
@@ -289,10 +286,9 @@ class AuthController extends GetxController {
   void saveGoogleData(models.User user,
       void Function(
           Resource<void> value,
-          ) updateUI , bool astro) {
+          ) updateUI , bool astro , Function() goTO) {
     loading.value = true;
-    user.plan = selectedPlan.value;
-    if(astro && selectedPlan.value<2) user.plan = 2;
+    user.plan = 0;
     if (image.value != null) {
       _repo.storeProfileImage(File(image.value!.path), user.uid).then((value) {
         if (value.isSuccess) {
@@ -301,7 +297,7 @@ class AuthController extends GetxController {
             if (p0 is Success<void>) {
               debugPrint("saved data");
             }
-          });
+          } , goTO);
         } else {
           _showError("error", (value as Failure<String>).error);
         }
@@ -313,18 +309,18 @@ class AuthController extends GetxController {
         if (p0 is Success<void>) {
           debugPrint("saved data");
         }
-      });
+      } , goTO);
     }
   }
 
   _saveDataFromGoogle(models.User user,
-      void Function(Resource<void>) updateUI) {
+      void Function(Resource<void>) updateUI  , void Function() goTO) {
     _repo.saveUserData(user).then((value) {
       loading.value = false;
       updateUI(value);
       if (value is Success) {
         startListeningToUser(user.uid);
-        Get.offAndToNamed(Routes.main);
+        goTO();
       } else {
         value = value as Failure;
         error.value = value.error;

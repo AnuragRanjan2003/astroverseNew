@@ -1,11 +1,14 @@
 import 'package:astroverse/models/item.dart';
+import 'package:astroverse/models/post.dart';
 import 'package:astroverse/models/user.dart' as models;
 import 'package:astroverse/res/strings/backend_strings.dart';
 import 'package:astroverse/utils/resource.dart';
 import 'package:astroverse/utils/safe_call.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:uuid/uuid.dart';
 
 class Database {
+  static const int _limit = 8;
   final _userCollection = FirebaseFirestore.instance
       .collection(BackEndStrings.userCollection)
       .withConverter<models.User>(
@@ -19,6 +22,13 @@ class Database {
       .withConverter<Item>(
         fromFirestore: (snapshot, options) => Item.fromJson(snapshot.data()!),
         toFirestore: (item, options) => item.toJson(),
+      );
+
+  final _postCollection = FirebaseFirestore.instance
+      .collection(BackEndStrings.postCollection)
+      .withConverter<Post>(
+        fromFirestore: (snapshot, options) => Post.fromJson(snapshot.data()!),
+        toFirestore: (value, options) => value.toJson(),
       );
 
   Future<Resource<void>> saveUserData(models.User user) async =>
@@ -43,5 +53,48 @@ class Database {
         await _userCollection.where('uid', isEqualTo: uid).count().get();
     if (res.count == 0) return false;
     return true;
+  }
+
+  Future<Resource<Post>> savePost(Post post) async {
+    try {
+      post.id = const Uuid().v4();
+      await _postCollection.doc(post.id).set(post);
+      return Success(post);
+    } on FirebaseException catch (e) {
+      return Failure<Post>(e.message.toString());
+    } catch (e) {
+      return Failure<Post>(e.toString());
+    }
+  }
+
+  Future<Resource<List<QueryDocumentSnapshot<Post>>>> fetchPostsByGenreAndPage(
+      List<String> genre) async {
+    try {
+      QuerySnapshot<Post> res = await _postCollection
+          .limit(_limit)
+          .where("genre", arrayContainsAny: genre)
+          .get();
+      final data = res.docs;
+      return Success(data);
+    } on FirebaseException catch (e) {
+      return Failure<List<QueryDocumentSnapshot<Post>>>(e.message.toString());
+    } catch (e) {
+      return Failure<List<QueryDocumentSnapshot<Post>>>(e.toString());
+    }
+  }
+
+  Future<Resource<List<QueryDocumentSnapshot<Post>>>> fetchMorePosts(
+      QueryDocumentSnapshot<Post> lastPost, List<String> genre) async {
+    try {
+      final res = await _postCollection
+          .limit(_limit)
+          .where("genre", arrayContainsAny: genre)
+          .startAfter([lastPost]).get();
+      return Success(res.docs);
+    } on FirebaseException catch (e) {
+      return Failure<List<QueryDocumentSnapshot<Post>>>(e.message.toString());
+    } catch (e) {
+      return Failure<List<QueryDocumentSnapshot<Post>>>(e.toString());
+    }
   }
 }

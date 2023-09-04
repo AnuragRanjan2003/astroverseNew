@@ -9,6 +9,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 
 import '../db/auth.dart';
 import '../db/db.dart';
+import '../models/post.dart';
 
 class AuthRepo {
   final _auth = Auth();
@@ -47,6 +48,8 @@ class AuthRepo {
       await _auth.sendOtp(callbacks,number);
 
   Future<bool> checkOTP(PhoneAuthCredential cred) async => await _auth.checkOtp(cred);
+
+
 
   Future<void> logOut() async => await _auth.logOut();
 }

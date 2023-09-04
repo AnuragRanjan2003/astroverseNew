@@ -115,9 +115,17 @@ class OtpScreenPortrait extends StatelessWidget {
                                               }
                                             });
                                           } else {
-                                            auth.saveGoogleData(user, (value) {
-                                              log("saved" , name: "SAVE DATA");
-                                            },user.astro);
+                                            auth.saveGoogleData(
+                                                user,
+                                                (value) {
+                                                  log("saved",
+                                                      name: "SAVE DATA");
+                                                },
+                                                user.astro,
+                                                () {
+                                                  Get.offAndToNamed(
+                                                      Routes.main);
+                                                });
                                           }
                                         }, () {
                                           controller.verifyOtpLoading.value =

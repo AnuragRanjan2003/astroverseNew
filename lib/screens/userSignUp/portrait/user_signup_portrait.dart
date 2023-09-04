@@ -3,6 +3,7 @@ import 'package:astroverse/controllers/auth_controller.dart';
 import 'package:astroverse/models/user.dart';
 import 'package:astroverse/res/img/images.dart';
 import 'package:astroverse/routes/routes.dart';
+import 'package:astroverse/screens/astroSignUp/portrait/astro_signup_portrait.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -91,8 +92,9 @@ class UserSignUpPortrait extends StatelessWidget {
                                 name.value.text.isEmpty) return;
                             auth.pass.value = password.value.text;
                             final User user = User(name.value.text,
-                                email.value.text, "", 0, "", false, "","");
-                            Get.toNamed(Routes.moreProfile, arguments: user);
+                                email.value.text, "", 0, "", false, "", "");
+                            Get.toNamed(Routes.upiScreen,
+                                arguments: Parcel(data: user, google: false));
                           },
                           shape: ButtonDecors.filled,
                           color: ProjectColors.main,
@@ -104,7 +106,19 @@ class UserSignUpPortrait extends StatelessWidget {
                         ),
                         MaterialButton(
                           onPressed: () {
-                            auth.signUpWithGoogle((p0){Get.toNamed(Routes.moreProfile , arguments: p0);},false);
+                            auth.signUpWithGoogle((p0) {
+                              auth.saveGoogleData(
+                                  p0,
+                                  (value) {
+                                    Get.toNamed(Routes.upiScreen,
+                                        arguments: Parcel(data: p0, google: true));
+                                  },
+                                  false,
+                                  () {
+                                    Get.toNamed(Routes.upiScreen,
+                                        arguments: Parcel(data: p0, google: true));
+                                  });
+                            }, false);
                           },
                           shape: ButtonDecors.outlined,
                           padding: const EdgeInsets.symmetric(vertical: 12),
