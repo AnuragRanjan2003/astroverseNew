@@ -13,6 +13,8 @@ class MainController extends GetxController {
   Rx<bool> morePostsToLoad = true.obs;
   Rxn<QueryDocumentSnapshot<Post>> lastPost = Rxn();
   static const _maxPostLimit = 50;
+  Rx<bool> nothingToShow = false.obs;
+  Rx<bool> loadingMorePosts = false.obs;
 
   @override
   void onInit() {
@@ -32,7 +34,9 @@ class MainController extends GetxController {
     } else {
       log(lastPost.value!.data().toString(), name: "LP");
     }
+    loadingMorePosts.value = true;
     _postRepo.fetchPostsByGenreAndPage(genre).then((value) {
+      loadingMorePosts.value = false;
       if (value.isSuccess) {
         value = value as Success<List<QueryDocumentSnapshot<Post>>>;
         List<Post> list = [];
@@ -46,6 +50,7 @@ class MainController extends GetxController {
         log(list.length.toString(), name: "GOT LIST SIZE");
         log(list.toString(), name: "GOT LIST");
         postList.value = list;
+        nothingToShow.value = list.isEmpty;
         log(postList.length.toString(), name: "POST LIST SUCCESS");
       } else {
         value = value as Failure<List<QueryDocumentSnapshot<Post>>>;
@@ -56,8 +61,10 @@ class MainController extends GetxController {
 
   void fetchMorePosts(List<String> genre) {
     log("loading more posts", name: "POST LIST");
-    if (morePostsToLoad.value == false) return;
+    if (morePostsToLoad.value == false || postList.length >= _maxPostLimit) return;
+    loadingMorePosts.value = true;
     _postRepo.fetchMorePost(lastPost.value!, genre).then((value) {
+      loadingMorePosts.value = false;
       if (value.isSuccess) {
         value = value as Success<List<QueryDocumentSnapshot<Post>>>;
         List<Post> list = [];
@@ -71,7 +78,8 @@ class MainController extends GetxController {
         log("${lastPost.value!.data()}", name: "IS NULL");
         log(list.length.toString(), name: "GOT LIST SIZE");
         log(list.toString(), name: "GOT LIST");
-        postList.value = list;
+        postList.addAll(list);
+        morePostsToLoad.value = list.isNotEmpty;
         log(postList.length.toString(), name: "POST LIST SUCCESS");
       } else {
         value = value as Failure<List<QueryDocumentSnapshot<Post>>>;

@@ -8,7 +8,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:uuid/uuid.dart';
 
 class Database {
-  static const int _limit = 8;
+  static const int _limit = 5;
   final _userCollection = FirebaseFirestore.instance
       .collection(BackEndStrings.userCollection)
       .withConverter<models.User>(
@@ -89,7 +89,8 @@ class Database {
       final res = await _postCollection
           .limit(_limit)
           .where("genre", arrayContainsAny: genre)
-          .startAfter([lastPost]).get();
+          .startAfterDocument(lastPost)
+          .get();
       return Success(res.docs);
     } on FirebaseException catch (e) {
       return Failure<List<QueryDocumentSnapshot<Post>>>(e.message.toString());

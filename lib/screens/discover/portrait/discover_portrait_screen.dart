@@ -27,25 +27,30 @@ class DiscoverScreenPortrait extends StatelessWidget {
       length: 2,
       child: Scaffold(
         backgroundColor: color,
-        floatingActionButton: (auth.user.value?.astro == true)
-            ? FloatingActionButton(
-                onPressed: () {
-                  _testPost(main , index);
-                  index++;
-                },
-                backgroundColor: Colors.lightBlue.withAlpha(150),
-                elevation: 0,
-                child: const Icon(
-                  Icons.add,
-                  color: Colors.white,
-                ),
-              )
-            : null,
+        floatingActionButton: Obx(() {
+          if (auth.user.value?.astro == true) {
+            return FloatingActionButton(
+              onPressed: () {
+                _testPost(main, index);
+                index++;
+              },
+              backgroundColor: Colors.lightBlue.shade300,
+              elevation: 0,
+              child: const Icon(
+                Icons.add,
+                color: Colors.white,
+              ),
+            );
+          }
+          return const SizedBox(
+            height: 0,
+          );
+        }),
         body: Container(
             width: wd,
-            child: const Column(
+            child: Column(
               children: [
-                TabBar(
+                const TabBar(
                   indicatorColor: Colors.lightBlue,
                   labelColor: Colors.lightBlue,
                   tabs: [
@@ -60,9 +65,11 @@ class DiscoverScreenPortrait extends StatelessWidget {
                 Expanded(
                   child: TabBarView(children: [
                     Center(
-                      child: NewPostsPage(),
+                      child: NewPostsPage(
+                        cons: cons,
+                      ),
                     ),
-                    Center(
+                    const Center(
                       child: Text("following"),
                     ),
                   ]),
@@ -73,14 +80,15 @@ class DiscoverScreenPortrait extends StatelessWidget {
     );
   }
 
-  _testPost(MainController controller , int index) {
+  _testPost(MainController controller, int index) {
     final post = Post(
       id: "12123234",
       title: "$index",
       description: "asdasdsdadsasd",
       genre: ["a", "b"],
       date: DateTime.timestamp(),
-      imageUrl: "213213",
+      imageUrl:
+          "https://images.unsplash.com/photo-1693054092499-c471393da690?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80",
       upVotes: 20,
       downVotes: 10,
       authorName: "abc",
@@ -88,7 +96,7 @@ class DiscoverScreenPortrait extends StatelessWidget {
     );
 
     controller.savePost(post, (p0) {
-      if(p0.isSuccess) {
+      if (p0.isSuccess) {
         log((p0 as Success<Post>).data.toString(), name: "POST");
       }
     });

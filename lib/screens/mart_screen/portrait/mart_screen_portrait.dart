@@ -17,7 +17,7 @@ class MartScreenPortrait extends StatelessWidget {
       floatingActionButton: (auth.user.value?.astro == true)
           ? FloatingActionButton(
         onPressed: _postItemScreen,
-        backgroundColor: Colors.lightBlue.withAlpha(150),
+        backgroundColor: Colors.lightBlue.shade300,
         elevation: 0,
         child: const Icon(
           Icons.add,
