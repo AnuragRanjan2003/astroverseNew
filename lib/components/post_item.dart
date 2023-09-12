@@ -1,7 +1,12 @@
+import 'dart:developer';
+
 import 'package:astroverse/res/colors/project_colors.dart';
 import 'package:astroverse/res/textStyles/text_styles.dart';
+import 'package:astroverse/routes/routes.dart';
+import 'package:astroverse/utils/hero_tag.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:get/get.dart';
 
 import '../models/post.dart';
 
@@ -12,101 +17,133 @@ class PostItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.only(left: 18, right: 18, top: 15, bottom: 10),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Row(
-            children: [
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Text(
-                        post.title,
-                        style: TextStylesLight().coloredBodyBold(Colors.black),
-                        textAlign: TextAlign.left,
+    return GestureDetector(
+      onTap: () {
+        log("tapped", name: "POST ITEM");
+        Get.toNamed(Routes.postFullScreen, arguments: post);
+      },
+      child: Container(
+        padding:
+            const EdgeInsets.only(left: 18, right: 18, top: 15, bottom: 10),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Row(
+              children: [
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Hero(
+                      tag: HeroTag().forPost(post, PostFields.userBar),
+                      child: Row(
+                        children: [
+                          Text(
+                            post.title,
+                            style:
+                                TextStylesLight().coloredBodyBold(Colors.black),
+                            textAlign: TextAlign.left,
+                          ),
+                          const SizedBox(
+                            width: 8,
+                          ),
+                          Text(
+                            "@${post.authorName}",
+                            style: TextStylesLight()
+                                .coloredSmall(ProjectColors.onBackground),
+                          )
+                        ],
                       ),
-                      const SizedBox(width: 8,),
-                      Text("@${post.authorName}" , style: TextStylesLight().coloredSmall(ProjectColors.onBackground),)
-                    ],
-                  ),
-                  Text(
-                    toTimeDelay(post.date),
-                    style: TextStylesLight().coloredSmall(ProjectColors.onBackground),
-                  ),
-                ],
-              ),
-            ],
-          ),
-          const SizedBox(
-            height: 8,
-          ),
-          AspectRatio(
-              aspectRatio: 4 / 3,
-              child: ClipRRect(
-                borderRadius: const BorderRadius.all(Radius.circular(15)),
-                child: Image(
-                  image: NetworkImage(post.imageUrl),
-                  width: double.infinity,
-                  fit: BoxFit.cover,
+                    ),
+                    Text(
+                      toTimeDelay(post.date),
+                      style: TextStylesLight().small,
+                    ),
+                  ],
                 ),
-              )),
-          const SizedBox(
-            height: 8,
-          ),
-          Text(
-            post.description,
-            style: TextStylesLight().small,
-            textAlign: TextAlign.start,
-            overflow: TextOverflow.visible,
-            maxLines: 6,
-          ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: [
-              IconButton(
-                  onPressed: () {},
-                  icon: const FaIcon(
-                    FontAwesomeIcons.comments,
-                    size: 20,
-                    color: ProjectColors.onBackground,
-                  )),
-              IconButton(
-                  onPressed: () {},
-                  icon: const FaIcon(
-                    FontAwesomeIcons.heart,
-                    size: 20,
-                    color: ProjectColors.onBackground,
-                  )),
-              IconButton(
-                  onPressed: () {},
-                  icon: const FaIcon(
-                    FontAwesomeIcons.thumbsDown,
-                    size: 20,
-                    color: ProjectColors.onBackground,
-                  )),
-            ],
-          )
-        ],
+              ],
+            ),
+            post.imageUrl.isNotEmpty
+                ? const SizedBox(
+                    height: 15,
+                  )
+                : const SizedBox(
+                    height: 0,
+                  ),
+            Hero(tag: HeroTag().forPost(post, PostFields.image), child: buildContent(post)),
+            const SizedBox(
+              height: 15,
+            ),
+            Hero(
+              tag: HeroTag().forPost(post, PostFields.description),
+              child: Text(
+                post.description,
+                style: TextStylesLight().small,
+                textAlign: TextAlign.start,
+                overflow: TextOverflow.visible,
+                maxLines: 6,
+              ),
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: [
+                IconButton(
+                    onPressed: () {},
+                    icon: const FaIcon(
+                      FontAwesomeIcons.comments,
+                      size: 20,
+                      color: ProjectColors.onBackground,
+                    )),
+                IconButton(
+                    onPressed: () {},
+                    icon: const FaIcon(
+                      FontAwesomeIcons.heart,
+                      size: 20,
+                      color: ProjectColors.onBackground,
+                    )),
+                IconButton(
+                    onPressed: () {},
+                    icon: const FaIcon(
+                      FontAwesomeIcons.thumbsDown,
+                      size: 20,
+                      color: ProjectColors.onBackground,
+                    )),
+              ],
+            )
+          ],
+        ),
       ),
     );
   }
 
-  String toTimeDelay(DateTime date){
+  String toTimeDelay(DateTime date) {
     final now = DateTime.now();
     final delay = now.difference(date);
     final days = delay.inDays;
-    String str ="";
-    if(days==0) {
+    String str = "";
+    if (days == 0) {
       str = "today";
-    } else if(days==1) {
+    } else if (days == 1) {
       str = "yesterday";
     } else {
-      str=  "$days days ago";
+      str = "$days days ago";
     }
     return str;
+  }
+
+  Widget buildContent(Post post) {
+    return post.imageUrl.isNotEmpty
+        ? AspectRatio(
+            aspectRatio: 4 / 3,
+            child: ClipRRect(
+              borderRadius: const BorderRadius.all(Radius.circular(15)),
+              child: Image(
+                image: NetworkImage(post.imageUrl),
+                width: double.infinity,
+                fit: BoxFit.cover,
+              ),
+            ))
+        : const SizedBox(
+            height: 0,
+          );
   }
 }

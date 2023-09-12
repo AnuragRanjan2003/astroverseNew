@@ -1,7 +1,6 @@
 import 'package:astroverse/res/dims/global.dart';
 import 'package:astroverse/res/textStyles/text_styles.dart';
 import 'package:flutter/material.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get/get.dart';
 
 import '../models/user.dart';

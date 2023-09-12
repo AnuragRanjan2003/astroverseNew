@@ -15,6 +15,8 @@ import 'package:get/get.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:image_picker/image_picker.dart';
 
+import 'main_controller.dart';
+
 class AuthController extends GetxController {
   Rxn<models.User> user = Rxn<models.User>();
   Rx<bool> loading = false.obs;
@@ -30,6 +32,7 @@ class AuthController extends GetxController {
   Timer? _resendTimerInstance;
   Rx<int> resendTimer = 60.obs;
   Rx<int> astroPlanSelected = Rx(0);
+  final MainController _main = Get.put(MainController());
 
   @override
   void onInit() async {
@@ -74,12 +77,15 @@ class AuthController extends GetxController {
       debugPrint("user:${event.data()}");
       userLoading.value = false;
       debugPrint("user loading : ${loading.value}");
-      if (event.data() != null) user.value = event.data()!;
+      if (event.data() != null) {
+        user.value = event.data()!;
+        _main.setUser(user.value);
+      }
     });
   }
 
-  createUserWithEmail(models.User user, String password,
-      void Function(Resource) updateUI) {
+  createUserWithEmail(
+      models.User user, String password, void Function(Resource) updateUI) {
     user.plan = 0;
     String path = BackEndStrings.defaultImage;
     if (image.value != null) path = image.value!.path;
@@ -128,8 +134,8 @@ class AuthController extends GetxController {
     super.onClose();
   }
 
-  createUserWithEmailForAstro(models.User user, String password,
-      void Function(Resource) updateUI) {
+  createUserWithEmailForAstro(
+      models.User user, String password, void Function(Resource) updateUI) {
     user.plan = 0;
     String path = BackEndStrings.defaultImage;
     if (image.value != null) path = image.value!.path;
@@ -231,7 +237,7 @@ class AuthController extends GetxController {
     });
   }
 
-  signInWithGoogle(void Function(Resource<UserCredential> ) updateUI) {
+  signInWithGoogle(void Function(Resource<UserCredential>) updateUI) {
     _repo.signInWithGoogle().then((value) {
       if (value.isSuccess) {
         value = value as Success<UserCredential>;
@@ -255,7 +261,7 @@ class AuthController extends GetxController {
     });
   }
 
-  signUpWithGoogle(void Function(models.User) onComplete , bool astro) {
+  signUpWithGoogle(void Function(models.User) onComplete, bool astro) {
     _repo.signInWithGoogle().then((value) {
       if (value.isSuccess) {
         value = value as Success<UserCredential>;
@@ -267,7 +273,7 @@ class AuthController extends GetxController {
                 _parseValueForModel(cred.displayName),
                 _parseValueForModel(cred.email),
                 _parseValueForModel(cred.photoURL),
-                  0,
+                0,
                 _parseValueForModel(cred.uid),
                 astro,
                 _parseValueForModel(cred.phoneNumber),
@@ -283,10 +289,13 @@ class AuthController extends GetxController {
     });
   }
 
-  void saveGoogleData(models.User user,
+  void saveGoogleData(
+      models.User user,
       void Function(
-          Resource<void> value,
-          ) updateUI , bool astro , Function() goTO) {
+        Resource<void> value,
+      ) updateUI,
+      bool astro,
+      Function() goTO) {
     loading.value = true;
     user.plan = 0;
     if (image.value != null) {
@@ -297,7 +306,7 @@ class AuthController extends GetxController {
             if (p0 is Success<void>) {
               debugPrint("saved data");
             }
-          } , goTO);
+          }, goTO);
         } else {
           _showError("error", (value as Failure<String>).error);
         }
@@ -309,12 +318,12 @@ class AuthController extends GetxController {
         if (p0 is Success<void>) {
           debugPrint("saved data");
         }
-      } , goTO);
+      }, goTO);
     }
   }
 
-  _saveDataFromGoogle(models.User user,
-      void Function(Resource<void>) updateUI  , void Function() goTO) {
+  _saveDataFromGoogle(models.User user, void Function(Resource<void>) updateUI,
+      void Function() goTO) {
     _repo.saveUserData(user).then((value) {
       loading.value = false;
       updateUI(value);

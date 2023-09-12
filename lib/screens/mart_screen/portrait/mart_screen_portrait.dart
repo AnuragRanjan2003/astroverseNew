@@ -16,20 +16,21 @@ class MartScreenPortrait extends StatelessWidget {
       backgroundColor: ProjectColors.background,
       floatingActionButton: (auth.user.value?.astro == true)
           ? FloatingActionButton(
-        onPressed: _postItemScreen,
-        backgroundColor: Colors.lightBlue.shade300,
-        elevation: 0,
-        child: const Icon(
-          Icons.add,
-          color: Colors.white,
-        ),
-      ):null,
+              onPressed: _postItemScreen,
+              backgroundColor: Colors.lightBlue.shade300,
+              elevation: 0,
+              child: const Icon(
+                Icons.add,
+                color: Colors.white,
+              ),
+            )
+          : null,
       body: SingleChildScrollView(
         child: SafeArea(
           child: Container(
               child: const Column(
-                children: [],
-              )),
+            children: [],
+          )),
         ),
       ),
     );

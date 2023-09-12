@@ -45,11 +45,12 @@ dependencies:
   image_picker: ^1.0.2
   google_nav_bar: ^5.0.6
   google_sign_in: ^6.1.4
-  glassmorphism: ^3.0.0
   shimmer: ^3.0.0
   flutter_otp_text_field: ^1.1.1
   uuid: ^4.0.0
   liquid_pull_to_refresh: ^3.0.1
+  glassmorphism_ui: ^0.3.0
+  cached_network_image: ^3.2.3
 
 dev_dependencies:
   flutter_test:

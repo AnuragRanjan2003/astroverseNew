@@ -4,6 +4,7 @@ import 'package:astroverse/components/new_posts_page.dart';
 import 'package:astroverse/controllers/main_controller.dart';
 import 'package:astroverse/utils/resource.dart';
 import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get/get.dart';
 
 import '../../../controllers/auth_controller.dart';
@@ -36,9 +37,11 @@ class DiscoverScreenPortrait extends StatelessWidget {
               },
               backgroundColor: Colors.lightBlue.shade300,
               elevation: 0,
-              child: const Icon(
-                Icons.add,
+              shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(50))),
+              child: const FaIcon(
+                FontAwesomeIcons.penNib,
                 color: Colors.white,
+                size: 17,
               ),
             );
           }
@@ -46,7 +49,7 @@ class DiscoverScreenPortrait extends StatelessWidget {
             height: 0,
           );
         }),
-        body: Container(
+        body: SizedBox(
             width: wd,
             child: Column(
               children: [
@@ -84,11 +87,10 @@ class DiscoverScreenPortrait extends StatelessWidget {
     final post = Post(
       id: "12123234",
       title: "$index",
-      description: "asdasdsdadsasd",
+      description: "asdasdsdadsasdasdjaasjka",
       genre: ["a", "b"],
       date: DateTime.timestamp(),
-      imageUrl:
-          "https://images.unsplash.com/photo-1693054092499-c471393da690?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80",
+      imageUrl: "",
       upVotes: 20,
       downVotes: 10,
       authorName: "abc",

@@ -65,6 +65,8 @@ class TextStylesLight implements ProjectTextStyles {
   TextStyle coloredSmallThick(Color color) =>
       TextStyle(color: color, fontSize: 14, fontWeight: FontWeight.w500);
 
+  TextStyle get title => const TextStyle(color: Colors.black , fontSize: 18 , fontWeight: FontWeight.w700);
+
 }
 
 class TextStyleDark implements ProjectTextStyles {
