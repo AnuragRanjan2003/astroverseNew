@@ -10,7 +10,7 @@ class Post {
   final List<String> genre;
   final DateTime date;
   final String imageUrl;
-  final int upVotes;
+  int upVotes;
   final int downVotes;
   final String authorName;
   final String authorId;
@@ -22,8 +22,8 @@ class Post {
     required this.genre,
     required this.date,
     required this.imageUrl,
-    required this.upVotes,
-    required this.downVotes,
+    this.upVotes=0,
+    this.downVotes=0,
     required this.authorName,
     required this.authorId,
   });

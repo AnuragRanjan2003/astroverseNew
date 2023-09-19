@@ -3,6 +3,7 @@ import 'dart:developer';
 import 'package:astroverse/components/post_item.dart';
 import 'package:astroverse/controllers/auth_controller.dart';
 import 'package:astroverse/controllers/main_controller.dart';
+import 'package:astroverse/controllers/new_page_controller.dart';
 import 'package:astroverse/res/textStyles/text_styles.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -19,49 +20,87 @@ class NewPostsPage extends StatelessWidget {
   Widget build(BuildContext context) {
     final MainController mainController = Get.find();
     final AuthController auth = Get.find();
+    final NewPageController newPage = Get.put(NewPageController());
     final wd = cons.maxWidth;
     final ScrollController scrollController = ScrollController();
     if (auth.user.value != null) {
-      log("not null" ,name:"USER");
+      log("not null", name: "USER");
       mainController.startReadingUpVotedPosts(auth.user.value!.uid);
     }
 
+    const genres = NewPageController.genresList;
     return RefreshIndicator(
       color: Colors.lightBlue,
       onRefresh: () async {
         log('refreshing', name: "REFRESH");
-        mainController.refreshPosts();
+        mainController.refreshPosts(newPage.selectedGenres.isEmpty
+            ? NewPageController.genresList
+            : newPage.selectedGenres);
       },
-      child: Obx(() => ListView.separated(
-          physics: const AlwaysScrollableScrollPhysics(),
-          controller: scrollController,
-          itemBuilder: (context, index) {
-            if (index == mainController.postList.length) {
-              if (mainController.loadingMorePosts.isTrue) {
-                return const CupertinoActivityIndicator();
-              } else if (mainController.morePostsToLoad.isTrue) {
-                return Padding(
-                  padding:
-                      EdgeInsets.symmetric(horizontal: 0.25 * wd, vertical: 10),
-                  child: OutlinedButton(
-                      onPressed: () {
-                        mainController.fetchMorePosts(["a", "b"]);
-                      },
-                      child: Text(
-                        "load more",
-                        style: TextStylesLight().small,
-                      )),
-                );
-              } else {
-                return const SizedBox(
-                  height: 0,
-                );
-              }
-            }
-            return listItem(mainController.postList[index]);
-          },
-          separatorBuilder: (context, index) => separator(),
-          itemCount: mainController.postList.length + 1)),
+      child: Column(
+        children: [
+          Obx(() => Row(
+                children: List.generate(
+                    genres.length,
+                    (index) => buildFilterChip(
+                        mainController, newPage, index, genres)),
+              )),
+          Expanded(
+            child: Obx(() => ListView.separated(
+                physics: const AlwaysScrollableScrollPhysics(),
+                controller: scrollController,
+                itemBuilder: (context, index) {
+                  if (index == mainController.postList.length) {
+                    if (mainController.loadingMorePosts.isTrue) {
+                      return const CupertinoActivityIndicator();
+                    } else if (mainController.morePostsToLoad.isTrue) {
+                      return Padding(
+                        padding: EdgeInsets.symmetric(
+                            horizontal: 0.25 * wd, vertical: 10),
+                        child: OutlinedButton(
+                            onPressed: () {
+                              mainController.fetchMorePosts(newPage.selectedGenres);
+                            },
+                            child: Text(
+                              "load more",
+                              style: TextStylesLight().small,
+                            )),
+                      );
+                    } else {
+                      return const SizedBox(
+                        height: 0,
+                      );
+                    }
+                  }
+                  return listItem(mainController.postList[index]);
+                },
+                separatorBuilder: (context, index) => separator(),
+                itemCount: mainController.postList.length + 1)),
+          ),
+        ],
+      ),
+    );
+  }
+
+  FilterChip buildFilterChip(MainController main, NewPageController newPage,
+      int index, List<String> genres) {
+    return FilterChip(
+      onSelected: (e) {
+        if (e == true) {
+          newPage.addItem(index);
+        } else {
+          newPage.removeItem(index);
+        }
+      },
+      label: Text(
+        genres[index],
+        style: TextStylesLight().coloredSmall(
+            newPage.genres[index] ? Colors.white : Colors.black54),
+      ),
+      selected: newPage.genres[index],
+      selectedColor: Colors.lightBlue.shade300,
+      shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.all(Radius.circular(30))),
     );
   }
 

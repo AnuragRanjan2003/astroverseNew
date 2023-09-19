@@ -2,6 +2,7 @@ import 'package:astroverse/screens/ask/ask_screen.dart';
 import 'package:astroverse/screens/astroLogIn/astro_login_screen.dart';
 import 'package:astroverse/screens/astroSelectPlan/astro_select_plan.dart';
 import 'package:astroverse/screens/astroSignUp/astro_signup_screen.dart';
+import 'package:astroverse/screens/createPost/create_post_screen.dart';
 import 'package:astroverse/screens/emailverfication/email_verification_screen.dart';
 import 'package:astroverse/screens/main/main_screen.dart';
 import 'package:astroverse/screens/moreProfile/more_profile_screen.dart';
@@ -29,6 +30,7 @@ class Routes {
   static const otpScreen = '/otp';
   static const upiScreen = '/upi';
   static const postFullScreen = '/post_full_screen';
+  static const createPostScreen = '/create_post_screen';
 }
 
 class AppRoutes {
@@ -88,6 +90,10 @@ class AppRoutes {
         GetPage(
           name: Routes.postFullScreen,
           page: () => const PostFullScreen(),
+        ),
+        GetPage(
+          name: Routes.createPostScreen,
+          page: () => const CreatePostScreen(),
         ),
       ];
 }

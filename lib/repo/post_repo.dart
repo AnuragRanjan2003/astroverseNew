@@ -21,8 +21,8 @@ class PostRepo {
   Future<Resource<int>> increaseVote(String id, String uid) async =>
       await _db.increaseVote(id, uid);
 
-  Future<Resource<int>> decreaseVote(String id) async =>
-      await _db.decreaseVote(id);
+  Future<Resource<int>> decreaseVote(String id , String uid) async =>
+      await _db.decreaseVote(id,uid);
 
      Stream<QuerySnapshot<PostSave>> upVotedPostStream(String uid , List<Post> posts) =>
       _db.upVotedPostsStream(uid , posts);

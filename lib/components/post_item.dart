@@ -35,24 +35,16 @@ class PostItem extends StatelessWidget {
                   children: [
                     Hero(
                       tag: HeroTag().forPost(post, PostFields.userBar),
-                      child: Row(
-                        children: [
-                          Text(
-                            post.title,
-                            style:
-                                TextStylesLight().coloredBodyBold(Colors.black),
-                            textAlign: TextAlign.left,
-                          ),
-                          const SizedBox(
-                            width: 8,
-                          ),
-                          Text(
-                            "@${post.authorName}",
-                            style: TextStylesLight()
-                                .coloredSmall(ProjectColors.onBackground),
-                          )
-                        ],
+                      child: Text(
+                        post.title,
+                        style: TextStylesLight().coloredBodyBold(Colors.black),
+                        textAlign: TextAlign.left,
                       ),
+                    ),
+                    Text(
+                      "@${post.authorName}",
+                      style: TextStylesLight()
+                          .coloredSmall(ProjectColors.onBackground),
                     ),
                     Text(
                       toTimeDelay(post.date),
@@ -69,7 +61,9 @@ class PostItem extends StatelessWidget {
                 : const SizedBox(
                     height: 0,
                   ),
-            Hero(tag: HeroTag().forPost(post, PostFields.image), child: buildContent(post)),
+            Hero(
+                tag: HeroTag().forPost(post, PostFields.image),
+                child: buildContent(post)),
             const SizedBox(
               height: 15,
             ),
@@ -83,31 +77,58 @@ class PostItem extends StatelessWidget {
                 maxLines: 6,
               ),
             ),
+            const SizedBox(
+              height: 10,
+            ),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
-                IconButton(
-                    onPressed: () {},
-                    icon: const FaIcon(
-                      FontAwesomeIcons.comments,
-                      size: 20,
-                      color: ProjectColors.onBackground,
-                    )),
-                IconButton(
-                    onPressed: () {},
-                    icon: const FaIcon(
-                      FontAwesomeIcons.heart,
-                      size: 20,
-                      color: ProjectColors.onBackground,
-                    )),
-                IconButton(
-                    onPressed: () {},
-                    icon: const FaIcon(
-                      FontAwesomeIcons.thumbsDown,
-                      size: 20,
-                      color: ProjectColors.onBackground,
-                    )),
+                const Expanded(
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        FontAwesomeIcons.comments,
+                        size: 20,
+                        color: ProjectColors.onBackground,
+                      ),
+                      SizedBox(width: 10,),
+                      Text('12')
+                    ],
+                  ),
+                ),
+                Expanded(
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Icon(
+                        FontAwesomeIcons.heart,
+                        size: 20,
+                        color: ProjectColors.onBackground,
+                      ),
+                      const SizedBox(width: 10,),
+                      Text(post.upVotes.toString())
+                    ],
+                  ),
+                ),
+                const Expanded(
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        FontAwesomeIcons.thumbsDown,
+                        size: 20,
+                        color: ProjectColors.onBackground,
+                      ),
+                      SizedBox(width: 10,),
+                      Text('12')
+                    ],
+                  ),
+                ),
               ],
+            ),
+            const SizedBox(
+              height: 10,
             )
           ],
         ),

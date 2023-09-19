@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:developer';
 
+import 'package:astroverse/controllers/new_page_controller.dart';
 import 'package:astroverse/models/post_save.dart';
 import 'package:astroverse/models/user.dart';
 import 'package:astroverse/repo/post_repo.dart';
@@ -24,12 +25,12 @@ class MainController extends GetxController {
 
   @override
   void onInit() {
-    fetchPostsByGenreAndPage(["a", "b"]);
+    fetchPostsByGenreAndPage(NewPageController.genresList);
   }
 
   void setUser(User? user) {
     this.user.value = user;
-    if(this.user.value!=null) startReadingUpVotedPosts(this.user.value!.uid);
+    if (this.user.value != null) startReadingUpVotedPosts(this.user.value!.uid);
   }
 
   @override
@@ -62,7 +63,7 @@ class MainController extends GetxController {
             lastPost.value = element;
           }
         }
-        log("${lastPost.value!.data()}", name: "IS NULL");
+        //log("${lastPost.value!.data()}", name: "IS NULL");
         log(list.length.toString(), name: "GOT LIST SIZE");
         log(list.toString(), name: "GOT LIST");
         postList.value = list;
@@ -106,20 +107,38 @@ class MainController extends GetxController {
     });
   }
 
-  void refreshPosts() {
+  void refreshPosts(List<String> genre) {
     clearPosts();
-    fetchPostsByGenreAndPage(["a", "b"]);
+    log(genre.toString() , name: "GENRES");
+    fetchPostsByGenreAndPage(genre);
   }
 
   void increaseVote(String id, String uid, Function() onComplete) {
+    final e = postList.indexWhere((element) => element.id == id);
+    postList[e].upVotes++;
+    postList.refresh();
     _postRepo.increaseVote(id, uid).then((value) {
       if (value.isSuccess) {
         log("up voted");
+
+        log('upvoted to : ${postList[e].upVotes}', name: "UPVOTES");
         onComplete();
       }
     });
   }
 
+  void decrementVote(String id, String uid, Function() onComplete) {
+    final e = postList.indexWhere((element) => element.id == id);
+    postList[e].upVotes--;
+    postList.refresh();
+    _postRepo.decreaseVote(id, uid).then((value) {
+      if (value.isSuccess) {
+        log("down voted");
+        log('upvoted to : ${postList[e].upVotes}', name: "UPVOTES");
+        onComplete();
+      }
+    });
+  }
 
   void startReadingUpVotedPosts(String? uid) {
     log("reading upvotes", name: "UPVOTES");
@@ -133,6 +152,7 @@ class MainController extends GetxController {
       }
       upVotedPosts.clear();
       upVotedPosts.value = list;
+      upVotedPosts.refresh();
       log(upVotedPosts.toString(), name: "UPVOTED");
     });
   }

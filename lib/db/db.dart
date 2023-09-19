@@ -113,15 +113,13 @@ class Database {
 
   Future<Resource<int>> increaseVote(String id, String uid) async {
     try {
-      final res = await _postCollection.doc(id).get();
-      if (res.data() != null) {
-        await _upVotedCollection(uid)
-            .doc(id)
-            .set(PostSave(id, DateTime.now().toString()));
-        return Success<int>(res.data()!.upVotes + 1);
-      } else {
-        return Failure<int>("returned null");
-      }
+      final res = await _postCollection
+          .doc(id)
+          .update({"upVotes": FieldValue.increment(1)});
+      await _upVotedCollection(uid)
+          .doc(id)
+          .set(PostSave(id, DateTime.now().toString()));
+      return Success(1);
     } on FirebaseException catch (e) {
       return Failure<int>(e.message.toString());
     } catch (e) {
@@ -129,18 +127,13 @@ class Database {
     }
   }
 
-  Future<Resource<int>> decreaseVote(String id) async {
+  Future<Resource<int>> decreaseVote(String id, String uid) async {
     try {
-      final res = await _postCollection.doc(id).get();
-      if (res.data() != null) {
-        await _postCollection
-            .doc(id)
-            .update({"downVotes": res.data()!.upVotes - 1});
-
-        return Success<int>(res.data()!.upVotes - 1);
-      } else {
-        return Failure<int>("returned null");
-      }
+      final res = await _postCollection
+          .doc(id)
+          .update({"upVotes": FieldValue.increment(-1)});
+      await _upVotedCollection(uid).doc(id).delete();
+      return Success(1);
     } on FirebaseException catch (e) {
       return Failure<int>(e.message.toString());
     } catch (e) {

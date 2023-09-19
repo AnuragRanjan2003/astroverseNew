@@ -1,4 +1,7 @@
+import 'dart:developer';
+
 import 'package:astroverse/controllers/main_controller.dart';
+import 'package:astroverse/models/post_save.dart';
 import 'package:astroverse/res/dims/global.dart';
 import 'package:astroverse/res/textStyles/text_styles.dart';
 import 'package:astroverse/utils/hero_tag.dart';
@@ -29,24 +32,21 @@ class PostFullPortrait extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Hero(
-                tag: HeroTag().forPost(post, PostFields.userBar),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      '@${post.authorName}',
-                      style: TextStylesLight().coloredSmallThick(Colors.black),
-                    ),
-                    const SizedBox(
-                      width: 8,
-                    ),
-                    Text(
-                      toTimeDelay(post.date),
-                      style: TextStylesLight().small,
-                    ),
-                  ],
-                ),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    '@${post.authorName}',
+                    style: TextStylesLight().coloredSmallThick(Colors.black),
+                  ),
+                  const SizedBox(
+                    width: 8,
+                  ),
+                  Text(
+                    toTimeDelay(post.date),
+                    style: TextStylesLight().small,
+                  ),
+                ],
               ),
               const SizedBox(
                 height: 5,
@@ -75,10 +75,7 @@ class PostFullPortrait extends StatelessWidget {
                 ),
               ),
               const SizedBox(
-                height: 10,
-              ),
-              const SizedBox(
-                height: 10,
+                height: 20,
               ),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -86,10 +83,10 @@ class PostFullPortrait extends StatelessWidget {
                   Column(
                     children: [
                       IconButton(
-                        onPressed: (){},
+                        onPressed: () {},
                         icon: const FaIcon(
                           FontAwesomeIcons.comments,
-                          size: 20,
+                          size: 25,
                         ),
                       ),
                       Text(post.upVotes.toString(),
@@ -98,18 +95,44 @@ class PostFullPortrait extends StatelessWidget {
                   ),
                   Column(
                     children: [
-                      IconButton(
-                        onPressed: () {
-                          main.increaseVote(post.id, auth.user.value!.uid , () {
-                          },);
-                        },
-                        icon: const FaIcon(
-                          FontAwesomeIcons.heart,
-                          size: 20,
+                      Obx(
+                        () => IconButton(
+                          onPressed: () {
+                            if (!isUpVoted(main.upVotedPosts, post.id)) {
+                              main.postList.firstWhere(
+                                  (element) => element.id == post.id);
+                              main.increaseVote(
+                                post.id,
+                                auth.user.value!.uid,
+                                () {},
+                              );
+                            } else {
+                              main.decrementVote(
+                                post.id,
+                                auth.user.value!.uid,
+                                () {},
+                              );
+                            }
+                          },
+                          icon: isUpVoted(main.upVotedPosts, post.id)
+                              ? const FaIcon(
+                                  FontAwesomeIcons.solidHeart,
+                                  color: Colors.red,
+                                  size: 25,
+                                )
+                              : const FaIcon(
+                                  FontAwesomeIcons.heart,
+                                  size: 25,
+                                ),
                         ),
                       ),
-                      Text(post.upVotes.toString(),
-                          style: TextStylesLight().small)
+                      Obx(() {
+                        final i = main.postList
+                            .indexWhere((element) => element.id == post.id);
+                        log('$i', name: 'UI UPVOTE');
+                        return Text(main.postList[i].upVotes.toString(),
+                            style: TextStylesLight().small);
+                      })
                     ],
                   ),
                   Column(
@@ -118,7 +141,7 @@ class PostFullPortrait extends StatelessWidget {
                         onPressed: () {},
                         icon: const FaIcon(
                           FontAwesomeIcons.thumbsDown,
-                          size: 20,
+                          size: 25,
                         ),
                       ),
                       Text(
@@ -187,5 +210,9 @@ class PostFullPortrait extends StatelessWidget {
         : const SizedBox(
             height: 0,
           );
+  }
+
+  bool isUpVoted(List<PostSave> list, String id) {
+    return list.any((element) => element.id == id);
   }
 }

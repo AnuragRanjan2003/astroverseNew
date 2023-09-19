@@ -2,6 +2,7 @@ import 'dart:developer';
 
 import 'package:astroverse/components/new_posts_page.dart';
 import 'package:astroverse/controllers/main_controller.dart';
+import 'package:astroverse/routes/routes.dart';
 import 'package:astroverse/utils/resource.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -32,8 +33,7 @@ class DiscoverScreenPortrait extends StatelessWidget {
           if (auth.user.value?.astro == true) {
             return FloatingActionButton(
               onPressed: () {
-                _testPost(main, index);
-                index++;
+                Get.toNamed(Routes.createPostScreen);
               },
               backgroundColor: Colors.lightBlue.shade300,
               elevation: 0,
