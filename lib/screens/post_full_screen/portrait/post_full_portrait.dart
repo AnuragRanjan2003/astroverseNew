@@ -1,5 +1,6 @@
 import 'dart:developer';
 
+import 'package:astroverse/controllers/full_post_page_controller.dart';
 import 'package:astroverse/controllers/main_controller.dart';
 import 'package:astroverse/models/post_save.dart';
 import 'package:astroverse/res/dims/global.dart';
@@ -21,8 +22,56 @@ class PostFullPortrait extends StatelessWidget {
   Widget build(BuildContext context) {
     final MainController main = Get.find();
     final AuthController auth = Get.find();
+    final FullPostPageController controller = Get.put(FullPostPageController());
     final Post post = Get.arguments;
+    log(post.authorId, name: "UID");
+    controller.getAuthor(post.authorId);
     return Scaffold(
+      appBar: AppBar(
+        backgroundColor: Colors.grey.shade200,
+        title: Row(
+          children: [
+            Obx(() {
+              if (controller.author.value == null) {
+                return ClipRRect(
+                  borderRadius: const BorderRadius.all(Radius.circular(20)),
+                  child: Container(
+                    width: 30,
+                    height: 30,
+                    color: Colors.grey.shade300,
+                  ),
+                );
+              }
+              return ClipRRect(
+                  borderRadius: const BorderRadius.all(Radius.circular(20)),
+                  child: Image(
+                    image: NetworkImage(controller.author.value!.image),
+                    width: 30,
+                    height: 30,
+                  ));
+            }),
+            const SizedBox(
+              width: 5,
+            ),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  '@${post.authorName}',
+                  style: TextStylesLight().coloredSmallThick(Colors.black),
+                ),
+                const SizedBox(
+                  width: 8,
+                ),
+                Text(
+                  toTimeDelay(post.date),
+                  style: TextStylesLight().small,
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
       extendBodyBehindAppBar: true,
       extendBody: true,
       body: SafeArea(
@@ -32,22 +81,6 @@ class PostFullPortrait extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    '@${post.authorName}',
-                    style: TextStylesLight().coloredSmallThick(Colors.black),
-                  ),
-                  const SizedBox(
-                    width: 8,
-                  ),
-                  Text(
-                    toTimeDelay(post.date),
-                    style: TextStylesLight().small,
-                  ),
-                ],
-              ),
               const SizedBox(
                 height: 5,
               ),

@@ -54,6 +54,11 @@ class Database {
   Stream<DocumentSnapshot<models.User>> getUserStream(String id) =>
       _userCollection.doc(id).snapshots();
 
+  Future<Resource<DocumentSnapshot<models.User>>> getUserData(
+          String uid) async =>
+      await SafeCall().fireStoreCall<DocumentSnapshot<models.User>>(
+          () async => await _userCollection.doc(uid).get());
+
   getMoreItems(DocumentSnapshot ds, List<String> cat) =>
       _itemCollection.startAfterDocument(ds).limit(20).where(
         "category",
@@ -82,10 +87,7 @@ class Database {
   Future<Resource<List<QueryDocumentSnapshot<Post>>>> fetchPostsByGenreAndPage(
       List<String> genre) async {
     try {
-      QuerySnapshot<Post> res = await _postCollection
-          .limit(_limit)
-          .where("genre", arrayContainsAny: genre)
-          .get();
+      QuerySnapshot<Post> res = await _postCollection.limit(_limit).get();
       final data = res.docs;
       return Success(data);
     } on FirebaseException catch (e) {
@@ -100,7 +102,6 @@ class Database {
     try {
       final res = await _postCollection
           .limit(_limit)
-          .where("genre", arrayContainsAny: genre)
           .startAfterDocument(lastPost)
           .get();
       return Success(res.docs);

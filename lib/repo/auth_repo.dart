@@ -32,6 +32,8 @@ class AuthRepo {
   Stream<DocumentSnapshot<models.User>> getUserStream(String id) =>
       _db.getUserStream(id);
 
+  Future<Resource<DocumentSnapshot<models.User>>> getUserData(String uid) async => await _db.getUserData(uid);
+
   Future<Resource<String>> sendEmailVerificationEmail() async =>
       await _auth.sendVerificationEmail();
 

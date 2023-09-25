@@ -21,6 +21,8 @@ class Auth {
           await mAuth.createUserWithEmailAndPassword(
               email: user.email, password: password));
 
+
+
   Future<Resource<String>> sendVerificationEmail() async =>
       await SafeCall().authCall<String>(() async {
         mAuth.currentUser?.reload();

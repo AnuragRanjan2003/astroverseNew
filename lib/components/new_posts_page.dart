@@ -23,6 +23,7 @@ class NewPostsPage extends StatelessWidget {
     final NewPageController newPage = Get.put(NewPageController());
     final wd = cons.maxWidth;
     final ScrollController scrollController = ScrollController();
+
     if (auth.user.value != null) {
       log("not null", name: "USER");
       mainController.startReadingUpVotedPosts(auth.user.value!.uid);
@@ -46,36 +47,44 @@ class NewPostsPage extends StatelessWidget {
                         mainController, newPage, index, genres)),
               )),
           Expanded(
-            child: Obx(() => ListView.separated(
-                physics: const AlwaysScrollableScrollPhysics(),
-                controller: scrollController,
-                itemBuilder: (context, index) {
-                  if (index == mainController.postList.length) {
-                    if (mainController.loadingMorePosts.isTrue) {
-                      return const CupertinoActivityIndicator();
-                    } else if (mainController.morePostsToLoad.isTrue) {
-                      return Padding(
-                        padding: EdgeInsets.symmetric(
-                            horizontal: 0.25 * wd, vertical: 10),
-                        child: OutlinedButton(
-                            onPressed: () {
-                              mainController.fetchMorePosts(newPage.selectedGenres);
-                            },
-                            child: Text(
-                              "load more",
-                              style: TextStylesLight().small,
-                            )),
-                      );
-                    } else {
-                      return const SizedBox(
-                        height: 0,
-                      );
-                    }
-                  }
-                  return listItem(mainController.postList[index]);
-                },
-                separatorBuilder: (context, index) => separator(),
-                itemCount: mainController.postList.length + 1)),
+            child: Obx(
+              () {
+                final list = filterPostList(mainController.postList,
+                    newPage.toGenre(newPage.selectedGenres));
+                return ListView.separated(
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    controller: scrollController,
+                    itemBuilder: (context, index) {
+                      if (index == list.length) {
+                        if (mainController.loadingMorePosts.isTrue) {
+                          return const CupertinoActivityIndicator();
+                        } else if (mainController.morePostsToLoad.isTrue) {
+                          return Padding(
+                            padding: EdgeInsets.symmetric(
+                                horizontal: 0.25 * wd, vertical: 10),
+                            child: OutlinedButton(
+                                onPressed: () {
+                                  mainController
+                                      .fetchMorePosts(newPage.selectedGenres);
+                                },
+                                child: Text(
+                                  "load more",
+                                  style: TextStylesLight().small,
+                                )),
+                          );
+                        } else {
+                          return const SizedBox(
+                            height: 0,
+                          );
+                        }
+                      }
+
+                      return listItem(list[index]);
+                    },
+                    separatorBuilder: (context, index) => separator(),
+                    itemCount: list.length + 1);
+              },
+            ),
           ),
         ],
       ),
@@ -85,6 +94,7 @@ class NewPostsPage extends StatelessWidget {
   FilterChip buildFilterChip(MainController main, NewPageController newPage,
       int index, List<String> genres) {
     return FilterChip(
+      backgroundColor: Colors.white,
       onSelected: (e) {
         if (e == true) {
           newPage.addItem(index);
@@ -124,4 +134,21 @@ class NewPostsPage extends StatelessWidget {
   }
 
   Widget listItem(Post post) => PostItem(post: post);
+
+  bool areEqual(List l1, List l2) {
+    if (l1.length == l2.length && l1.every((element) => l2.contains(element))) {
+      return true;
+    }
+    return false;
+  }
+
+  List<Post> filterPostList(List<Post> l1, List<String> g) {
+    List<Post> filter = <Post>[];
+
+    for (Post it in l1) {
+      if (areEqual(it.genre, g)) filter.add(it);
+    }
+
+    return filter;
+  }
 }

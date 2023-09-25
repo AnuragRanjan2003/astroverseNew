@@ -109,7 +109,7 @@ class MainController extends GetxController {
 
   void refreshPosts(List<String> genre) {
     clearPosts();
-    log(genre.toString() , name: "GENRES");
+    log(genre.toString(), name: "GENRES");
     fetchPostsByGenreAndPage(genre);
   }
 
@@ -161,5 +161,21 @@ class MainController extends GetxController {
     postList.clear();
     lastPost.value = null;
     morePostsToLoad.value = true;
+  }
+
+  int filteredLength(List<String> l) {
+    int n = 0;
+    for (var it in postList) {
+      if (areEqual(it.genre, l)) n++;
+    }
+
+    return n;
+  }
+
+  bool areEqual(List l1, List l2) {
+    if (l1.length == l2.length && l1.every((element) => l2.contains(element))) {
+      return true;
+    }
+    return false;
   }
 }
