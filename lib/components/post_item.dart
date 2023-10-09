@@ -4,6 +4,7 @@ import 'package:astroverse/res/colors/project_colors.dart';
 import 'package:astroverse/res/textStyles/text_styles.dart';
 import 'package:astroverse/routes/routes.dart';
 import 'package:astroverse/utils/hero_tag.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get/get.dart';
@@ -158,7 +159,7 @@ class PostItem extends StatelessWidget {
             child: ClipRRect(
               borderRadius: const BorderRadius.all(Radius.circular(15)),
               child: Image(
-                image: NetworkImage(post.imageUrl),
+                image: CachedNetworkImageProvider(post.imageUrl),
                 width: double.infinity,
                 fit: BoxFit.cover,
               ),

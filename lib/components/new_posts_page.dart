@@ -49,8 +49,8 @@ class NewPostsPage extends StatelessWidget {
           Expanded(
             child: Obx(
               () {
-                final list = filterPostList(mainController.postList,
-                    newPage.toGenre(newPage.selectedGenres));
+                final list = filterPostList(
+                    mainController.postList, newPage.selectedGenres);
                 return ListView.separated(
                     physics: const AlwaysScrollableScrollPhysics(),
                     controller: scrollController,
@@ -95,6 +95,7 @@ class NewPostsPage extends StatelessWidget {
       int index, List<String> genres) {
     return FilterChip(
       backgroundColor: Colors.white,
+      checkmarkColor: Colors.white,
       onSelected: (e) {
         if (e == true) {
           newPage.addItem(index);
@@ -144,7 +145,7 @@ class NewPostsPage extends StatelessWidget {
 
   List<Post> filterPostList(List<Post> l1, List<String> g) {
     List<Post> filter = <Post>[];
-
+    if (g.isEmpty) return l1;
     for (Post it in l1) {
       if (areEqual(it.genre, g)) filter.add(it);
     }

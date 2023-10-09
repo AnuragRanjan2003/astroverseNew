@@ -1,12 +1,13 @@
-import 'package:astroverse/models/item.dart';
 import 'package:astroverse/models/post.dart';
 import 'package:astroverse/models/post_save.dart';
+import 'package:astroverse/models/save_service.dart';
+import 'package:astroverse/models/service.dart';
 import 'package:astroverse/models/user.dart' as models;
 import 'package:astroverse/res/strings/backend_strings.dart';
 import 'package:astroverse/utils/resource.dart';
 import 'package:astroverse/utils/safe_call.dart';
+import 'package:astroverse/utils/service_utils.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:uuid/uuid.dart';
 
 class Database {
   static const int _limit = 2;
@@ -16,13 +17,6 @@ class Database {
         fromFirestore: (snapshot, options) =>
             models.User.fromJson(snapshot.data()),
         toFirestore: (user, options) => user.toJson(),
-      );
-
-  final _itemCollection = FirebaseFirestore.instance
-      .collection(BackEndStrings.itemsCollection)
-      .withConverter<Item>(
-        fromFirestore: (snapshot, options) => Item.fromJson(snapshot.data()!),
-        toFirestore: (item, options) => item.toJson(),
       );
 
   final _postCollection = FirebaseFirestore.instance
@@ -47,10 +41,6 @@ class Database {
       await SafeCall().fireStoreCall<void>(
           () async => await _userCollection.doc(user.uid).set(user));
 
-  Future<Resource<void>> saveItemData(Item item) async =>
-      await SafeCall().fireStoreCall<void>(
-          () async => await _itemCollection.doc(item.id).set(item));
-
   Stream<DocumentSnapshot<models.User>> getUserStream(String id) =>
       _userCollection.doc(id).snapshots();
 
@@ -58,12 +48,6 @@ class Database {
           String uid) async =>
       await SafeCall().fireStoreCall<DocumentSnapshot<models.User>>(
           () async => await _userCollection.doc(uid).get());
-
-  getMoreItems(DocumentSnapshot ds, List<String> cat) =>
-      _itemCollection.startAfterDocument(ds).limit(20).where(
-        "category",
-        whereIn: [cat],
-      );
 
   Future<bool> checkForUserData(String uid) async {
     final res =
@@ -74,7 +58,6 @@ class Database {
 
   Future<Resource<Post>> savePost(Post post) async {
     try {
-      post.id = const Uuid().v4();
       await _postCollection.doc(post.id).set(post);
       return Success(post);
     } on FirebaseException catch (e) {
@@ -84,10 +67,32 @@ class Database {
     }
   }
 
+  Future<Resource<Service>> saveService(Service s, String id) async =>
+      await ServiceUtils(id).savePost(s);
+
+  Future<Resource<List<QueryDocumentSnapshot<Service>>>>
+      fetchServiceByGenreAndPage(List<String> genre , String uid) async =>
+          await ServiceUtils(uid).fetchByGenreAndPage(genre);
+
+  Future<Resource<List<QueryDocumentSnapshot<Service>>>> fetchMoreService(
+          QueryDocumentSnapshot<Service> lastPost,
+          List<String> genre,
+          String uid) async =>
+      await ServiceUtils(uid).fetchMore(lastPost, genre);
+
+  Future<Resource<int>> increaseServiceVote(String uid, String id) async =>
+      await ServiceUtils(uid).like(id);
+
+  Future<Resource<int>> decreaseServiceVote(String uid, String id) async =>
+      await ServiceUtils(uid).dislike(id);
+
   Future<Resource<List<QueryDocumentSnapshot<Post>>>> fetchPostsByGenreAndPage(
       List<String> genre) async {
     try {
-      QuerySnapshot<Post> res = await _postCollection.limit(_limit).get();
+      QuerySnapshot<Post> res = await _postCollection
+          .limit(_limit)
+          .orderBy("date", descending: true)
+          .get();
       final data = res.docs;
       return Success(data);
     } on FirebaseException catch (e) {
@@ -102,6 +107,7 @@ class Database {
     try {
       final res = await _postCollection
           .limit(_limit)
+          .orderBy("date", descending: true)
           .startAfterDocument(lastPost)
           .get();
       return Success(res.docs);
@@ -142,9 +148,7 @@ class Database {
     }
   }
 
-  Stream<QuerySnapshot<PostSave>> upVotedPostsStream(
-      String uid, List<Post> posts) {
-    final ids = posts.map<String>((e) => e.id);
+  Stream<QuerySnapshot<PostSave>> upVotedPostsStream(String uid) {
     return FirebaseFirestore.instance
         .collection(BackEndStrings.userCollection)
         .doc(uid)
@@ -156,4 +160,7 @@ class Database {
         )
         .snapshots();
   }
+
+  Stream<QuerySnapshot<SaveService>> upVotedServicesStream(String uid) =>
+      ServiceUtils(uid).likedStream(uid);
 }

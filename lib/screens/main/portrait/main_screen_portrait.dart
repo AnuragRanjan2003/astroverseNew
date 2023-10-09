@@ -49,24 +49,7 @@ class MainScreenPortrait extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: ProjectColors.background,
-      appBar: AppBar(
-        leadingWidth: 50,
-        backgroundColor: ProjectColors.background,
-        leading: Obx(() {
-          if (auth.userLoading.isFalse) {
-            return profileImage(auth);
-          } else {
-            return loadingShimmer(profileImagePlaceholder());
-          }
-        }),
-        title: Obx(() {
-          if (auth.userLoading.isFalse) {
-            return nameText(auth);
-          } else {
-            return loadingShimmer(nameTextPlaceHolder());
-          }
-        }),
-      ),
+      appBar: _customAppBar(auth, "Explore"),
       bottomNavigationBar: Container(
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
         color: Colors.transparent,
@@ -77,6 +60,7 @@ class MainScreenPortrait extends StatelessWidget {
             pageController.animateToPage(e,
                 duration: const Duration(milliseconds: 200),
                 curve: Curves.linear);
+            auth.page.value = e;
           },
           tabs: tabs,
           activeColor: Colors.lightBlue,
@@ -111,24 +95,25 @@ class MainScreenPortrait extends StatelessWidget {
 
   Container nameTextPlaceHolder() {
     return Container(
-      decoration: const BoxDecoration(color: Colors.white,borderRadius: BorderRadius.all(Radius.circular(20))),
+      decoration: const BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.all(Radius.circular(20))),
       child: const Text(
         "             ",
       ),
     );
   }
 
-  IconButton profileImage(AuthController auth) {
-    return IconButton(
-      iconSize: 40,
-      icon: ClipRRect(
+  profileImage(AuthController auth) {
+    return GestureDetector(
+      child: ClipRRect(
         borderRadius: const BorderRadius.all(Radius.circular(20)),
         child: Image(
           image: NetworkImage(auth.user.value!.image),
           fit: BoxFit.fill,
         ),
       ),
-      onPressed: () {
+      onTap: () {
         Get.toNamed(Routes.profile);
       },
     );
@@ -146,6 +131,55 @@ class MainScreenPortrait extends StatelessWidget {
         Get.toNamed(Routes.profile);
       },
     );
+  }
+
+  _customAppBar(AuthController auth, String page) {
+    return PreferredSize(
+        preferredSize: const Size.fromHeight(90),
+        child: Container(
+            padding: const EdgeInsets.only(top: 35, right: 30, left: 30),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    GestureDetector(
+                      child: const Icon(Icons.notifications,color: Colors.black54,),
+                      onTap: (){},
+                    ),
+                    GestureDetector(
+                      child: CircleAvatar(
+                        radius: 20,
+                        child: Obx(() {
+                          if (auth.user.value == null) {
+                            return profileImagePlaceholder();
+                          }
+                          return profileImage(auth);
+                        }),
+                      ),
+                      onTap: () {
+                        Get.toNamed(Routes.profile);
+                      },
+                    )
+                  ],
+                ),
+                Obx(() => Text(
+                      _pageName(auth.page.value),
+                      style: const TextStyle(
+                          fontSize: 28, fontWeight: FontWeight.bold),
+                    ))
+              ],
+            )));
+  }
+
+  String _pageName(int i) {
+    if (i == 0) {
+      return "Discover";
+    } else if (i == 1) {
+      return "Mart";
+    }
+    return "Activity";
   }
 
   Widget loadingShimmer(Widget child) {

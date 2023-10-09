@@ -9,7 +9,7 @@ class Storage {
   final _profileImage =
       FirebaseStorage.instance.ref(BackEndStrings.profileImage);
 
-  final _itemImage = FirebaseStorage.instance.ref(BackEndStrings.itemImage);
+  final _postImage = FirebaseStorage.instance.ref(BackEndStrings.postImage);
 
   Future<Resource<String>> storeProfileImage(File file, String id) async =>
       await SafeCall().storageCall<String>(() async {
@@ -18,9 +18,9 @@ class Storage {
         return x;
       });
 
-  Future<Resource<String>> storeItemImage(File file, String id) async =>
+  Future<Resource<String>> storePostImage(File file, String id) async =>
       await SafeCall().storageCall<String>(() async {
-        await _itemImage.child(id).putFile(file);
-        return await _itemImage.child(id).getDownloadURL();
+        await _postImage.child(id).putFile(file);
+        return await _postImage.child(id).getDownloadURL();
       });
 }

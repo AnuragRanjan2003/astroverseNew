@@ -25,6 +25,7 @@ class MainController extends GetxController {
 
   @override
   void onInit() {
+    super.onInit();
     fetchPostsByGenreAndPage(NewPageController.genresList);
   }
 
@@ -36,12 +37,6 @@ class MainController extends GetxController {
   @override
   void onClose() {
     likes?.cancel();
-  }
-
-  void savePost(Post post, void Function(Resource<Post>) updateUI) {
-    _postRepo.savePost(post).then((value) {
-      updateUI(value);
-    });
   }
 
   void fetchPostsByGenreAndPage(List<String> genre) {
@@ -145,7 +140,7 @@ class MainController extends GetxController {
     likes?.cancel();
     var list = <PostSave>[];
     if (uid == null) return;
-    _postRepo.upVotedPostStream(uid, postList).listen((event) {
+    _postRepo.upVotedPostStream(uid).listen((event) {
       log("liked changed", name: "UPVOTES");
       for (var it in event.docs) {
         list.add(it.data());

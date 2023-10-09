@@ -51,6 +51,7 @@ dependencies:
   liquid_pull_to_refresh: ^3.0.1
   glassmorphism_ui: ^0.3.0
   cached_network_image: ^3.2.3
+  firebase_app_check: ^0.2.0
 
 dev_dependencies:
   flutter_test:

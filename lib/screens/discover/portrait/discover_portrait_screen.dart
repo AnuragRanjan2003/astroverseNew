@@ -1,15 +1,11 @@
-import 'dart:developer';
-
 import 'package:astroverse/components/new_posts_page.dart';
 import 'package:astroverse/controllers/main_controller.dart';
 import 'package:astroverse/routes/routes.dart';
-import 'package:astroverse/utils/resource.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get/get.dart';
 
 import '../../../controllers/auth_controller.dart';
-import '../../../models/post.dart';
 
 class DiscoverScreenPortrait extends StatelessWidget {
   final BoxConstraints cons;
@@ -37,7 +33,8 @@ class DiscoverScreenPortrait extends StatelessWidget {
               },
               backgroundColor: Colors.lightBlue.shade300,
               elevation: 0,
-              shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(50))),
+              shape: const RoundedRectangleBorder(
+                  borderRadius: BorderRadius.all(Radius.circular(50))),
               child: const FaIcon(
                 FontAwesomeIcons.penNib,
                 color: Colors.white,
@@ -81,26 +78,5 @@ class DiscoverScreenPortrait extends StatelessWidget {
             )),
       ),
     );
-  }
-
-  _testPost(MainController controller, int index) {
-    final post = Post(
-      id: "12123234",
-      title: "$index",
-      description: "asdasdsdadsasdasdjaasjka",
-      genre: ["a", "b"],
-      date: DateTime.timestamp(),
-      imageUrl: "",
-      upVotes: 20,
-      downVotes: 10,
-      authorName: "abc",
-      authorId: "123",
-    );
-
-    controller.savePost(post, (p0) {
-      if (p0.isSuccess) {
-        log((p0 as Success<Post>).data.toString(), name: "POST");
-      }
-    });
   }
 }

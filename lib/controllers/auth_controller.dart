@@ -32,6 +32,7 @@ class AuthController extends GetxController {
   Timer? _resendTimerInstance;
   Rx<int> resendTimer = 60.obs;
   Rx<int> astroPlanSelected = Rx(0);
+  Rx<int> page = 0.obs;
   final MainController _main = Get.put(MainController());
 
   @override
