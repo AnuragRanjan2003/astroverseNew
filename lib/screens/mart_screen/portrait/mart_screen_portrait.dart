@@ -1,3 +1,4 @@
+import 'package:astroverse/components/mart_item.dart';
 import 'package:astroverse/controllers/service_controller.dart';
 import 'package:astroverse/res/colors/project_colors.dart';
 import 'package:flutter/material.dart';
@@ -16,11 +17,24 @@ class MartScreenPortrait extends StatelessWidget {
     final AuthController auth = Get.find();
     final ServiceController service = Get.find();
     service.fetchServiceByGenreAndPage([], auth.user.value!.uid);
+    final dummy = Service(
+        price: 100,
+        uses: 0,
+        lastDate: DateTime.parse("2020-10-09T20:54:17.008199"),
+        lat: 0.0,
+        lng: 0.0,
+        title: "try",
+        description: "try ,try",
+        genre: [],
+        date: DateTime.now(),
+        imageUrl: "",
+        authorName: "12345",
+        authorId: "12345");
     return Scaffold(
       backgroundColor: ProjectColors.background,
       floatingActionButton: (auth.user.value?.astro == true)
           ? FloatingActionButton(
-              onPressed: (){},
+              onPressed: () {},
               backgroundColor: Colors.lightBlue.shade300,
               elevation: 0,
               child: const Icon(
@@ -29,12 +43,27 @@ class MartScreenPortrait extends StatelessWidget {
               ),
             )
           : null,
-      body: SingleChildScrollView(
-        child: SafeArea(
-          child: Container(
-              child: const Column(
-            children: [],
-          )),
+      body: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 10),
+          child: Column(
+            children: [
+              const TextField(
+                decoration: InputDecoration(
+                  prefixIcon: Icon(Icons.search_sharp),
+                    border: OutlineInputBorder(
+                        borderRadius: BorderRadius.all(Radius.circular(20))),
+                    hintText: "Search"),
+              ),
+              const SizedBox(height: 8,),
+              Expanded(
+                child: ListView.builder(
+                  itemCount: 3,
+                  itemBuilder: (context, index) => MartItem(item: dummy),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
