@@ -1,3 +1,4 @@
+import 'package:astroverse/controllers/location_controller.dart';
 import 'package:astroverse/controllers/main_controller.dart';
 import 'package:astroverse/screens/main/landscape/main_screen_landscape.dart';
 import 'package:astroverse/screens/main/portrait/main_screen_portrait.dart';
@@ -14,6 +15,7 @@ class MainScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final main = Get.put(MainController());
     final AuthController auth = Get.find();
+    Get.put(LocationController());
     main.setUser(auth.user.value);
     return Responsive(
         portrait: (cons) => MainScreenPortrait(cons: cons),

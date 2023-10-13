@@ -1,10 +1,13 @@
 import 'dart:developer';
+import 'dart:io';
 
 import 'package:astroverse/models/service.dart';
 import 'package:astroverse/repo/service_repo.dart';
+import 'package:astroverse/res/strings/backend_strings.dart';
 import 'package:astroverse/utils/resource.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:get/get.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:uuid/uuid.dart';
 
 const tag = "SERVICE";
@@ -18,17 +21,46 @@ class ServiceController extends GetxController {
   static const _maxPostLimit = 50;
   Rx<bool> nothingToShow = false.obs;
   Rx<bool> loadingMorePosts = false.obs;
+  Rxn<XFile> image = Rxn();
+  final _imagePicker = ImagePicker();
+  Rx<bool> isItem = false.obs;
+
+  selectImage() async {
+    final img = await _imagePicker.pickImage(source: ImageSource.gallery);
+    image.value = img;
+  }
 
   postService(Service s) {
     final id = const Uuid().v4();
     s.id = id;
+    final file = File(image.value!.path);
 
-    _repo.saveService(s, id).then((value) {
+    if (image.value == null) {
+      s.imageUrl = BackEndStrings.defaultServiceImage;
+      _repo.saveService(s, id).then((value) {
+        if (value.isSuccess) {
+          log('service posted', name: tag);
+        } else {
+          value = value as Failure<Service>;
+          log('failed ${value.error}', name: tag);
+        }
+      });
+      return;
+    }
+
+    _repo.storeServiceImage(file, id).then((value) {
       if (value.isSuccess) {
-        log('service posted', name: tag);
+        s.imageUrl = (value as Success<String>).data;
+        _repo.saveService(s, id).then((value) {
+          if (value.isSuccess) {
+            log('service posted', name: tag);
+          } else {
+            value = value as Failure<Service>;
+            log('failed ${value.error}', name: tag);
+          }
+        });
       } else {
-        value = value as Failure<Service>;
-        log('failed ${value.error}', name: tag);
+        Get.snackbar('Error', (value as Failure<String>).error);
       }
     });
   }
@@ -71,7 +103,7 @@ class ServiceController extends GetxController {
       log(lastPost.value!.data().toString(), name: "LP");
     }
     loadingMorePosts.value = true;
-    _repo.fetchPostsByGenreAndPage(genre,uid).then((value) {
+    _repo.fetchPostsByGenreAndPage(genre, uid).then((value) {
       loadingMorePosts.value = false;
       if (value.isSuccess) {
         value = value as Success<List<QueryDocumentSnapshot<Service>>>;

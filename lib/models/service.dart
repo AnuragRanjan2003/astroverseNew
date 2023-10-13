@@ -7,21 +7,24 @@ part 'service.g.dart';
 class Service extends Post {
   double price;
   int uses;
+  String place;
   DateTime lastDate;
 
-  Service(
-      {required this.price,
-      required this.uses,
-      required this.lastDate,
-      required super.lat,
-      required super.lng,
-      required super.title,
-      required super.description,
-      required super.genre,
-      required super.date,
-      required super.imageUrl,
-      required super.authorName,
-      required super.authorId});
+  Service({
+    required this.price,
+    required this.uses,
+    required this.lastDate,
+    required super.lat,
+    required super.lng,
+    required super.title,
+    required super.description,
+    required super.genre,
+    required super.date,
+    required super.imageUrl,
+    required super.authorName,
+    required super.authorId,
+    required this.place,
+  });
 
   factory Service.fromJson(json) => _$ServiceFromJson(json);
 

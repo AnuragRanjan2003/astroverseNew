@@ -19,6 +19,7 @@ Service _$ServiceFromJson(Map<String, dynamic> json) => Service(
       imageUrl: json['imageUrl'] as String,
       authorName: json['authorName'] as String,
       authorId: json['authorId'] as String,
+      place: json['place'] as String,
     )
       ..id = json['id'] as String
       ..upVotes = json['upVotes'] as int;
@@ -37,5 +38,6 @@ Map<String, dynamic> _$ServiceToJson(Service instance) => <String, dynamic>{
       'authorId': instance.authorId,
       'price': instance.price,
       'uses': instance.uses,
+      'place': instance.place,
       'lastDate': instance.lastDate.toIso8601String(),
     };

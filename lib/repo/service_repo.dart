@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:astroverse/db/db.dart';
 import 'package:astroverse/db/storage.dart';
 import 'package:astroverse/models/save_service.dart';
@@ -12,11 +14,12 @@ class ServiceRepo {
   Future<Resource<Service>> saveService(Service post, String uid) async =>
       await _db.saveService(post, uid);
 
-  // Future<Resource<String>> storePostImage(File file , String id) async => await _storage.storePostImage(file, id);
+  Future<Resource<String>> storeServiceImage(File file, String id) async =>
+      await _storage.storeServiceImage(file, id);
 
   Future<Resource<List<QueryDocumentSnapshot<Service>>>>
-      fetchPostsByGenreAndPage(List<String> genre , String uid) async =>
-          await _db.fetchServiceByGenreAndPage(genre,uid);
+      fetchPostsByGenreAndPage(List<String> genre, String uid) async =>
+          await _db.fetchServiceByGenreAndPage(genre, uid);
 
   Future<Resource<List<QueryDocumentSnapshot<Service>>>> fetchMorePost(
           QueryDocumentSnapshot<Service> lastPost,
