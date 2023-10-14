@@ -15,7 +15,7 @@ const tag = "SERVICE";
 class ServiceController extends GetxController {
   final _repo = ServiceRepo();
 
-  RxList<Service> postList = <Service>[].obs;
+  RxList<Service> serviceList = <Service>[].obs;
   Rx<bool> morePostsToLoad = true.obs;
   Rxn<QueryDocumentSnapshot<Service>> lastPost = Rxn();
   static const _maxPostLimit = 50;
@@ -23,7 +23,7 @@ class ServiceController extends GetxController {
   Rx<bool> loadingMorePosts = false.obs;
   Rxn<XFile> image = Rxn();
   final _imagePicker = ImagePicker();
-  Rx<bool> isItem = false.obs;
+  Rx<int> selectedItem = 0.obs;
 
   selectImage() async {
     final img = await _imagePicker.pickImage(source: ImageSource.gallery);
@@ -33,7 +33,6 @@ class ServiceController extends GetxController {
   postService(Service s) {
     final id = const Uuid().v4();
     s.id = id;
-    final file = File(image.value!.path);
 
     if (image.value == null) {
       s.imageUrl = BackEndStrings.defaultServiceImage;
@@ -47,8 +46,9 @@ class ServiceController extends GetxController {
       });
       return;
     }
-
+    final file = File(image.value!.path);
     _repo.storeServiceImage(file, id).then((value) {
+      log(image.value!.path  , name: 'FILE');
       if (value.isSuccess) {
         s.imageUrl = (value as Success<String>).data;
         _repo.saveService(s, id).then((value) {
@@ -67,7 +67,7 @@ class ServiceController extends GetxController {
 
   fetchMoreServices(String uid, List<String> genre) {
     log("loading more posts", name: "POST LIST");
-    if (morePostsToLoad.value == false || postList.length >= _maxPostLimit)
+    if (morePostsToLoad.value == false || serviceList.length >= _maxPostLimit)
       return;
     loadingMorePosts.value = true;
     _repo.fetchMorePost(lastPost.value!, genre, uid).then((value) {
@@ -85,9 +85,9 @@ class ServiceController extends GetxController {
         log("${lastPost.value!.data()}", name: "IS NULL");
         log(list.length.toString(), name: "GOT LIST SIZE");
         log(list.toString(), name: "GOT LIST");
-        postList.addAll(list);
+        serviceList.addAll(list);
         morePostsToLoad.value = list.isNotEmpty;
-        log(postList.length.toString(), name: "POST LIST SUCCESS");
+        log(serviceList.length.toString(), name: "POST LIST SUCCESS");
       } else {
         value = value as Failure<List<QueryDocumentSnapshot<Service>>>;
         log(value.error, name: tag);
@@ -117,9 +117,9 @@ class ServiceController extends GetxController {
         //log("${lastPost.value!.data()}", name: "IS NULL");
         log(list.length.toString(), name: "GOT SERVICE LIST");
         log(list.toString(), name: "GOT SERVICE LIST");
-        postList.value = list;
+        serviceList.value = list;
         nothingToShow.value = list.isEmpty;
-        log(postList.length.toString(), name: "SERVICE LIST SUCCESS");
+        log(serviceList.length.toString(), name: "SERVICE LIST SUCCESS");
       } else {
         value = value as Failure<List<QueryDocumentSnapshot<Service>>>;
         log(value.error, name: "SERVICE LIST FAILED");

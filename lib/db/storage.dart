@@ -29,7 +29,7 @@ class Storage {
   Future<Resource<String>> storeServiceImage(File file, String id) async =>
       await SafeCall().storageCall<String>(() async {
         await _serviceImage.child(id).putFile(file);
-        return await _postImage.child(id).getDownloadURL();
+        return await _serviceImage.child(id).getDownloadURL();
       });
 
 }

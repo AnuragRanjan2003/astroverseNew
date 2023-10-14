@@ -18,6 +18,7 @@ class MartScreenPortrait extends StatelessWidget {
     final AuthController auth = Get.find();
     final ServiceController service = Get.find();
     service.fetchServiceByGenreAndPage([], auth.user.value!.uid);
+    final gridController = ScrollController();
     final dummy = Service(
         price: 100,
         uses: 0,
@@ -57,19 +58,52 @@ class MartScreenPortrait extends StatelessWidget {
                         borderRadius: BorderRadius.all(Radius.circular(20))),
                     hintText: "Search"),
               ),
+              Row(
+                children: [
+                  buildFilterChip('item 1'),
+                  const SizedBox(
+                    width: 5,
+                  ),
+                  buildFilterChip('item 2'),
+                  const SizedBox(
+                    width: 5,
+                  ),
+                  buildFilterChip('item 3'),
+                ],
+              ),
               const SizedBox(
                 height: 8,
               ),
               Expanded(
-                child: ListView.builder(
-                  itemCount: 3,
-                  itemBuilder: (context, index) => MartItem(item: dummy),
-                ),
+                child: Obx(() {
+                  final list = service.serviceList.value;
+                  return GridView.builder(
+                    itemCount: list.length,
+                    controller: gridController,
+                    gridDelegate:
+                        const SliverGridDelegateWithFixedCrossAxisCount(childAspectRatio: 0.9/2,
+                      crossAxisCount: 2),
+                    itemBuilder: (context, index) => MartItem(item: list[index]),
+
+                  );
+                }),
               ),
             ],
           ),
         ),
       ),
+    );
+  }
+
+  FilterChip buildFilterChip(String label) {
+    return FilterChip(
+      label: Text(label),
+      onSelected: (_) {},
+      backgroundColor: Colors.white,
+      checkmarkColor: Colors.white,
+      selectedColor: Colors.lightBlue.shade300,
+      shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.all(Radius.circular(30))),
     );
   }
 

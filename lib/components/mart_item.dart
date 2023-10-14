@@ -1,4 +1,5 @@
 import 'package:astroverse/models/service.dart';
+import 'package:astroverse/res/colors/project_colors.dart';
 import 'package:astroverse/res/img/images.dart';
 import 'package:astroverse/res/textStyles/text_styles.dart';
 import 'package:astroverse/routes/routes.dart';
@@ -7,7 +8,7 @@ import 'package:get/get.dart';
 
 class MartItem extends StatelessWidget {
   final Service item;
-  static const double _radius = 30;
+  static const double _radius = 20;
 
   const MartItem({super.key, required this.item});
 
@@ -19,7 +20,6 @@ class MartItem extends StatelessWidget {
       shape: const RoundedRectangleBorder(
           borderRadius: BorderRadius.all(Radius.circular(_radius))),
       child: Container(
-        height: 440,
         decoration: const BoxDecoration(
             borderRadius: BorderRadius.all(Radius.circular(_radius))),
         child: Column(
@@ -30,13 +30,13 @@ class MartItem extends StatelessWidget {
               child: item.imageUrl.isNotEmpty
                   ? Image.network(
                       item.imageUrl,
-                      height: 220,
-                      fit: BoxFit.fitWidth,
+                      fit: BoxFit.fill,
+                      height: 140,
                     )
                   : const Image(
                       image: ProjectImages.planet,
+                      height: 140,
                       fit: BoxFit.fill,
-                      height: 220,
                     ),
             ),
             Expanded(
@@ -46,41 +46,32 @@ class MartItem extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
-                  const Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [Text("@name"), Text("today")],
+                  Text(item.authorName,style: const TextStyle(fontSize: 13),),
+                  Text(
+                    item.genre[0],
+                    style: const TextStyle(fontSize: 10,color: Color(0xff444040),fontWeight: FontWeight.bold),
                   ),
-                  const Chip(
-                    label: Text(
-                      "palm reading",
-                      style: TextStyle(fontSize: 10),
-                    ),
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.all(Radius.circular(30))),
-                  ),
-                  const Text(
-                    "dtata\nadsda\ndasdaas",
+                  Text(
+                    item.title,
                     overflow: TextOverflow.ellipsis,
                     textAlign: TextAlign.left,
                   ),
                   Text(
-                    "₹50",
+                    '₹${item.price.toInt()}',
                     style: TextStylesLight().bodyBold,
                   ),
                   MaterialButton(
-                    onPressed: () => Get.toNamed(Routes.martItemFullScreen , arguments: item),
+                    onPressed: () =>
+                        Get.toNamed(Routes.martItemFullScreen, arguments: item),
                     padding: const EdgeInsets.symmetric(horizontal: 40),
                     shape: const RoundedRectangleBorder(
                         borderRadius: BorderRadius.all(Radius.circular(30))),
-                    color: const Color(0xff444040),
+                    color: ProjectColors.lightBlack,
                     child: const Text(
                       "Buy",
                       style: TextStyle(fontSize: 13, color: Colors.white),
                     ),
                   ),
-                  const SizedBox(
-                    height: 10,
-                  )
                 ],
               ),
             ))

@@ -1,3 +1,4 @@
+import 'dart:developer';
 import 'dart:io';
 
 import 'package:astroverse/controllers/auth_controller.dart';
@@ -11,7 +12,7 @@ import 'package:get/get.dart';
 
 class CreateServicePortrait extends StatelessWidget {
   final BoxConstraints cons;
-  static const _list = ['item 1', 'item 2', 'item 3'];
+  static const _list = {'item 1': 0, 'item 2': 1, 'item 3': 2};
 
   const CreateServicePortrait({super.key, required this.cons});
 
@@ -24,12 +25,12 @@ class CreateServicePortrait extends StatelessWidget {
     final title = TextEditingController();
     final place = TextEditingController();
     final price = TextEditingController(text: '0');
-    final category = TextEditingController();
     return Scaffold(
       body: SafeArea(
         child: SingleChildScrollView(
           child: Container(
-            padding: const EdgeInsets.only(left: 20, right: 20, top: 0 , bottom: 10),
+            padding:
+                const EdgeInsets.only(left: 20, right: 20, top: 0, bottom: 10),
             height: cons.maxHeight,
             child: Column(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -67,19 +68,25 @@ class CreateServicePortrait extends StatelessWidget {
                   maxLines: 1,
                 ),
                 DropdownMenu(
-                    controller: category,
                     enableSearch: true,
                     width: 190,
                     inputDecorationTheme: const InputDecorationTheme(
                         border: OutlineInputBorder(
-                            borderRadius: BorderRadius.all(Radius.circular(30)))),
+                            borderRadius:
+                                BorderRadius.all(Radius.circular(30)))),
                     label: const Text('category'),
                     dropdownMenuEntries: List.generate(
                         _list.length,
-                        (i) =>
-                            DropdownMenuEntry(value: _list[i], label: _list[i])),
+                        (i) => DropdownMenuEntry(
+                            value: _list.keys.toList()[i],
+                            label: _list.keys.toList()[i])),
                     onSelected: (e) {
-                      service.isItem.value = e == _list[0];
+                      if (e == null) {
+                        service.selectedItem.value = 0;
+                      } else {
+                        service.selectedItem.value = _list[e]!;
+                      }
+                      log(service.selectedItem.value.toString(), name: 'DROPDOWN');
                     }),
                 TextField(
                   controller: body,
@@ -88,7 +95,7 @@ class CreateServicePortrait extends StatelessWidget {
                   maxLines: 4,
                 ),
                 Obx(() => Visibility(
-                    visible: service.isItem.isFalse,
+                    visible: service.selectedItem.value == 0,
                     child: TextField(
                       controller: place,
                       decoration: const InputDecoration(
@@ -118,9 +125,9 @@ class CreateServicePortrait extends StatelessWidget {
                         lastDate: DateTime(0),
                         lat: location.latitude!,
                         lng: location.longitude!,
-                        title: "",
+                        title: title.value.text,
                         description: body.value.text,
-                        genre: [category.value.text],
+                        genre: [_list.keys.toList()[service.selectedItem.value]],
                         date: DateTime.now(),
                         place: place.value.text,
                         imageUrl: '',

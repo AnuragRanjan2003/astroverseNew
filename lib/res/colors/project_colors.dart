@@ -9,5 +9,6 @@ class ProjectColors {
   static const primary = Color(0xff1F54D3);
   static const text = onBackground;
   static const main = primary;
+  static const lightBlack = Color(0xff444040);
   //static const main = Color(0xfff94e36);
 }
