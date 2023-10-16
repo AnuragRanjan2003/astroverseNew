@@ -24,13 +24,13 @@ class MartItemFullPortrait extends StatelessWidget {
               ? Image(
                   image: NetworkImage(item.imageUrl),
                   height: cons.maxHeight * 0.45,
-                  fit: BoxFit.fill,
+                  fit: BoxFit.fitHeight,
                   width: cons.maxWidth,
                 )
               : Image(
                   image: ProjectImages.planet,
                   height: cons.maxHeight * 0.45,
-                  fit: BoxFit.fill,
+                  fit: BoxFit.fitHeight,
                   width: cons.maxWidth,
                 ),
           const SizedBox(
@@ -44,13 +44,39 @@ class MartItemFullPortrait extends StatelessWidget {
                   Padding(
                     padding:
                         const EdgeInsets.symmetric(horizontal: 15, vertical: 5),
+                    child: Text(
+                      item.title,
+                      style: const TextStyle(
+                          fontWeight: FontWeight.bold, fontSize: 24),
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 15,vertical: 5),
                     child: Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
                       children: [
-                        Text(
-                          item.title,
-                          style: const TextStyle(
-                              fontWeight: FontWeight.w600, fontSize: 24),
-                        )
+                        buildChip(
+                            '4.4',
+                            const Icon(
+                              Icons.star,
+                              color: Colors.lightGreen,
+                            )),
+                        const SizedBox(
+                          width: 10,
+                        ),
+                        buildChip(
+                            item.uses.toString(),
+                            const Icon(
+                              Icons.data_exploration_outlined,
+                              color: Colors.blueAccent,
+                            )),
+                        const SizedBox(width: 10,),
+                        buildChip(
+                            item.genre.first,
+                            const Icon(
+                              Icons.category_outlined,
+                              color: Colors.black,
+                            )),
                       ],
                     ),
                   ),
@@ -77,9 +103,10 @@ class MartItemFullPortrait extends StatelessWidget {
                   Visibility(
                     visible: item.place.isNotEmpty,
                     child: const Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 15, vertical: 8),
+                      padding:
+                          EdgeInsets.symmetric(horizontal: 15, vertical: 8),
                       child: Text(
-                        'Address',
+                        'Pickup Address',
                         style: TextStyle(
                             fontSize: 16,
                             color: ProjectColors.lightBlack,
@@ -90,8 +117,8 @@ class MartItemFullPortrait extends StatelessWidget {
                   Visibility(
                     visible: item.place.isNotEmpty,
                     child: Padding(
-                      padding:
-                          const EdgeInsets.symmetric(horizontal: 15, vertical: 0),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 15, vertical: 0),
                       child: Text(
                         item.place,
                         style: const TextStyle(
@@ -130,7 +157,7 @@ class MartItemFullPortrait extends StatelessWidget {
               padding: const EdgeInsets.symmetric(horizontal: 60, vertical: 15),
               shape: const RoundedRectangleBorder(
                   borderRadius: BorderRadius.all(Radius.circular(30))),
-              child: Text("Buy ₹${item.price.toInt()}",
+              child: Text("Buy for ₹ ${item.price.toInt()}",
                   textAlign: TextAlign.center,
                   style: const TextStyle(fontSize: 13, color: Colors.white)),
             ),
@@ -138,6 +165,27 @@ class MartItemFullPortrait extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  Container buildChip(String text, Icon icon) {
+    return Container(
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+        decoration: BoxDecoration(
+            borderRadius: const BorderRadius.all(Radius.circular(8)),
+            border: Border.all(width: 1, color: Colors.grey)),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            icon,
+            const SizedBox(
+              width: 5,
+            ),
+            Text(
+              text,
+              style: const TextStyle(fontWeight: FontWeight.bold),
+            ),
+          ],
+        ));
   }
 
   Widget buildRow(String label, String value, IconData icon) => Padding(

@@ -24,6 +24,8 @@ class ServiceController extends GetxController {
   Rxn<XFile> image = Rxn();
   final _imagePicker = ImagePicker();
   Rx<int> selectedItem = 0.obs;
+  Rx<double> price = 0.00.obs;
+  Rx<bool> formValid = false.obs;
 
   selectImage() async {
     final img = await _imagePicker.pickImage(source: ImageSource.gallery);
