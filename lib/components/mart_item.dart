@@ -20,6 +20,8 @@ class MartItem extends StatelessWidget {
       shape: const RoundedRectangleBorder(
           borderRadius: BorderRadius.all(Radius.circular(_radius))),
       child: Container(
+        height: 350,
+        width: 130,
         decoration: const BoxDecoration(
             borderRadius: BorderRadius.all(Radius.circular(_radius))),
         child: Column(
@@ -46,7 +48,7 @@ class MartItem extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
-                  Text(item.authorName,style: const TextStyle(fontSize: 13),),
+                  Text('@${item.authorName}',style: const TextStyle(fontSize: 11),),
                   Text(
                     item.genre[0],
                     style: const TextStyle(fontSize: 10,color: Color(0xff444040),fontWeight: FontWeight.bold),
@@ -55,6 +57,7 @@ class MartItem extends StatelessWidget {
                     item.title,
                     overflow: TextOverflow.ellipsis,
                     textAlign: TextAlign.left,
+                    style: TextStyle(fontSize: 12),
                   ),
                   Text(
                     '₹${item.price.toInt()}',

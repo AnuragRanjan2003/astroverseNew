@@ -9,6 +9,7 @@ import 'package:astroverse/res/colors/project_colors.dart';
 import 'package:astroverse/res/img/images.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:image_picker/image_picker.dart';
 
 class CreateServicePortrait extends StatelessWidget {
   final BoxConstraints cons;
@@ -29,25 +30,30 @@ class CreateServicePortrait extends StatelessWidget {
     final body = TextEditingController();
     final title = TextEditingController();
     final place = TextEditingController();
-    final price = TextEditingController(text: service.price.value.toInt().toString());
+    final price =
+        TextEditingController(text: service.price.value.toInt().toString());
 
     price.addListener(() {
       service.price.value =
           price.value.text.isNotEmpty ? double.parse(price.value.text) : 0.00;
-      service.formValid.value = validate(title, body, price);
+      service.formValid.value = validate(
+          title, body, price, service.image.value, service.selectedItem.value);
     });
 
     place.addListener(() {
-      service.formValid.value = validate(title, body, price);
+      service.formValid.value = validate(
+          title, body, price, service.image.value, service.selectedItem.value);
     });
 
     title.addListener(() {
-      service.formValid.value = validate(title, body, price);
+      service.formValid.value = validate(
+          title, body, price, service.image.value, service.selectedItem.value);
     });
     return WillPopScope(
-      onWillPop: () async{
+      onWillPop: () async {
         service.price.value = 0.00;
         service.formValid.value = false;
+        service.image.value = null;
         return true;
       },
       child: Scaffold(
@@ -232,9 +238,14 @@ class CreateServicePortrait extends StatelessWidget {
                               ? () {
                                   var location = loc.location.value!;
                                   var user = auth.user.value!;
-                                  log(' post is valid : ${validate(title, body, price)}',
+                                  log(' post is valid : ${validate(title, body, price, service.image.value, service.selectedItem.value)}',
                                       name: "SERVICE");
-                                  if(!validate(title, body, price)) return;
+                                  if (!validate(
+                                      title,
+                                      body,
+                                      price,
+                                      service.image.value,
+                                      service.selectedItem.value)) return;
                                   final res = Service(
                                       price: double.parse(price.value.text),
                                       uses: 0,
@@ -244,8 +255,8 @@ class CreateServicePortrait extends StatelessWidget {
                                       title: title.value.text,
                                       description: body.value.text,
                                       genre: [
-                                        _list.keys
-                                            .toList()[service.selectedItem.value]
+                                        _list.keys.toList()[
+                                            service.selectedItem.value]
                                       ],
                                       date: DateTime.now(),
                                       place: place.value.text,
@@ -286,11 +297,11 @@ class CreateServicePortrait extends StatelessWidget {
 }
 
 bool validate(TextEditingController title, TextEditingController body,
-    TextEditingController price) {
+    TextEditingController price, XFile? image, int i) {
   final t = title.value.text;
   final b = body.value.text;
-  //final p = price.value.text;
 
   if (t.isEmpty || b.isEmpty) return false;
+  if (i == 1 && image == null) return false;
   return true;
 }

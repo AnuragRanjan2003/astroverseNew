@@ -43,7 +43,7 @@ class MartItemFullPortrait extends StatelessWidget {
                 children: [
                   Padding(
                     padding:
-                        const EdgeInsets.symmetric(horizontal: 15, vertical: 5),
+                        const EdgeInsets.symmetric(horizontal: 15, vertical: 8),
                     child: Text(
                       item.title,
                       style: const TextStyle(
@@ -182,7 +182,7 @@ class MartItemFullPortrait extends StatelessWidget {
             ),
             Text(
               text,
-              style: const TextStyle(fontWeight: FontWeight.bold),
+              style: const TextStyle(fontWeight: FontWeight.bold , fontSize: 12),
             ),
           ],
         ));

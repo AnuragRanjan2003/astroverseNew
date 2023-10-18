@@ -1,15 +1,19 @@
+import 'dart:developer';
+
 import 'package:astroverse/components/mart_item.dart';
 import 'package:astroverse/controllers/service_controller.dart';
+import 'package:astroverse/models/service.dart';
 import 'package:astroverse/res/colors/project_colors.dart';
 import 'package:astroverse/routes/routes.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../../controllers/auth_controller.dart';
-import '../../../models/service.dart';
 
 class MartScreenPortrait extends StatelessWidget {
   final BoxConstraints cons;
+  static const chipNames = ['item', 'job prediction', 'palm reading'];
 
   const MartScreenPortrait({super.key, required this.cons});
 
@@ -17,22 +21,12 @@ class MartScreenPortrait extends StatelessWidget {
   Widget build(BuildContext context) {
     final AuthController auth = Get.find();
     final ServiceController service = Get.find();
-    service.fetchServiceByGenreAndPage([], auth.user.value!.uid);
-    final gridController = ScrollController();
-    final dummy = Service(
-        price: 100,
-        uses: 0,
-        lastDate: DateTime.parse("2020-10-09T20:54:17.008199"),
-        lat: 0.0,
-        lng: 0.0,
-        place: "",
-        title: "try",
-        description: "try ,try",
-        genre: [],
-        date: DateTime.now(),
-        imageUrl: "",
-        authorName: "12345",
-        authorId: "12345");
+    service.fetchServiceByGenreAndPage([], auth.user.value!.uid, (e) {});
+
+    service.selectedItem.listen((p0) {
+      log(p0.toString(), name: "on select");
+    });
+
     return Scaffold(
       backgroundColor: ProjectColors.background,
       floatingActionButton: (auth.user.value?.astro == true)
@@ -54,40 +48,108 @@ class MartScreenPortrait extends StatelessWidget {
               const TextField(
                 decoration: InputDecoration(
                     prefixIcon: Icon(Icons.search_sharp),
+                    contentPadding: EdgeInsets.symmetric(vertical: 10),
                     border: OutlineInputBorder(
-                        borderRadius: BorderRadius.all(Radius.circular(20))),
+                        borderRadius: BorderRadius.all(Radius.circular(15))),
                     hintText: "Search"),
               ),
-              Row(
-                children: [
-                  buildFilterChip('item 1'),
-                  const SizedBox(
-                    width: 5,
-                  ),
-                  buildFilterChip('item 2'),
-                  const SizedBox(
-                    width: 5,
-                  ),
-                  buildFilterChip('item 3'),
-                ],
+              const SizedBox(
+                height: 10,
+              ),
+              SizedBox(
+                height: 70,
+                child: ListView(
+                  scrollDirection: Axis.horizontal,
+                  children: [
+                    Obx(() => buildFilterChip(chipNames[0], (e) {
+                          e
+                              ? service.selectedItem.value = 1
+                              : service.selectedItem.value = 0;
+                        }, service.selectedItem.value == 1)),
+                    const SizedBox(
+                      width: 5,
+                    ),
+                    Obx(() => buildFilterChip(chipNames[1], (e) {
+                          e
+                              ? service.selectedItem.value = 2
+                              : service.selectedItem.value = 0;
+                        }, service.selectedItem.value == 2)),
+                    const SizedBox(
+                      width: 5,
+                    ),
+                    Obx(() => buildFilterChip(chipNames[2], (e) {
+                          e
+                              ? service.selectedItem.value = 3
+                              : service.selectedItem.value = 0;
+                        }, service.selectedItem.value == 3)),
+                  ],
+                ),
               ),
               const SizedBox(
                 height: 8,
               ),
               Expanded(
-                child: Obx(() {
-                  final list = service.serviceList.value;
-                  return GridView.builder(
-                    itemCount: list.length,
-                    controller: gridController,
-                    gridDelegate:
-                        const SliverGridDelegateWithFixedCrossAxisCount(childAspectRatio: 0.9/2,
-                      crossAxisCount: 2),
-                    itemBuilder: (context, index) => MartItem(item: list[index]),
+                child: RefreshIndicator(
+                  onRefresh: () async {
+                    await service.onRefresh([], auth.user.value!.uid, (p0) => null);
+                    return;
+                  },
+                  child: Obx(() {
+                    var list = <Service>[];
 
-                  );
-                }),
+                    for (var element in service.serviceList) {
+                      if (service.selectedItem.value == 0) {
+                        list.add(element);
+                      } else if (element.genre.contains(
+                          chipNames[service.selectedItem.value - 1])) {
+                        list.add(element);
+                      }
+                    }
+
+                    int len = list.length.isEven
+                        ? list.length ~/ 2
+                        : (list.length + 1) ~/ 2;
+                    return ListView.separated(
+                      itemCount: len + 1,
+                      itemBuilder: (context, index) {
+                        if (index == len) {
+                          return service.morePostsToLoad.isTrue
+                              ? OutlinedButton(
+                                  onPressed: () {
+                                    service.fetchMoreServices(
+                                        auth.user.value!.uid, [], (p0) => null);
+                                  },
+                                  child: const Text("load more"))
+                              : const SizedBox(
+                                  height: 0,
+                                );
+                        }
+                        return Row(
+                          children: [
+                            Expanded(child: MartItem(item: list[2 * index])),
+                            (2 * index + 1 < list.length)
+                                ? Expanded(
+                                    child: MartItem(item: list[2 * index + 1]))
+                                : const Expanded(
+                                    child: SizedBox(
+                                    width: 50,
+                                  )),
+                          ],
+                        );
+                      },
+                      separatorBuilder: (context, index) => const SizedBox(
+                        height: 30,
+                      ),
+                    );
+                  }),
+                ),
               ),
+              Obx(() => Visibility(
+                  visible: service.loadingMorePosts.isTrue,
+                  child: const SizedBox(
+                      width: 40,
+                      height: 40,
+                      child: CupertinoActivityIndicator()))),
             ],
           ),
         ),
@@ -95,15 +157,21 @@ class MartScreenPortrait extends StatelessWidget {
     );
   }
 
-  FilterChip buildFilterChip(String label) {
+  FilterChip buildFilterChip(
+      String label, void Function(bool) onSelect, bool selected) {
     return FilterChip(
-      label: Text(label),
-      onSelected: (_) {},
+      label: Text(
+        label,
+        style: TextStyle(
+            fontSize: 12, color: selected ? Colors.white : Colors.black),
+      ),
+      onSelected: onSelect,
+      selected: selected,
       backgroundColor: Colors.white,
       checkmarkColor: Colors.white,
       selectedColor: Colors.lightBlue.shade300,
       shape: const RoundedRectangleBorder(
-          borderRadius: BorderRadius.all(Radius.circular(30))),
+          borderRadius: BorderRadius.all(Radius.circular(20))),
     );
   }
 

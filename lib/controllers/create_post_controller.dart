@@ -15,7 +15,7 @@ class CreatePostController extends GetxController {
 
   void pickImage() async {
     final ip = ImagePicker();
-    final file = await ip.pickImage(source: ImageSource.gallery);
+    final file = await ip.pickImage(source: ImageSource.gallery , imageQuality: 30);
     image.value = file;
   }
 
