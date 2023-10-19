@@ -1,3 +1,4 @@
+import 'package:astroverse/controllers/service_controller.dart';
 import 'package:astroverse/models/service.dart';
 import 'package:astroverse/res/colors/project_colors.dart';
 import 'package:astroverse/res/img/images.dart';
@@ -14,6 +15,7 @@ class MartItemFullPortrait extends StatelessWidget {
   Widget build(BuildContext context) {
     final Service? item = Get.arguments;
     final sb = StringBuffer();
+    final ServiceController service = Get.find();
     sb.writeAll(item!.genre, ", ");
 
     return Scaffold(
@@ -101,7 +103,7 @@ class MartItemFullPortrait extends StatelessWidget {
                   ),
                   Padding(
                     padding:
-                        const EdgeInsets.symmetric(horizontal: 15, vertical: 8),
+                        const EdgeInsets.symmetric(horizontal: 35, vertical: 8),
                     child: Text(
                       item.description,
                       style: const TextStyle(
@@ -114,12 +116,20 @@ class MartItemFullPortrait extends StatelessWidget {
                     child: const Padding(
                       padding:
                           EdgeInsets.symmetric(horizontal: 15, vertical: 8),
-                      child: Text(
-                        'Pickup Address',
-                        style: TextStyle(
-                            fontSize: 16,
+                      child: Wrap(
+                        children: [
+                          Icon(
+                            Icons.location_pin,
                             color: ProjectColors.lightBlack,
-                            fontWeight: FontWeight.bold),
+                          ),
+                          Text(
+                            'Pickup Address',
+                            style: TextStyle(
+                                fontSize: 16,
+                                color: ProjectColors.lightBlack,
+                                fontWeight: FontWeight.bold),
+                          ),
+                        ],
                       ),
                     ),
                   ),
@@ -127,7 +137,7 @@ class MartItemFullPortrait extends StatelessWidget {
                     visible: item.place.isNotEmpty,
                     child: Padding(
                       padding: const EdgeInsets.symmetric(
-                          horizontal: 15, vertical: 0),
+                          horizontal: 35, vertical: 0),
                       child: Text(
                         item.place,
                         style: const TextStyle(
@@ -138,12 +148,24 @@ class MartItemFullPortrait extends StatelessWidget {
                   ),
                   const Padding(
                     padding: EdgeInsets.symmetric(horizontal: 15, vertical: 8),
-                    child: Text(
-                      'Details',
-                      style: TextStyle(
-                          fontSize: 16,
+                    child: Wrap(
+                      children: [
+                        Icon(
+                          Icons.info,
                           color: ProjectColors.lightBlack,
-                          fontWeight: FontWeight.bold),
+                          size: 22,
+                        ),
+                        SizedBox(
+                          width: 5,
+                        ),
+                        Text(
+                          'Details',
+                          style: TextStyle(
+                              fontSize: 16,
+                              color: ProjectColors.lightBlack,
+                              fontWeight: FontWeight.bold),
+                        ),
+                      ],
                     ),
                   ),
                   buildRow('provider', item.authorName, Icons.person_2),
@@ -161,9 +183,11 @@ class MartItemFullPortrait extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 10),
             child: MaterialButton(
-              onPressed: () {},
+              onPressed: () async {
+                await service.makePayment();
+              },
               color: const Color(0xff444040),
-              padding: const EdgeInsets.symmetric(horizontal: 60, vertical: 15),
+              padding: const EdgeInsets.symmetric(horizontal: 70, vertical: 15),
               shape: const RoundedRectangleBorder(
                   borderRadius: BorderRadius.all(Radius.circular(30))),
               child: Text("Buy for ₹ ${item.price.toInt()}",
@@ -198,7 +222,7 @@ class MartItemFullPortrait extends StatelessWidget {
   }
 
   Widget buildRow(String label, String value, IconData icon) => Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 5),
+        padding: const EdgeInsets.symmetric(horizontal: 35, vertical: 5),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [

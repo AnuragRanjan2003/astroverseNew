@@ -69,7 +69,7 @@ class MartItem extends StatelessWidget {
                     item.title,
                     overflow: TextOverflow.ellipsis,
                     textAlign: TextAlign.left,
-                    style: TextStyle(fontSize: 12),
+                    style: const TextStyle(fontSize: 12),
                   ),
                   Text(
                     '₹${item.price.toInt()}',
