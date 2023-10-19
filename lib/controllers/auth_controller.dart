@@ -8,6 +8,7 @@ import 'package:astroverse/res/strings/backend_strings.dart';
 import 'package:astroverse/routes/routes.dart';
 import 'package:astroverse/utils/resource.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -18,6 +19,11 @@ import 'package:image_picker/image_picker.dart';
 import 'main_controller.dart';
 
 class AuthController extends GetxController {
+  final FirebaseAnalyticsObserver observer =
+      FirebaseAnalyticsObserver(analytics: FirebaseAnalytics.instance);
+
+  final _analytics = FirebaseAnalytics.instance;
+
   Rxn<models.User> user = Rxn<models.User>();
   Rx<bool> loading = false.obs;
   Rx<bool> userLoading = false.obs;
@@ -41,6 +47,7 @@ class AuthController extends GetxController {
     if (fUser != null) {
       final res = await _repo.checkForUserData(fUser.uid);
       if (res == true) {
+        _analytics.logLogin(loginMethod: "remember me");
         startListeningToUser(fUser.uid);
         emailVerified.value = _repo.checkIfEmailVerified();
         if (emailVerified.value == true) {
@@ -60,6 +67,7 @@ class AuthController extends GetxController {
       updateUI(value, _repo.checkIfEmailVerified());
       if (value.isSuccess) {
         value = value as Success<UserCredential>;
+        _analytics.logLogin(loginMethod: "Email");
         value.data.user ??
             startListeningToUser(
               value.data.user!.uid,
@@ -104,6 +112,7 @@ class AuthController extends GetxController {
               debugPrint("image uploaded");
               user.image = (task as Success<String>).data;
               saveData(user, (p0) {
+                _analytics.logSignUp(signUpMethod: "Email");
                 loading.value = false;
                 updateUI(p0);
               }, (event as Success<UserCredential>).data);
@@ -115,6 +124,7 @@ class AuthController extends GetxController {
           user.image = BackEndStrings.defaultImage;
           saveData(user, (p0) {
             loading.value = false;
+            _analytics.logSignUp(signUpMethod: "Email");
             updateUI(p0);
           }, event.data);
         }
@@ -154,6 +164,7 @@ class AuthController extends GetxController {
               debugPrint("image uploaded");
               user.image = (task as Success<String>).data;
               saveData(user, (p0) {
+                _analytics.logEvent(name: "astro signup Email");
                 loading.value = false;
                 updateUI(p0);
               }, (event as Success<UserCredential>).data);
@@ -164,6 +175,7 @@ class AuthController extends GetxController {
         } else {
           user.image = BackEndStrings.defaultImage;
           saveData(user, (p0) {
+            _analytics.logEvent(name: "astro signup Email");
             loading.value = false;
             updateUI(p0);
           }, event.data);
@@ -200,9 +212,11 @@ class AuthController extends GetxController {
     _repo.sendEmailVerificationEmail().then((value) {
       debugPrint("res value is success on email sent : ${value.isSuccess}");
       if (value.isSuccess) {
+        _analytics.logEvent(name: "verification email sent");
         Get.snackbar("Email", (value as Success<String>).data);
         startEmailVerificationCheck(() {
           onVerified();
+          _analytics.logEvent(name: "email verified");
           debugPrint("email verified");
         });
       } else {
@@ -241,6 +255,7 @@ class AuthController extends GetxController {
   signInWithGoogle(void Function(Resource<UserCredential>) updateUI) {
     _repo.signInWithGoogle().then((value) {
       if (value.isSuccess) {
+        _analytics.logLogin(loginMethod: "Google");
         value = value as Success<UserCredential>;
         _repo.checkForUserData(value.data.user!.uid).then((it) {
           if (it == false) {
@@ -269,7 +284,7 @@ class AuthController extends GetxController {
         _repo.checkForUserData(value.data.user!.uid).then((it) {
           if (it == false) {
             final cred = (value as Success<UserCredential>).data.user!;
-
+            _analytics.logSignUp(signUpMethod: "Google");
             final user = models.User(
                 _parseValueForModel(cred.displayName),
                 _parseValueForModel(cred.email),
@@ -341,6 +356,7 @@ class AuthController extends GetxController {
   void logOut() {
     _repo.logOut().then((value) {
       Get.offAllNamed(Routes.ask);
+      _analytics.logEvent(name: "logout");
     });
   }
 

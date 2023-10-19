@@ -3,6 +3,7 @@ import 'package:astroverse/res/colors/project_colors.dart';
 import 'package:astroverse/res/textStyles/text_styles.dart';
 import 'package:astroverse/routes/routes.dart';
 import 'package:astroverse/screens/mart_screen/mart_screen.dart';
+import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_nav_bar/google_nav_bar.dart';
@@ -17,6 +18,8 @@ class MainScreenPortrait extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    var observer =
+        FirebaseAnalyticsObserver(analytics: FirebaseAnalytics.instance);
     final PageController pageController = PageController(initialPage: 0);
     final double wd = cons.maxWidth;
     final double ht = cons.maxHeight;
@@ -145,8 +148,11 @@ class MainScreenPortrait extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     GestureDetector(
-                      child: const Icon(Icons.notifications,color: Colors.black54,),
-                      onTap: (){},
+                      child: const Icon(
+                        Icons.notifications,
+                        color: Colors.black54,
+                      ),
+                      onTap: () {},
                     ),
                     GestureDetector(
                       child: CircleAvatar(

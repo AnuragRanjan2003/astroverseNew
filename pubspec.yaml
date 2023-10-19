@@ -48,13 +48,13 @@ dependencies:
   shimmer: ^3.0.0
   flutter_otp_text_field: ^1.1.1
   uuid: ^4.0.0
-  liquid_pull_to_refresh: ^3.0.1
-  glassmorphism_ui: ^0.3.0
   cached_network_image: ^3.2.3
   firebase_app_check: ^0.2.0
   location: ^5.0.3
   intl: ^0.18.1
-  firebase_analytics: ^10.6.0
+  firebase_analytics: ^10.6.1
+  flutter_stripe: ^9.4.0
+  flutter_dotenv: ^5.1.0
 
 dev_dependencies:
   flutter_test:

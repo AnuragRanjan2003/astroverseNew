@@ -63,6 +63,7 @@ class DefaultFirebaseOptions {
     messagingSenderId: '76643529369',
     projectId: 'astroverse-5f2ae',
     storageBucket: 'astroverse-5f2ae.appspot.com',
+    androidClientId: '76643529369-213g0bgkq8gc4jbf0aopbsn34psri4eg.apps.googleusercontent.com',
     iosClientId: '76643529369-tach42r0oun3bkf4c9psbq5nqnha5hei.apps.googleusercontent.com',
     iosBundleId: 'com.example.astroverse',
   );
