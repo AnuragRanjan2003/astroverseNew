@@ -34,4 +34,6 @@ class PostRepo {
 
      Stream<QuerySnapshot<PostSave>> upVotedPostStream(String uid ) =>
       _db.upVotedPostsStream(uid );
+
+     Future<void> addPostView(String id) async => await _db.addPostView(id);
 }

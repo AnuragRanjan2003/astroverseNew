@@ -27,7 +27,7 @@ class MartItemFullPortrait extends StatelessWidget {
                   tag: "service ${item.id}",
                   child: Image(
                     image: NetworkImage(item.imageUrl),
-                    height: cons.maxHeight * 0.45,
+                    height: cons.maxHeight * 0.40,
                     fit: BoxFit.fitHeight,
                     width: cons.maxWidth,
                   ),
@@ -184,7 +184,7 @@ class MartItemFullPortrait extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 10),
             child: MaterialButton(
               onPressed: () async {
-                await service.makePayment();
+                await service.makePayment(item, (e) {});
               },
               color: const Color(0xff444040),
               padding: const EdgeInsets.symmetric(horizontal: 70, vertical: 15),

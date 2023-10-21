@@ -1,7 +1,9 @@
 import 'dart:developer';
 
+import 'package:astroverse/components/comments_bottom_sheet.dart';
 import 'package:astroverse/controllers/full_post_page_controller.dart';
 import 'package:astroverse/controllers/main_controller.dart';
+import 'package:astroverse/models/comment.dart';
 import 'package:astroverse/models/post_save.dart';
 import 'package:astroverse/res/dims/global.dart';
 import 'package:astroverse/res/textStyles/text_styles.dart';
@@ -25,7 +27,19 @@ class PostFullPortrait extends StatelessWidget {
     final FullPostPageController controller = Get.put(FullPostPageController());
     final Post post = Get.arguments;
     log(post.authorId, name: "UID");
+    controller.addPostView(post.id);
+    final dummy = Comment(
+      'xyz',
+      '12345',
+      'nice',
+      '123456',
+      '320ff7bd-5664-4be6-b06b-347d82261a51',
+      false,
+      DateTime.now(),
+    );
     controller.getAuthor(post.authorId);
+    //controller.postComment(dummy, post.id);
+    controller.fetchComments(post.id);
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.grey.shade200,
@@ -72,10 +86,9 @@ class PostFullPortrait extends StatelessWidget {
           ],
         ),
       ),
-      extendBodyBehindAppBar: true,
-      extendBody: true,
-      body: SafeArea(
+      body: SingleChildScrollView(
         child: Container(
+          height: Get.height * 0.9,
           padding: const EdgeInsets.symmetric(
               horizontal: GlobalDims.horizontalPadding, vertical: 20),
           child: Column(
@@ -108,7 +121,7 @@ class PostFullPortrait extends StatelessWidget {
                 ),
               ),
               const SizedBox(
-                height: 20,
+                height: 10,
               ),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -122,7 +135,7 @@ class PostFullPortrait extends StatelessWidget {
                           size: 25,
                         ),
                       ),
-                      Text(post.upVotes.toString(),
+                      Text(post.comments.toString(),
                           style: TextStylesLight().small)
                     ],
                   ),
@@ -173,12 +186,12 @@ class PostFullPortrait extends StatelessWidget {
                       IconButton(
                         onPressed: () {},
                         icon: const FaIcon(
-                          FontAwesomeIcons.thumbsDown,
+                          FontAwesomeIcons.eye,
                           size: 25,
                         ),
                       ),
                       Text(
-                        post.downVotes.toString(),
+                        post.views.toString(),
                         style: TextStylesLight().small,
                       )
                     ],
@@ -186,7 +199,7 @@ class PostFullPortrait extends StatelessWidget {
                 ],
               ),
               const SizedBox(
-                height: 15,
+                height: 8,
               ),
               Row(
                 children: [
@@ -205,7 +218,17 @@ class PostFullPortrait extends StatelessWidget {
                   ),
                 ],
               ),
-              Expanded(child: Container())
+              GestureDetector(
+                onTap: () {
+                  Get.bottomSheet(
+                    CommentsBottomSheet(
+                      user: auth.user.value!,
+                      post: post,
+                    ),
+                  );
+                },
+                child: buildCommentWidget(),
+              ),
             ],
           ),
         ),
@@ -247,5 +270,34 @@ class PostFullPortrait extends StatelessWidget {
 
   bool isUpVoted(List<PostSave> list, String id) {
     return list.any((element) => element.id == id);
+  }
+
+  Widget buildCommentWidget() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 20),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
+        decoration: const BoxDecoration(
+            color: Color(0x64dad9d9),
+            borderRadius: BorderRadius.all(Radius.circular(15))),
+        child: const Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              "Comments",
+              style: TextStyle(
+                color: Colors.black,
+                fontWeight: FontWeight.bold,
+                fontSize: 15,
+              ),
+            ),
+            SizedBox(
+              height: 10,
+            ),
+            Text('click to see the comment section')
+          ],
+        ),
+      ),
+    );
   }
 }

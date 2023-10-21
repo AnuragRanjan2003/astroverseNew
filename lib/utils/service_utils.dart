@@ -1,4 +1,3 @@
-import 'package:astroverse/models/post.dart';
 import 'package:astroverse/models/save_service.dart';
 import 'package:astroverse/models/service.dart';
 import 'package:astroverse/utils/postable.dart';
@@ -37,7 +36,7 @@ class ServiceUtils extends Postable<Service, SaveService> {
   Future<Resource<int>> dislike(String id) async {
     try {
       await ref.doc(id).update({"upVotes": FieldValue.increment(-1)});
-      await likeRef.doc(id).delete();
+      await likeRef?.doc(id).delete();
       return Success(1);
     } on FirebaseException catch (e) {
       return Failure<int>(e.message.toString());
@@ -66,7 +65,7 @@ class ServiceUtils extends Postable<Service, SaveService> {
   Future<Resource<int>> like(String id) async {
     try {
       await ref.doc(id).update({"upVotes": FieldValue.increment(1)});
-      await likeRef.doc(id).set(SaveService(id, DateTime.now().toString()));
+      await likeRef?.doc(id).set(SaveService(id, DateTime.now().toString()));
       return Success(1);
     } on FirebaseException catch (e) {
       return Failure<int>(e.message.toString());
@@ -94,9 +93,8 @@ class ServiceUtils extends Postable<Service, SaveService> {
   }
 
   @override
-  Stream<QuerySnapshot<SaveService>> likedStream(
-          String uid) =>
-      likeRef.snapshots();
+  Stream<QuerySnapshot<SaveService>> likedStream(String uid) =>
+      likeRef!.snapshots();
 
   @override
   Future<Resource<Service>> savePost(Service post) async {

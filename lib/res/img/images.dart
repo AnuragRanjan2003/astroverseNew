@@ -9,4 +9,5 @@ class ProjectImages{
   static const bank = AssetImage('lib/assets/images/bank.png');
   static const phone = AssetImage('lib/assets/images/phone.png');
   static const planet = AssetImage('lib/assets/images/planet.png');
+  static const emptyBox = AssetImage('lib/assets/images/empty_box.png');
 }

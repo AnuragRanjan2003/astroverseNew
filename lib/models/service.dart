@@ -33,6 +33,6 @@ class Service extends Post {
 
   @override
   String toString() {
-    return "Service(id : $id ,title : $title ,descr: $description , genre : ${genre.toString()} , date : ${date.toString()} , image : $imageUrl , upVotes : $upVotes , downVotes : $downVotes , author : $authorName , authorId : $authorId )\n";
+    return "Service(id : $id ,title : $title ,descr: $description , genre : ${genre.toString()} , date : ${date.toString()} , image : $imageUrl , upVotes : $upVotes , comments : $comments , author : $authorName , authorId : $authorId )\n";
   }
 }

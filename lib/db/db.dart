@@ -1,9 +1,13 @@
+import 'dart:developer';
+
+import 'package:astroverse/models/comment.dart';
 import 'package:astroverse/models/post.dart';
 import 'package:astroverse/models/post_save.dart';
 import 'package:astroverse/models/save_service.dart';
 import 'package:astroverse/models/service.dart';
 import 'package:astroverse/models/user.dart' as models;
 import 'package:astroverse/res/strings/backend_strings.dart';
+import 'package:astroverse/utils/comment_utils.dart';
 import 'package:astroverse/utils/resource.dart';
 import 'package:astroverse/utils/safe_call.dart';
 import 'package:astroverse/utils/service_utils.dart';
@@ -71,7 +75,7 @@ class Database {
       await ServiceUtils(id).savePost(s);
 
   Future<Resource<List<QueryDocumentSnapshot<Service>>>>
-      fetchServiceByGenreAndPage(List<String> genre , String uid) async =>
+      fetchServiceByGenreAndPage(List<String> genre, String uid) async =>
           await ServiceUtils(uid).fetchByGenreAndPage(genre);
 
   Future<Resource<List<QueryDocumentSnapshot<Service>>>> fetchMoreService(
@@ -163,4 +167,27 @@ class Database {
 
   Stream<QuerySnapshot<SaveService>> upVotedServicesStream(String uid) =>
       ServiceUtils(uid).likedStream(uid);
+
+  Future<Resource<List<QueryDocumentSnapshot<Comment>>>> fetchComments(
+          String postId) async =>
+      await CommentUtils(postId).fetchByGenreAndPage([]);
+
+  Future<Resource<List<QueryDocumentSnapshot<Comment>>>> fetchMoreComments(
+          String postId, QueryDocumentSnapshot<Comment> lastPost) async =>
+      await CommentUtils(postId).fetchMore(lastPost, []);
+
+  Future<Resource<Comment>> postComment(String postId, Comment post) async {
+    await _postCollection
+        .doc(postId)
+        .update({"comments": FieldValue.increment(1)});
+    return await CommentUtils(postId).savePost(post);
+  }
+
+  Future<void> addPostView(String id) async {
+    try {
+      await _postCollection.doc(id).update({'views': FieldValue.increment(1)});
+    } catch (e) {
+      log(e.toString(), name: "VIEWS");
+    }
+  }
 }

@@ -6,7 +6,7 @@ import '../models/post_save.dart';
 
 abstract class Postable<T,T2> {
   final CollectionReference<T> ref;
-  final CollectionReference<T2> likeRef;
+  final CollectionReference<T2>? likeRef;
   static const limit = 3;
 
   Postable(this.ref, this.likeRef);

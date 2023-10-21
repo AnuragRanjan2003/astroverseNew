@@ -13,7 +13,8 @@ class Post {
   int upVotes;
   final double lat;
   final double lng;
-  final int downVotes;
+  final int comments;
+  final int views;
   final String authorName;
   final String authorId;
 
@@ -27,7 +28,8 @@ class Post {
     required this.date,
     required this.imageUrl,
     this.upVotes = 0,
-    this.downVotes = 0,
+    this.comments = 0,
+    this.views = 0,
     required this.authorName,
     required this.authorId,
   });
@@ -38,6 +40,6 @@ class Post {
 
   @override
   String toString() {
-    return "Post(id : $id ,title : $title ,descr: $description , genre : ${genre.toString()} , date : ${date.toString()} , image : $imageUrl , upVotes : $upVotes , downVotes : $downVotes , author : $authorName , authorId : $authorId )";
+    return "Post(id : $id ,title : $title ,descr: $description , genre : ${genre.toString()} , date : ${date.toString()} , image : $imageUrl , upVotes : $upVotes , comments : $comments , views : $views , author : $authorName , authorId : $authorId )";
   }
 }

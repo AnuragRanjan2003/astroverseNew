@@ -16,7 +16,8 @@ Post _$PostFromJson(Map<String, dynamic> json) => Post(
       date: DateTime.parse(json['date'] as String),
       imageUrl: json['imageUrl'] as String,
       upVotes: json['upVotes'] as int? ?? 0,
-      downVotes: json['downVotes'] as int? ?? 0,
+      comments: json['comments'] as int? ?? 0,
+      views: json['views'] as int? ?? 0,
       authorName: json['authorName'] as String,
       authorId: json['authorId'] as String,
     );
@@ -31,7 +32,8 @@ Map<String, dynamic> _$PostToJson(Post instance) => <String, dynamic>{
       'upVotes': instance.upVotes,
       'lat': instance.lat,
       'lng': instance.lng,
-      'downVotes': instance.downVotes,
+      'comments': instance.comments,
+      'views': instance.views,
       'authorName': instance.authorName,
       'authorId': instance.authorId,
     };

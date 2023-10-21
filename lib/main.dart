@@ -19,7 +19,7 @@ void main() async {
   await FirebaseAppCheck.instance
       .activate(androidProvider: AndroidProvider.playIntegrity);
   final analytics = FirebaseAnalytics.instanceFor(app: app);
-  analytics.logLogin(loginMethod: "Email");
+  analytics.logEvent(name: "login");
   runApp(const MyApp());
 }
 

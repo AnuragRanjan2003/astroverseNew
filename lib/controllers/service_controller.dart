@@ -7,6 +7,7 @@ import 'package:astroverse/repo/service_repo.dart';
 import 'package:astroverse/res/strings/backend_strings.dart';
 import 'package:astroverse/utils/resource.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_stripe/flutter_stripe.dart';
 import 'package:get/get.dart';
@@ -84,8 +85,8 @@ class ServiceController extends GetxController {
     morePostsToLoad.value = true;
   }
 
-  fetchMoreServices(
-      String uid, List<String> genre, Function(List<Service>) onFetch) {
+  fetchMoreServices(String uid, List<String> genre,
+      Function(List<Service>) onFetch) {
     log("loading more posts", name: "POST LIST");
     if (morePostsToLoad.value == false || serviceList.length >= _maxPostLimit) {
       return;
@@ -116,8 +117,8 @@ class ServiceController extends GetxController {
     });
   }
 
-  void fetchServiceByGenreAndPage(
-      List<String> genre, String uid, Function(List<Service>) onFetch) {
+  void fetchServiceByGenreAndPage(List<String> genre, String uid,
+      Function(List<Service>) onFetch) {
     log("loading  posts", name: "POST LIST");
     if (lastPost.value == null) {
       log("null", name: "LP");
@@ -151,8 +152,8 @@ class ServiceController extends GetxController {
     });
   }
 
-  Future<void> onRefresh(
-      List<String> genre, String uid, Function(List<Service>) onFetch) async {
+  Future<void> onRefresh(List<String> genre, String uid,
+      Function(List<Service>) onFetch) async {
     clearList();
     log("loading  posts", name: "POST LIST");
     if (lastPost.value == null) {
@@ -184,9 +185,12 @@ class ServiceController extends GetxController {
     }
   }
 
-  Future<void> makePayment() async {
+  Future<void> makePayment(Service item, Function(String) onError) async {
     try {
-      final body = {'amount': '100', 'currency': 'INR'};
+      final body = {
+        'amount': "${(item.price * 100).toInt()}",
+        'currency': 'INR'
+      };
 
       final res = await http.post(
           Uri.parse('https://api.stripe.com/v1/payment_intents'),
@@ -198,11 +202,19 @@ class ServiceController extends GetxController {
       final Map<String, dynamic> intent = jsonDecode(res.body.toString());
       await Stripe.instance.initPaymentSheet(
           paymentSheetParameters: SetupPaymentSheetParameters(
-        paymentIntentClientSecret: intent["client_secret"],
+            paymentIntentClientSecret: intent["client_secret"],
             merchantDisplayName: 'Astroverse',
-      ));
-
-      await Stripe.instance.presentPaymentSheet(options: const PaymentSheetPresentOptions());
-    } on StripeException catch (e) {}
+          ));
+      try {
+        await Stripe.instance
+            .presentPaymentSheet(options: const PaymentSheetPresentOptions());
+      } on StripeException catch (e) {
+        onError(e.toString());
+      } on StripeConfigException catch (e) {
+        onError(e.message);
+      }
+    } catch (e) {
+      onError(e.toString());
+    }
   }
 }

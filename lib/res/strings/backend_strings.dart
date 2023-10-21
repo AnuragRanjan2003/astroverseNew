@@ -6,6 +6,7 @@ class BackEndStrings {
   static const postCollection = "post";
   static const upvoteCollection = "upVoted";
   static const usedServiceCollection = "used";
+  static const comments = "comments";
 
   static const profileImage = "profileImage";
   static const serviceImage = "serviceImage";
