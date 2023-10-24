@@ -3,6 +3,7 @@ import 'dart:developer';
 import 'dart:io';
 
 import 'package:astroverse/models/service.dart';
+import 'package:astroverse/models/transaction.dart';
 import 'package:astroverse/repo/service_repo.dart';
 import 'package:astroverse/res/strings/backend_strings.dart';
 import 'package:astroverse/utils/resource.dart';
@@ -200,14 +201,20 @@ class ServiceController extends GetxController {
             'Content-type': 'application/x-www-form-urlencoded'
           });
       final Map<String, dynamic> intent = jsonDecode(res.body.toString());
+
       await Stripe.instance.initPaymentSheet(
           paymentSheetParameters: SetupPaymentSheetParameters(
             paymentIntentClientSecret: intent["client_secret"],
             merchantDisplayName: 'Astroverse',
+            googlePay: const PaymentSheetGooglePay(merchantCountryCode: 'GB' , testEnv: true)
           ));
       try {
-        await Stripe.instance
-            .presentPaymentSheet(options: const PaymentSheetPresentOptions());
+         await Stripe.instance
+            .presentPaymentSheet(options: const PaymentSheetPresentOptions()).then((value) {});
+
+         //final item = Transaction(Uuid().v4(), uid, date, itemId, itemType, amount, method)
+         //_repo.addTransaction(item);
+        
       } on StripeException catch (e) {
         onError(e.toString());
       } on StripeConfigException catch (e) {

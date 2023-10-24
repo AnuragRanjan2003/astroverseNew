@@ -8,8 +8,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_stripe/flutter_stripe.dart';
 import 'package:get/get.dart';
+import 'package:zego_uikit_prebuilt_call/zego_uikit_prebuilt_call.dart';
 
 void main() async {
+  final navigatorKey = GlobalKey<NavigatorState>();
   WidgetsFlutterBinding.ensureInitialized();
   final app = await Firebase.initializeApp(
       options: DefaultFirebaseOptions.currentPlatform);
@@ -20,11 +22,13 @@ void main() async {
       .activate(androidProvider: AndroidProvider.playIntegrity);
   final analytics = FirebaseAnalytics.instanceFor(app: app);
   analytics.logEvent(name: "login");
-  runApp(const MyApp());
+  ZegoUIKitPrebuiltCallInvitationService().setNavigatorKey(navigatorKey);
+  runApp(MyApp(navigatorKey: navigatorKey,));
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  final GlobalKey<NavigatorState> navigatorKey;
+  const MyApp({super.key, required this.navigatorKey});
 
   static FirebaseAnalytics analytics = FirebaseAnalytics.instance;
   static FirebaseAnalyticsObserver observer =
@@ -37,8 +41,10 @@ class MyApp extends StatelessWidget {
     analytics.logLogin(loginMethod: "Email");
     return GetMaterialApp(
       title: 'Flutter Demo',
+      navigatorKey: navigatorKey,
       debugShowCheckedModeBanner: false,
       getPages: AppRoutes.getPages,
+
       theme: ThemeData(
         fontFamily: 'Poppins',
         colorScheme: ColorScheme.fromSeed(seedColor: ProjectColors.primary),

@@ -1,10 +1,13 @@
+import 'package:astroverse/components/call_invitation_page.dart';
 import 'package:astroverse/controllers/auth_controller.dart';
+import 'package:astroverse/models/user.dart';
 import 'package:astroverse/res/colors/project_colors.dart';
 import 'package:astroverse/res/textStyles/text_styles.dart';
 import 'package:astroverse/routes/routes.dart';
 import 'package:astroverse/screens/mart_screen/mart_screen.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:get/get.dart';
 import 'package:google_nav_bar/google_nav_bar.dart';
 import 'package:shimmer/shimmer.dart';
@@ -19,7 +22,7 @@ class MainScreenPortrait extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     var observer =
-        FirebaseAnalyticsObserver(analytics: FirebaseAnalytics.instance);
+    FirebaseAnalyticsObserver(analytics: FirebaseAnalytics.instance);
     final PageController pageController = PageController(initialPage: 0);
     final double wd = cons.maxWidth;
     final double ht = cons.maxHeight;
@@ -50,6 +53,16 @@ class MainScreenPortrait extends StatelessWidget {
       ),
     ];
 
+    final receiver = User(
+        "abcde",
+        '',
+        '',
+        1,
+        'qR0IiDisDnPxziZhyZtPrNJPPfC3',
+        false,
+        '',
+        '');
+
     return Scaffold(
       backgroundColor: ProjectColors.background,
       appBar: _customAppBar(auth, "Explore"),
@@ -77,12 +90,14 @@ class MainScreenPortrait extends StatelessWidget {
             child: PageView(
               controller: pageController,
               physics: const NeverScrollableScrollPhysics(),
-              children: const [
-                DiscoverScreen(color: ProjectColors.background),
-                MartScreen(),
-                DiscoverScreen(
-                  color: Colors.green,
-                ),
+              children: [
+                const DiscoverScreen(color: ProjectColors.background),
+                const MartScreen(),
+                CallInvitationPage(
+                    sender: auth.user.value!,
+                    appId: int.parse(dotenv.get("ZEGOAPPID")),
+                    appSign: dotenv.get("ZEGOAPPSIGN"),
+                    receiver: receiver)
               ],
             )),
       ),
@@ -170,7 +185,8 @@ class MainScreenPortrait extends StatelessWidget {
                     )
                   ],
                 ),
-                Obx(() => Text(
+                Obx(() =>
+                    Text(
                       _pageName(auth.page.value),
                       style: const TextStyle(
                           fontSize: 28, fontWeight: FontWeight.bold),

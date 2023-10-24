@@ -5,6 +5,7 @@ import 'package:astroverse/models/post.dart';
 import 'package:astroverse/models/post_save.dart';
 import 'package:astroverse/models/save_service.dart';
 import 'package:astroverse/models/service.dart';
+import 'package:astroverse/models/transaction.dart' as t;
 import 'package:astroverse/models/user.dart' as models;
 import 'package:astroverse/res/strings/backend_strings.dart';
 import 'package:astroverse/utils/comment_utils.dart';
@@ -27,6 +28,14 @@ class Database {
       .collection(BackEndStrings.postCollection)
       .withConverter<Post>(
         fromFirestore: (snapshot, options) => Post.fromJson(snapshot.data()!),
+        toFirestore: (value, options) => value.toJson(),
+      );
+
+  final _transactionCollection = FirebaseFirestore.instance
+      .collection(BackEndStrings.transactionCollection)
+      .withConverter<t.Transaction>(
+        fromFirestore: (snapshot, options) =>
+            t.Transaction.fromJson(snapshot.data()),
         toFirestore: (value, options) => value.toJson(),
       );
 
@@ -190,4 +199,8 @@ class Database {
       log(e.toString(), name: "VIEWS");
     }
   }
+
+  Future<Resource<void>> addTransaction(t.Transaction item) async =>
+      await SafeCall().fireStoreCall<void>(
+          () async => await _transactionCollection.doc(item.id).set(item));
 }

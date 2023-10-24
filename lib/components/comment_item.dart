@@ -31,6 +31,7 @@ class CommentItem extends StatelessWidget {
                 child: Text(
                   toTimeDelay(item.date),
                   style: const TextStyle(
+                    fontSize: 10,
                       color: Colors.black, fontWeight: FontWeight.w500),
                 ),
               ),

@@ -25,6 +25,7 @@ class CommentsBottomSheet extends StatelessWidget {
 
     return Container(
       width: Get.width,
+      constraints: BoxConstraints(maxHeight: Get.height * 0.7),
       decoration: const BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.only(
@@ -47,7 +48,10 @@ class CommentsBottomSheet extends StatelessWidget {
             final list = postPageController.commentList;
             return Expanded(
                 child: list.isNotEmpty
-                    ? ListView.builder(
+                    ? ListView.separated(
+                        separatorBuilder: (context, index) => const SizedBox(
+                          height: 20,
+                        ),
                         itemBuilder: (context, index) {
                           if (index == list.length) {
                             return TextButton(

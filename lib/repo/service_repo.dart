@@ -4,6 +4,7 @@ import 'package:astroverse/db/db.dart';
 import 'package:astroverse/db/storage.dart';
 import 'package:astroverse/models/save_service.dart';
 import 'package:astroverse/models/service.dart';
+import 'package:astroverse/models/transaction.dart' as t;
 import 'package:astroverse/utils/resource.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
@@ -35,4 +36,7 @@ class ServiceRepo {
 
   Stream<QuerySnapshot<SaveService>> upVotedPostStream(String uid) =>
       _db.upVotedServicesStream(uid);
+
+  Future<Resource<void>> addTransaction(t.Transaction item) async =>
+      await _db.addTransaction(item);
 }

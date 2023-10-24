@@ -1,12 +1,14 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:json_annotation/json_annotation.dart';
 
 part 'comment.g.dart';
 
-@JsonSerializable()
+@JsonSerializable(anyMap: true)
 class Comment {
   final String userName;
   final String userId;
   final String body;
+  @JsonKey(fromJson: _dateFromTimeStamp, toJson: _dateAsIs)
   DateTime date;
   String id;
   final String postId;
@@ -30,4 +32,9 @@ class Comment {
   String toString() {
     return 'Comment(userName : $userName , id : $id , body : $body , userId : $userId , postId : $postId , astro : $astro , date : $date )';
   }
+
+  static DateTime _dateFromTimeStamp(Timestamp timestamp) =>
+      DateTime.parse(timestamp.toDate().toString());
+
+  static _dateAsIs(DateTime date) => date;
 }

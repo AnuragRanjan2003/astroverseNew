@@ -221,6 +221,7 @@ class PostFullPortrait extends StatelessWidget {
               GestureDetector(
                 onTap: () {
                   Get.bottomSheet(
+                    isScrollControlled: true,
                     CommentsBottomSheet(
                       user: auth.user.value!,
                       post: post,
