@@ -1,6 +1,7 @@
 import 'dart:developer';
 
 import 'package:astroverse/models/comment.dart';
+import 'package:astroverse/models/extra_info.dart';
 import 'package:astroverse/models/post.dart';
 import 'package:astroverse/models/post_save.dart';
 import 'package:astroverse/models/save_service.dart';
@@ -13,6 +14,8 @@ import 'package:astroverse/utils/resource.dart';
 import 'package:astroverse/utils/safe_call.dart';
 import 'package:astroverse/utils/service_utils.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+
+typedef SetInfo = String;
 
 class Database {
   static const int _limit = 2;
@@ -47,6 +50,29 @@ class Database {
           .withConverter<PostSave>(
             fromFirestore: (snapshot, options) =>
                 PostSave.fromJson(snapshot.data()),
+            toFirestore: (value, options) => value.toJson(),
+          );
+
+  CollectionReference<models.User> _followingCollection(String uid) =>
+      FirebaseFirestore.instance
+          .collection(BackEndStrings.userCollection)
+          .doc(uid)
+          .collection(BackEndStrings.followingCollection)
+          .withConverter<models.User>(
+            fromFirestore: (snapshot, options) =>
+                models.User.fromJson(snapshot.data()),
+            toFirestore: (value, options) => value.toJson(),
+          );
+
+  DocumentReference<ExtraInfo> _extraInfoCollection(String uid) =>
+      FirebaseFirestore.instance
+          .collection(BackEndStrings.userCollection)
+          .doc(uid)
+          .collection(BackEndStrings.metaDataCollection)
+          .doc('extraInfo')
+          .withConverter<ExtraInfo>(
+            fromFirestore: (snapshot, options) =>
+                ExtraInfo.fromJson(snapshot.data()),
             toFirestore: (value, options) => value.toJson(),
           );
 
@@ -203,4 +229,66 @@ class Database {
   Future<Resource<void>> addTransaction(t.Transaction item) async =>
       await SafeCall().fireStoreCall<void>(
           () async => await _transactionCollection.doc(item.id).set(item));
+
+  Future<Resource<void>> addFollowing(
+          String uid, models.User astrologer) async =>
+      await SafeCall().fireStoreCall<void>(() async =>
+          await _followingCollection(uid).doc(astrologer.uid).set(astrologer));
+
+  Future<Resource<List<QueryDocumentSnapshot<models.User>>>> fetchAstrologers(
+      GeoPoint place) async {
+    try {
+      QuerySnapshot<models.User> res = await _userCollection
+          .limit(_limit)
+          .where('astro', isEqualTo: true)
+          .get();
+      final data = res.docs;
+      return Success(data);
+    } on FirebaseException catch (e) {
+      return Failure<List<QueryDocumentSnapshot<models.User>>>(
+          e.message.toString());
+    } catch (e) {
+      return Failure<List<QueryDocumentSnapshot<models.User>>>(e.toString());
+    }
+  }
+
+  Future<Resource<List<QueryDocumentSnapshot<models.User>>>>
+      fetchMoreAstrologers(QueryDocumentSnapshot<models.User> last) async {
+    try {
+      final res = await _userCollection
+          .limit(_limit)
+          .where('astro', isEqualTo: true)
+          .startAfterDocument(last)
+          .get();
+      return Success(res.docs);
+    } on FirebaseException catch (e) {
+      return Failure<List<QueryDocumentSnapshot<models.User>>>(
+          e.message.toString());
+    } catch (e) {
+      return Failure<List<QueryDocumentSnapshot<models.User>>>(e.toString());
+    }
+  }
+
+  Future<Resource<ExtraInfo>> getExtraInfo(String uid) async {
+    try {
+      final res = await _extraInfoCollection(uid).get();
+      if (res.data() != null) return Success<ExtraInfo>(res.data()!);
+      return Failure<ExtraInfo>("null returned");
+    } on FirebaseException catch (e) {
+      return Failure<ExtraInfo>(e.message.toString());
+    } catch (e) {
+      return Failure<ExtraInfo>(e.toString());
+    }
+  }
+
+  Future<Resource<SetInfo>> setExtraInfo(ExtraInfo info, String uid) async {
+    try {
+      await _extraInfoCollection(uid).set(info, SetOptions(merge: true));
+      return Success<SetInfo>("set data");
+    } on FirebaseException catch (e) {
+      return Failure<SetInfo>(e.message.toString());
+    } catch (e) {
+      return Failure<SetInfo>(e.toString());
+    }
+  }
 }

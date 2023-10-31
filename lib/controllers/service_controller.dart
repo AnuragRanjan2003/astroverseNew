@@ -3,12 +3,10 @@ import 'dart:developer';
 import 'dart:io';
 
 import 'package:astroverse/models/service.dart';
-import 'package:astroverse/models/transaction.dart';
 import 'package:astroverse/repo/service_repo.dart';
 import 'package:astroverse/res/strings/backend_strings.dart';
 import 'package:astroverse/utils/resource.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_stripe/flutter_stripe.dart';
 import 'package:get/get.dart';

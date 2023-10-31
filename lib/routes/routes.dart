@@ -12,6 +12,7 @@ import 'package:astroverse/screens/otpScreen/otp_screen.dart';
 import 'package:astroverse/screens/phoneAuth/phone_auth_screen.dart';
 import 'package:astroverse/screens/post_full_screen/post_full_screen.dart';
 import 'package:astroverse/screens/profile/profile_screen.dart';
+import 'package:astroverse/screens/public_profile/public_profile_screen.dart';
 import 'package:astroverse/screens/upiscreen/enter_upi_screen.dart';
 import 'package:astroverse/screens/userLogin/user_login_screen.dart';
 import 'package:astroverse/screens/userSignUp/user_sign_up_screen.dart';
@@ -35,6 +36,7 @@ class Routes {
   static const createPostScreen = '/create_post_screen';
   static const martItemFullScreen = '/mart_item_full_screen';
   static const createServiceScreen = '/create_service_screen';
+  static const publicProfile = '/public_profile_screen';
 }
 
 class AppRoutes {
@@ -106,6 +108,10 @@ class AppRoutes {
         GetPage(
           name: Routes.createServiceScreen,
           page: () => const CreateServiceScreen(),
+        ),
+        GetPage(
+          name: Routes.publicProfile,
+          page: () => const PublicProfileScreen(),
         ),
       ];
 }

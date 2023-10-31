@@ -7,6 +7,7 @@ import 'package:astroverse/repo/auth_repo.dart';
 import 'package:astroverse/res/strings/backend_strings.dart';
 import 'package:astroverse/routes/routes.dart';
 import 'package:astroverse/utils/resource.dart';
+import 'package:astroverse/utils/zego_cloud_services.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -19,6 +20,7 @@ import 'package:image_picker/image_picker.dart';
 import 'main_controller.dart';
 
 class AuthController extends GetxController {
+  final _zegoService = ZegoCloudServices();
   final FirebaseAnalyticsObserver observer =
       FirebaseAnalyticsObserver(analytics: FirebaseAnalytics.instance);
 
@@ -48,7 +50,7 @@ class AuthController extends GetxController {
       final res = await _repo.checkForUserData(fUser.uid);
       if (res == true) {
         _analytics.logLogin(loginMethod: "remember me");
-        startListeningToUser(fUser.uid);
+        await startListeningToUser(fUser.uid);
         emailVerified.value = _repo.checkIfEmailVerified();
         if (emailVerified.value == true) {
           Get.toNamed(Routes.main);
@@ -62,14 +64,14 @@ class AuthController extends GetxController {
   loginUser(String email, String password,
       void Function(Resource<UserCredential>, bool) updateUI) {
     loading.value = true;
-    _repo.loginUser(email, password).then((value) {
+    _repo.loginUser(email, password).then((value) async {
       loading.value = false;
       updateUI(value, _repo.checkIfEmailVerified());
       if (value.isSuccess) {
         value = value as Success<UserCredential>;
         _analytics.logLogin(loginMethod: "Email");
         value.data.user ??
-            startListeningToUser(
+            await startListeningToUser(
               value.data.user!.uid,
             );
         error.value = null;
@@ -80,8 +82,9 @@ class AuthController extends GetxController {
     });
   }
 
-  startListeningToUser(String uid) {
+  startListeningToUser(String uid) async {
     userLoading.value = true;
+    await _zegoService.initCallInvitationService(uid, "You");
     _sub = _repo.getUserStream(uid).listen((event) {
       debugPrint("user:${event.data()}");
       userLoading.value = false;
@@ -191,12 +194,12 @@ class AuthController extends GetxController {
 
   void saveData(models.User user, void Function(Resource<void>) updateUI,
       UserCredential event) {
-    _repo.saveUserData(user).then((value) {
+    _repo.saveUserData(user).then((value) async {
       loading.value = false;
       updateUI(value);
       if (value is Success) {
         if (event.user != null) {
-          startListeningToUser(event.user!.uid);
+          await startListeningToUser(event.user!.uid);
         }
         error.value = null;
       } else {
@@ -257,7 +260,7 @@ class AuthController extends GetxController {
       if (value.isSuccess) {
         _analytics.logLogin(loginMethod: "Google");
         value = value as Success<UserCredential>;
-        _repo.checkForUserData(value.data.user!.uid).then((it) {
+        _repo.checkForUserData(value.data.user!.uid).then((it) async {
           if (it == false) {
             _showError(
               "No Record Found",
@@ -265,7 +268,7 @@ class AuthController extends GetxController {
             );
             GoogleSignIn().signOut();
           } else {
-            startListeningToUser(
+            await startListeningToUser(
               (value as Success<UserCredential>).data.user!.uid,
             );
             Get.offAndToNamed(Routes.main);
@@ -286,14 +289,15 @@ class AuthController extends GetxController {
             final cred = (value as Success<UserCredential>).data.user!;
             _analytics.logSignUp(signUpMethod: "Google");
             final user = models.User(
-                _parseValueForModel(cred.displayName),
-                _parseValueForModel(cred.email),
-                _parseValueForModel(cred.photoURL),
-                0,
-                _parseValueForModel(cred.uid),
-                astro,
-                _parseValueForModel(cred.phoneNumber),
-                "");
+              _parseValueForModel(cred.displayName),
+              _parseValueForModel(cred.email),
+              _parseValueForModel(cred.photoURL),
+              0,
+              _parseValueForModel(cred.uid),
+              astro,
+              _parseValueForModel(cred.phoneNumber),
+              "",
+            );
             onComplete(user);
           } else {
             _showError("Error", "user already exists");
@@ -340,11 +344,11 @@ class AuthController extends GetxController {
 
   _saveDataFromGoogle(models.User user, void Function(Resource<void>) updateUI,
       void Function() goTO) {
-    _repo.saveUserData(user).then((value) {
+    _repo.saveUserData(user).then((value) async {
       loading.value = false;
       updateUI(value);
       if (value is Success) {
-        startListeningToUser(user.uid);
+        await startListeningToUser(user.uid);
         goTO();
       } else {
         value = value as Failure;
@@ -355,8 +359,10 @@ class AuthController extends GetxController {
 
   void logOut() {
     _repo.logOut().then((value) {
-      Get.offAllNamed(Routes.ask);
-      _analytics.logEvent(name: "logout");
+      _zegoService.disposeCallInvitationService().then((value) {
+        Get.offAllNamed(Routes.ask);
+        _analytics.logEvent(name: "logout");
+      });
     });
   }
 

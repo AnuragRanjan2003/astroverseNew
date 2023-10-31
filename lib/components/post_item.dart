@@ -84,17 +84,19 @@ class PostItem extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
-                const Expanded(
+                Expanded(
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Icon(
+                      const Icon(
                         FontAwesomeIcons.comments,
                         size: 20,
                         color: ProjectColors.onBackground,
                       ),
-                      SizedBox(width: 10,),
-                      Text('12')
+                      const SizedBox(
+                        width: 10,
+                      ),
+                      Text(post.comments.toString())
                     ],
                   ),
                 ),
@@ -107,22 +109,26 @@ class PostItem extends StatelessWidget {
                         size: 20,
                         color: ProjectColors.onBackground,
                       ),
-                      const SizedBox(width: 10,),
+                      const SizedBox(
+                        width: 10,
+                      ),
                       Text(post.upVotes.toString())
                     ],
                   ),
                 ),
-                const Expanded(
+                Expanded(
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Icon(
-                        FontAwesomeIcons.thumbsDown,
+                      const Icon(
+                        FontAwesomeIcons.eye,
                         size: 20,
                         color: ProjectColors.onBackground,
                       ),
-                      SizedBox(width: 10,),
-                      Text('12')
+                      const SizedBox(
+                        width: 10,
+                      ),
+                      Text(post.views.toString())
                     ],
                   ),
                 ),

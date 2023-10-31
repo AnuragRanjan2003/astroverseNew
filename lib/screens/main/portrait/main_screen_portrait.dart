@@ -1,3 +1,4 @@
+import 'package:astroverse/components/astrologer_item.dart';
 import 'package:astroverse/components/call_invitation_page.dart';
 import 'package:astroverse/controllers/auth_controller.dart';
 import 'package:astroverse/models/user.dart';
@@ -5,6 +6,7 @@ import 'package:astroverse/res/colors/project_colors.dart';
 import 'package:astroverse/res/textStyles/text_styles.dart';
 import 'package:astroverse/routes/routes.dart';
 import 'package:astroverse/screens/mart_screen/mart_screen.dart';
+import 'package:astroverse/screens/peopleScreen/portrait/people_screen_portrait.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
@@ -45,8 +47,8 @@ class MainScreenPortrait extends StatelessWidget {
         padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 20),
       ),
       GButton(
-        icon: Icons.home_outlined,
-        text: "Home",
+        icon: Icons.people_outline,
+        text: "Astrologers",
         iconColor: ProjectColors.onBackground,
         textStyle: TextStylesLight().coloredSmallThick(Colors.lightBlue),
         padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 20),
@@ -93,11 +95,7 @@ class MainScreenPortrait extends StatelessWidget {
               children: [
                 const DiscoverScreen(color: ProjectColors.background),
                 const MartScreen(),
-                CallInvitationPage(
-                    sender: auth.user.value!,
-                    appId: int.parse(dotenv.get("ZEGOAPPID")),
-                    appSign: dotenv.get("ZEGOAPPSIGN"),
-                    receiver: receiver)
+                PeopleScreenPortrait(cons: cons)
               ],
             )),
       ),
@@ -132,7 +130,7 @@ class MainScreenPortrait extends StatelessWidget {
         ),
       ),
       onTap: () {
-        Get.toNamed(Routes.profile);
+        Get.toNamed(Routes.publicProfile);
       },
     );
   }
@@ -146,7 +144,7 @@ class MainScreenPortrait extends StatelessWidget {
             color: Colors.white,
           )),
       onPressed: () {
-        Get.toNamed(Routes.profile);
+       // Get.toNamed(Routes.profile);
       },
     );
   }
@@ -180,7 +178,7 @@ class MainScreenPortrait extends StatelessWidget {
                         }),
                       ),
                       onTap: () {
-                        Get.toNamed(Routes.profile);
+                        //Get.toNamed(Routes.publicProfile);
                       },
                     )
                   ],
@@ -201,7 +199,7 @@ class MainScreenPortrait extends StatelessWidget {
     } else if (i == 1) {
       return "Mart";
     }
-    return "Activity";
+    return "Astrologers";
   }
 
   Widget loadingShimmer(Widget child) {

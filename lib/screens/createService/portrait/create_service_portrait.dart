@@ -65,6 +65,8 @@ class CreateServicePortrait extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                const Text('Create\na Gig',style: TextStyle(fontSize: 30,color: ProjectColors.lightBlack , fontWeight: FontWeight.bold),),
+                const SizedBox(height: 8,),
                 Expanded(
                   child: SingleChildScrollView(
                     child: Column(

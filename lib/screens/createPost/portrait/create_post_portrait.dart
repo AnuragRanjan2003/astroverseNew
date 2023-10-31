@@ -33,11 +33,15 @@ class CreatePostPortrait extends StatelessWidget {
       body: SafeArea(
           child: SingleChildScrollView(
         child: Container(
-          padding: const EdgeInsets.only(top: GlobalDims.verticalPaddingExtra),
+          padding: const EdgeInsets.only(top: 10),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
+              const Padding(
+                padding: EdgeInsets.symmetric(horizontal: GlobalDims.horizontalPadding),
+                child: Text('Create\na Post' ,style: TextStyle(fontSize: 28 , fontWeight: FontWeight.bold),),
+              ),
               Padding(
                 padding: const EdgeInsets.symmetric(
                     horizontal: GlobalDims.horizontalPadding),

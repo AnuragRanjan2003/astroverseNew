@@ -1,8 +1,9 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:json_annotation/json_annotation.dart';
 
 part 'user.g.dart';
 
-@JsonSerializable()
+@JsonSerializable(anyMap: true)
 class User {
   final String name;
   final String email;
@@ -10,23 +11,26 @@ class User {
   String uid;
   int plan;
   final bool astro;
+  @JsonKey(fromJson: _fromJsonGeoPoint, toJson: _toJsonGeoPoint)
+  GeoPoint? location;
   String phNo;
   String upiID;
 
-  User(
-    this.name,
-    this.email,
-    this.image,
-    this.plan,
-    this.uid,
-    this.astro,
-    this.phNo,
-    this.upiID,
-  );
+  User(this.name, this.email, this.image, this.plan, this.uid, this.astro,
+      this.phNo, this.upiID,
+      {this.location});
 
   factory User.fromJson(json) => _$UserFromJson(json);
 
   Map<String, dynamic> toJson() => _$UserToJson(this);
+
+  static GeoPoint? _fromJsonGeoPoint(GeoPoint? geoPoint) {
+    return geoPoint;
+  }
+
+  static GeoPoint? _toJsonGeoPoint(GeoPoint? geoPoint) {
+    return geoPoint;
+  }
 
   @override
   String toString() {

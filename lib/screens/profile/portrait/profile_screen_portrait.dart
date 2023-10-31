@@ -1,13 +1,14 @@
 import 'package:astroverse/components/name_plate.dart';
 import 'package:astroverse/controllers/auth_controller.dart';
+import 'package:astroverse/models/user.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:shimmer/shimmer.dart';
 
 class ProfileScreenPortrait extends StatelessWidget {
   final BoxConstraints cons;
-
-  const ProfileScreenPortrait({super.key, required this.cons});
+  final User? user;
+  const ProfileScreenPortrait({super.key, required this.cons, this.user});
 
   @override
   Widget build(BuildContext context) {
@@ -17,7 +18,7 @@ class ProfileScreenPortrait extends StatelessWidget {
     return Scaffold(
       body: SingleChildScrollView(
         child: SafeArea(
-          child: Container(
+          child: SizedBox(
             width: wd,
             height: ht * 0.97,
             child: Column(

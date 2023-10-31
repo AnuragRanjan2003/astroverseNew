@@ -1,5 +1,4 @@
 import 'package:astroverse/models/comment.dart';
-import 'package:astroverse/models/post.dart';
 import 'package:flutter/material.dart';
 
 class CommentItem extends StatelessWidget {

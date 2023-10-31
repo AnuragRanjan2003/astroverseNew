@@ -1,8 +1,6 @@
 import 'package:astroverse/utils/resource.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-import '../models/post.dart';
-import '../models/post_save.dart';
 
 abstract class Postable<T,T2> {
   final CollectionReference<T> ref;

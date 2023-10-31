@@ -73,8 +73,9 @@ class MainController extends GetxController {
 
   void fetchMorePosts(List<String> genre) {
     log("loading more posts", name: "POST LIST");
-    if (morePostsToLoad.value == false || postList.length >= _maxPostLimit)
+    if (morePostsToLoad.value == false || postList.length >= _maxPostLimit) {
       return;
+    }
     loadingMorePosts.value = true;
 
     _postRepo.fetchMorePost(lastPost.value!, genre).then((value) {

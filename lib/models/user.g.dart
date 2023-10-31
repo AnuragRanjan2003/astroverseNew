@@ -6,7 +6,7 @@ part of 'user.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-User _$UserFromJson(Map<String, dynamic> json) => User(
+User _$UserFromJson(Map json) => User(
       json['name'] as String,
       json['email'] as String,
       json['image'] as String,
@@ -15,6 +15,7 @@ User _$UserFromJson(Map<String, dynamic> json) => User(
       json['astro'] as bool,
       json['phNo'] as String,
       json['upiID'] as String,
+      location: User._fromJsonGeoPoint(json['location'] as GeoPoint?),
     );
 
 Map<String, dynamic> _$UserToJson(User instance) => <String, dynamic>{
@@ -24,6 +25,7 @@ Map<String, dynamic> _$UserToJson(User instance) => <String, dynamic>{
       'uid': instance.uid,
       'plan': instance.plan,
       'astro': instance.astro,
+      'location': User._toJsonGeoPoint(instance.location),
       'phNo': instance.phNo,
       'upiID': instance.upiID,
     };
