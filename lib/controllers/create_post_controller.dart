@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:astroverse/repo/post_repo.dart';
 import 'package:astroverse/utils/resource.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:uuid/uuid.dart';
@@ -15,17 +16,25 @@ class CreatePostController extends GetxController {
 
   void pickImage() async {
     final ip = ImagePicker();
-    final file = await ip.pickImage(source: ImageSource.gallery , imageQuality: 30);
+    final file =
+        await ip.pickImage(source: ImageSource.gallery, imageQuality: 30);
     image.value = file;
   }
 
-  void savePost(Post post, void Function(Resource<Post>) updateUI) {
+  void savePost(Post post, void Function(Resource<Post>) updateUI, String uid) {
     loading.value = true;
     if (image.value == null) {
       post.id = const Uuid().v4();
-      _postRepo.savePost(post).then((value) {
+      _postRepo.savePost(post).then((it) {
         loading.value = false;
-        updateUI(value);
+        if (it.isSuccess) {
+          _postRepo.updateExtraInfo(
+              {"posts": FieldValue.increment(1)}, uid).then((value) {
+            updateUI(it);
+          });
+        } else {
+          updateUI(it);
+        }
       });
     } else {
       post.id = const Uuid().v4();
@@ -34,11 +43,18 @@ class CreatePostController extends GetxController {
         if (value.isSuccess) {
           value = value as Success<String>;
           post.imageUrl = value.data;
-          _postRepo.savePost(post).then((value) {
+          _postRepo.savePost(post).then((it) {
             loading.value = false;
-            updateUI(value);
+            if (it.isSuccess) {
+              _postRepo.updateExtraInfo(
+                  {"posts": FieldValue.increment(1)}, uid).then((value) {
+                updateUI(it);
+              });
+            } else {
+              updateUI(it);
+            }
           });
-        }else{
+        } else {
           loading.value = false;
         }
       });

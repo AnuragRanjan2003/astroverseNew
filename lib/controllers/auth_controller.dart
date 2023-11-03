@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:developer';
 import 'dart:io';
 
+import 'package:astroverse/models/extra_info.dart';
 import 'package:astroverse/models/user.dart' as models;
 import 'package:astroverse/repo/auth_repo.dart';
 import 'package:astroverse/res/strings/backend_strings.dart';
@@ -41,6 +42,7 @@ class AuthController extends GetxController {
   Rx<int> resendTimer = 60.obs;
   Rx<int> astroPlanSelected = Rx(0);
   Rx<int> page = 0.obs;
+  Rxn<ExtraInfo> info = Rxn();
   final MainController _main = Get.put(MainController());
 
   @override
@@ -95,6 +97,19 @@ class AuthController extends GetxController {
       }
     });
   }
+
+  getExtraInfo(String uid){
+    _repo.getExtraInfo(uid).then((value) {
+      if(value.isSuccess){
+        value = value as Success<ExtraInfo>;
+        info.value = value.data;
+      }else{
+        info.value = null;
+      }
+    });
+  }
+
+
 
   createUserWithEmail(
       models.User user, String password, void Function(Resource) updateUI) {
@@ -298,7 +313,18 @@ class AuthController extends GetxController {
               _parseValueForModel(cred.phoneNumber),
               "",
             );
-            onComplete(user);
+            final info = ExtraInfo(
+                joiningDate: DateTime.now(),
+                lastActive: DateTime.now(),
+                servicesSold: 0,
+                posts: 0);
+            _repo.setExtraInfo(info, cred.uid).then((value) {
+              if (value.isSuccess) {
+                onComplete(user);
+              } else {
+                _showError("Error", (value as Failure<String>).error);
+              }
+            });
           } else {
             _showError("Error", "user already exists");
           }

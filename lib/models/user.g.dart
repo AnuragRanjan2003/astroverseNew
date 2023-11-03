@@ -16,6 +16,8 @@ User _$UserFromJson(Map json) => User(
       json['phNo'] as String,
       json['upiID'] as String,
       location: User._fromJsonGeoPoint(json['location'] as GeoPoint?),
+      points: json['points'] as int? ?? 0,
+      profileViews: json['profileViews'] as int? ?? 0,
     );
 
 Map<String, dynamic> _$UserToJson(User instance) => <String, dynamic>{
@@ -26,6 +28,8 @@ Map<String, dynamic> _$UserToJson(User instance) => <String, dynamic>{
       'plan': instance.plan,
       'astro': instance.astro,
       'location': User._toJsonGeoPoint(instance.location),
+      'points': instance.points,
+      'profileViews': instance.profileViews,
       'phNo': instance.phNo,
       'upiID': instance.upiID,
     };

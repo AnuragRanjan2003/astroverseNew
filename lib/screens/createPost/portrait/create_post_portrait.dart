@@ -39,8 +39,12 @@ class CreatePostPortrait extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
               const Padding(
-                padding: EdgeInsets.symmetric(horizontal: GlobalDims.horizontalPadding),
-                child: Text('Create\na Post' ,style: TextStyle(fontSize: 28 , fontWeight: FontWeight.bold),),
+                padding: EdgeInsets.symmetric(
+                    horizontal: GlobalDims.horizontalPadding),
+                child: Text(
+                  'Create\na Post',
+                  style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
+                ),
               ),
               Padding(
                 padding: const EdgeInsets.symmetric(
@@ -118,29 +122,8 @@ class CreatePostPortrait extends StatelessWidget {
                         lat: 0,
                         lng: 0,
                         authorName: auth.user.value!.name);
-                    controller.savePost(post, (p0) {
-                      if (p0.isSuccess) {
-                        log("posted", name: "POST");
-                        Get.snackbar(
-                          '',
-                          '',
-                          titleText: const Text(
-                            'posted successfully',
-                            style: TextStyle(color: Colors.lightBlue),
-                          ),
-                          messageText: const Text(
-                            'posted successfully',
-                            style: TextStyle(color: Colors.lightBlue),
-                          ),
-                          snackPosition: SnackPosition.BOTTOM,
-                          duration: const Duration(seconds: 3),
-                          backgroundColor: Colors.white,
-                          colorText: Colors.white,
-                        );
-                      } else {
-                        log((p0 as Failure<Post>).error, name: "POST");
-                      }
-                    });
+                    controller.savePost(
+                        post, (p0) => _updateUI(p0), auth.user.value!.uid);
                   },
                   padding: const EdgeInsets.symmetric(vertical: 15),
                   color: Colors.lightBlue,
@@ -162,5 +145,29 @@ class CreatePostPortrait extends StatelessWidget {
         ),
       )),
     );
+  }
+
+  _updateUI(Resource<Post> p0) {
+    if (p0.isSuccess) {
+      log("posted", name: "POST");
+      Get.snackbar(
+        '',
+        '',
+        titleText: const Text(
+          'posted successfully',
+          style: TextStyle(color: Colors.lightBlue),
+        ),
+        messageText: const Text(
+          'posted successfully',
+          style: TextStyle(color: Colors.lightBlue),
+        ),
+        snackPosition: SnackPosition.BOTTOM,
+        duration: const Duration(seconds: 3),
+        backgroundColor: Colors.white,
+        colorText: Colors.white,
+      );
+    } else {
+      log((p0 as Failure<Post>).error, name: "POST");
+    }
   }
 }

@@ -1,5 +1,3 @@
-
-
 import 'dart:io';
 
 import 'package:astroverse/db/db.dart';
@@ -16,7 +14,8 @@ class PostRepo {
 
   Future<Resource<Post>> savePost(Post post) async => await _db.savePost(post);
 
-  Future<Resource<String>> storePostImage(File file , String id) async => await _storage.storePostImage(file, id);
+  Future<Resource<String>> storePostImage(File file, String id) async =>
+      await _storage.storePostImage(file, id);
 
   Future<Resource<List<QueryDocumentSnapshot<Post>>>> fetchPostsByGenreAndPage(
           List<String> genre) async =>
@@ -29,11 +28,14 @@ class PostRepo {
   Future<Resource<int>> increaseVote(String id, String uid) async =>
       await _db.increaseVote(id, uid);
 
-  Future<Resource<int>> decreaseVote(String id , String uid) async =>
-      await _db.decreaseVote(id,uid);
+  Future<Resource<int>> decreaseVote(String id, String uid) async =>
+      await _db.decreaseVote(id, uid);
 
-     Stream<QuerySnapshot<PostSave>> upVotedPostStream(String uid ) =>
-      _db.upVotedPostsStream(uid );
+  Stream<QuerySnapshot<PostSave>> upVotedPostStream(String uid) =>
+      _db.upVotedPostsStream(uid);
 
-     Future<void> addPostView(String id) async => await _db.addPostView(id);
+  Future<void> addPostView(String id) async => await _db.addPostView(id);
+
+  Future<Resource<SetInfo>> updateExtraInfo(Map<String, dynamic> data, String uid) async =>
+      await _db.updateExtraInfo(uid, data);
 }

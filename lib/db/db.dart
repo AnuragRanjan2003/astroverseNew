@@ -16,6 +16,7 @@ import 'package:astroverse/utils/service_utils.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 typedef SetInfo = String;
+typedef Json = Map<String, dynamic>;
 
 class Database {
   static const int _limit = 2;
@@ -289,6 +290,28 @@ class Database {
       return Failure<SetInfo>(e.message.toString());
     } catch (e) {
       return Failure<SetInfo>(e.toString());
+    }
+  }
+
+  Future<Resource<SetInfo>> updateExtraInfo(String uid, Json data) async {
+    try {
+      await _extraInfoCollection(uid).update(data);
+      return Success<SetInfo>("done");
+    } on FirebaseException catch (e) {
+      return Failure<SetInfo>(e.message.toString());
+    } catch (e) {
+      return Failure<SetInfo>(e.toString());
+    }
+  }
+
+  Future<Resource<Json>> updateUser(Json data, String uid) async {
+    try {
+      await _userCollection.doc(uid).update(data);
+      return Success<Json>(data);
+    } on FirebaseException catch (e) {
+      return Failure<Json>(e.message.toString());
+    } catch (e) {
+      return Failure<Json>(e.toString());
     }
   }
 }

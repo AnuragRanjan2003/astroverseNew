@@ -1,5 +1,3 @@
-import 'package:astroverse/components/astrologer_item.dart';
-import 'package:astroverse/components/call_invitation_page.dart';
 import 'package:astroverse/controllers/auth_controller.dart';
 import 'package:astroverse/models/user.dart';
 import 'package:astroverse/res/colors/project_colors.dart';
@@ -9,7 +7,6 @@ import 'package:astroverse/screens/mart_screen/mart_screen.dart';
 import 'package:astroverse/screens/peopleScreen/portrait/people_screen_portrait.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:get/get.dart';
 import 'package:google_nav_bar/google_nav_bar.dart';
 import 'package:shimmer/shimmer.dart';
@@ -24,7 +21,7 @@ class MainScreenPortrait extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     var observer =
-    FirebaseAnalyticsObserver(analytics: FirebaseAnalytics.instance);
+        FirebaseAnalyticsObserver(analytics: FirebaseAnalytics.instance);
     final PageController pageController = PageController(initialPage: 0);
     final double wd = cons.maxWidth;
     final double ht = cons.maxHeight;
@@ -55,15 +52,8 @@ class MainScreenPortrait extends StatelessWidget {
       ),
     ];
 
-    final receiver = User(
-        "abcde",
-        '',
-        '',
-        1,
-        'qR0IiDisDnPxziZhyZtPrNJPPfC3',
-        false,
-        '',
-        '');
+    final receiver =
+        User("abcde", '', '', 1, 'qR0IiDisDnPxziZhyZtPrNJPPfC3', false, '', '');
 
     return Scaffold(
       backgroundColor: ProjectColors.background,
@@ -130,7 +120,10 @@ class MainScreenPortrait extends StatelessWidget {
         ),
       ),
       onTap: () {
-        Get.toNamed(Routes.publicProfile);
+        Get.toNamed(
+          Routes.publicProfile,
+          arguments: auth.user.value!,
+        );
       },
     );
   }
@@ -144,7 +137,7 @@ class MainScreenPortrait extends StatelessWidget {
             color: Colors.white,
           )),
       onPressed: () {
-       // Get.toNamed(Routes.profile);
+        // Get.toNamed(Routes.profile);
       },
     );
   }
@@ -183,8 +176,7 @@ class MainScreenPortrait extends StatelessWidget {
                     )
                   ],
                 ),
-                Obx(() =>
-                    Text(
+                Obx(() => Text(
                       _pageName(auth.page.value),
                       style: const TextStyle(
                           fontSize: 28, fontWeight: FontWeight.bold),

@@ -10,10 +10,14 @@ class ExtraInfo {
 
   @JsonKey(fromJson: _dateFromTimeStamp, toJson: _dateAsIs)
   final DateTime lastActive;
+
   final int servicesSold;
 
+  final int posts;
+
   ExtraInfo(
-      {required this.joiningDate,
+      {required this.posts,
+      required this.joiningDate,
       required this.lastActive,
       required this.servicesSold});
 

@@ -7,6 +7,7 @@ part of 'extra_info.dart';
 // **************************************************************************
 
 ExtraInfo _$ExtraInfoFromJson(Map json) => ExtraInfo(
+      posts: json['posts'] as int,
       joiningDate:
           ExtraInfo._dateFromTimeStamp(json['joiningDate'] as Timestamp),
       lastActive: ExtraInfo._dateFromTimeStamp(json['lastActive'] as Timestamp),
@@ -17,4 +18,5 @@ Map<String, dynamic> _$ExtraInfoToJson(ExtraInfo instance) => <String, dynamic>{
       'joiningDate': ExtraInfo._dateAsIs(instance.joiningDate),
       'lastActive': ExtraInfo._dateAsIs(instance.lastActive),
       'servicesSold': instance.servicesSold,
+      'posts': instance.posts,
     };
