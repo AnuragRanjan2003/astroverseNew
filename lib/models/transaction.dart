@@ -12,10 +12,10 @@ class Transaction {
   final String itemId;
   final String itemType;
   final double amount;
-  final String method;
+  final String orderId;
 
   Transaction(this.id, this.uid, this.date, this.itemId, this.itemType,
-      this.amount, this.method);
+      this.amount, this.orderId);
 
   factory Transaction.fromJson(json) => _$TransactionFromJson(json);
 

@@ -23,8 +23,6 @@ class MainController extends GetxController {
   Rxn<User> user = Rxn();
   StreamSubscription<DocumentSnapshot<String>>? likes;
 
-
-
   void setUser(User? user) {
     this.user.value = user;
     if (this.user.value != null) startReadingUpVotedPosts(this.user.value!.uid);
@@ -35,7 +33,7 @@ class MainController extends GetxController {
     likes?.cancel();
   }
 
-  void fetchPostsByGenreAndPage(List<String> genre , String uid) {
+  void fetchPostsByGenreAndPage(List<String> genre, String uid) {
     log("loading  posts", name: "POST LIST");
     if (lastPost.value == null) {
       log("null", name: "LP");
@@ -43,7 +41,7 @@ class MainController extends GetxController {
       log(lastPost.value!.data().toString(), name: "LP");
     }
     loadingMorePosts.value = true;
-    _postRepo.fetchPostsByGenreAndPage(genre,uid).then((value) {
+    _postRepo.fetchPostsByGenreAndPage(genre, uid).then((value) {
       loadingMorePosts.value = false;
       if (value.isSuccess) {
         value = value as Success<List<QueryDocumentSnapshot<Post>>>;
@@ -67,42 +65,45 @@ class MainController extends GetxController {
     });
   }
 
-  void fetchMorePosts(List<String> genre , String uid) {
+  void fetchMorePosts(List<String> genre, String uid) {
     log("loading more posts", name: "POST LIST");
     if (morePostsToLoad.value == false || postList.length >= _maxPostLimit) {
       return;
     }
     loadingMorePosts.value = true;
+    if (lastPost.value == null) {
+      fetchPostsByGenreAndPage(NewPageController.genresList, uid);
+    } else {
+      _postRepo.fetchMorePost(lastPost.value!, genre, uid).then((value) {
+        loadingMorePosts.value = false;
+        if (value.isSuccess) {
+          value = value as Success<List<QueryDocumentSnapshot<Post>>>;
+          List<Post> list = [];
 
-    _postRepo.fetchMorePost(lastPost.value!, genre , uid).then((value) {
-      loadingMorePosts.value = false;
-      if (value.isSuccess) {
-        value = value as Success<List<QueryDocumentSnapshot<Post>>>;
-        List<Post> list = [];
-
-        for (var s in value.data) {
-          if (s.exists) {
-            list.add(s.data());
-            lastPost.value = s;
+          for (var s in value.data) {
+            if (s.exists) {
+              list.add(s.data());
+              lastPost.value = s;
+            }
           }
+          log("${lastPost.value!.data()}", name: "IS NULL");
+          log(list.length.toString(), name: "GOT LIST SIZE");
+          log(list.toString(), name: "GOT LIST");
+          postList.addAll(list);
+          morePostsToLoad.value = list.isNotEmpty;
+          log(postList.length.toString(), name: "POST LIST SUCCESS");
+        } else {
+          value = value as Failure<List<QueryDocumentSnapshot<Post>>>;
+          log(value.error, name: "POST LIST FAILED");
         }
-        log("${lastPost.value!.data()}", name: "IS NULL");
-        log(list.length.toString(), name: "GOT LIST SIZE");
-        log(list.toString(), name: "GOT LIST");
-        postList.addAll(list);
-        morePostsToLoad.value = list.isNotEmpty;
-        log(postList.length.toString(), name: "POST LIST SUCCESS");
-      } else {
-        value = value as Failure<List<QueryDocumentSnapshot<Post>>>;
-        log(value.error, name: "POST LIST FAILED");
-      }
-    });
+      });
+    }
   }
 
-  void refreshPosts(List<String> genre , String uid) {
+  void refreshPosts(List<String> genre, String uid) {
     clearPosts();
     log(genre.toString(), name: "GENRES");
-    fetchPostsByGenreAndPage(genre , uid);
+    fetchPostsByGenreAndPage(genre, uid);
   }
 
   void increaseVote(String id, String uid, Function() onComplete) {

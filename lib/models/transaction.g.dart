@@ -13,7 +13,7 @@ Transaction _$TransactionFromJson(Map json) => Transaction(
       json['itemId'] as String,
       json['itemType'] as String,
       (json['amount'] as num).toDouble(),
-      json['method'] as String,
+      json['orderId'] as String,
     );
 
 Map<String, dynamic> _$TransactionToJson(Transaction instance) =>
@@ -24,5 +24,5 @@ Map<String, dynamic> _$TransactionToJson(Transaction instance) =>
       'itemId': instance.itemId,
       'itemType': instance.itemType,
       'amount': instance.amount,
-      'method': instance.method,
+      'orderId': instance.orderId,
     };

@@ -53,7 +53,6 @@ dependencies:
   location: ^5.0.3
   intl: ^0.18.1
   firebase_analytics: ^10.6.3
-  flutter_stripe: ^9.4.0
   flutter_dotenv: ^5.1.0
   http: ^1.1.0
   zego_uikit_signaling_plugin: ^2.5.2

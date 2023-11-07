@@ -20,6 +20,8 @@ class MartItemFullPortrait extends StatelessWidget {
     final AuthController auth = Get.find();
     sb.writeAll(item!.genre, ", ");
 
+    service.attachPaymentEventListeners(auth.user.value!, item);
+
     return Scaffold(
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -188,20 +190,28 @@ class MartItemFullPortrait extends StatelessWidget {
               final user = auth.user.value;
               return MaterialButton(
                 onPressed: () async {
-                  if (user == null) {
-                    return;
-                  } else {
-                    service.callOrderApi();
-                  }
+                  (user == null || service.paymentLoading.isTrue)
+                      ? null
+                      : service.makePayment(item, user.phNo, user.email);
                 },
                 color: const Color(0xff444040),
                 padding:
                     const EdgeInsets.symmetric(horizontal: 70, vertical: 15),
                 shape: const RoundedRectangleBorder(
                     borderRadius: BorderRadius.all(Radius.circular(30))),
-                child: Text("Buy for ₹ ${item.price.toInt()}",
-                    textAlign: TextAlign.center,
-                    style: const TextStyle(fontSize: 13, color: Colors.white)),
+                child: service.paymentLoading.isTrue
+                    ? const SizedBox(
+                        height: 20,
+                        width: 20,
+                        child: CircularProgressIndicator(
+                          color: Colors.white,
+                          strokeWidth: 2.0,
+                        ),
+                      )
+                    : Text("Buy for ₹ ${item.price.toInt()}",
+                        textAlign: TextAlign.center,
+                        style:
+                            const TextStyle(fontSize: 13, color: Colors.white)),
               );
             }),
           )

@@ -7,7 +7,6 @@ import 'package:firebase_app_check/firebase_app_check.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:flutter_stripe/flutter_stripe.dart';
 import 'package:get/get.dart';
 import 'package:zego_uikit_prebuilt_call/zego_uikit_prebuilt_call.dart';
 
@@ -17,9 +16,6 @@ void main() async {
   final app = await Firebase.initializeApp(
       options: DefaultFirebaseOptions.currentPlatform);
   await dotenv.load(fileName: '.env');
-  Stripe.publishableKey = dotenv.env["PUBLISHABLEKEY"]!;
-
-  await Stripe.instance.applySettings();
   await FirebaseAppCheck.instance
       .activate(androidProvider: AndroidProvider.playIntegrity);
   final analytics = FirebaseAnalytics.instanceFor(app: app);

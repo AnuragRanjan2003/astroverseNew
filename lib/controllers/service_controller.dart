@@ -1,23 +1,24 @@
-import 'dart:convert';
 import 'dart:developer';
 import 'dart:io';
 
 import 'package:astroverse/models/service.dart';
+import 'package:astroverse/models/transaction.dart' as t;
+import 'package:astroverse/models/user.dart';
 import 'package:astroverse/repo/service_repo.dart';
 import 'package:astroverse/res/strings/backend_strings.dart';
 import 'package:astroverse/utils/env_vars.dart';
+import 'package:astroverse/utils/razor_pay_utils.dart';
 import 'package:astroverse/utils/resource.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:flutter_stripe/flutter_stripe.dart';
 import 'package:get/get.dart';
-import 'package:http/http.dart' as http;
 import 'package:image_picker/image_picker.dart';
 import 'package:razorpay_flutter/razorpay_flutter.dart';
 import 'package:uuid/uuid.dart';
 
 const tag = "SERVICE";
-typedef json = Map<String , dynamic>;
+
+typedef Json = Map<String, dynamic>;
 
 class ServiceController extends GetxController {
   final _repo = ServiceRepo();
@@ -36,71 +37,78 @@ class ServiceController extends GetxController {
   Rx<int> selectedChip = Rx(-1);
   Rx<int> loading = 0.obs;
   RxString searchText = "".obs;
+  RxBool paymentLoading = false.obs;
+
+  final razorPayUtils = RazorPayUtils();
 
   final _razorPay = Razorpay();
 
-
-  void _handlePaymentSuccess(PaymentSuccessResponse response) {
+  void _handlePaymentSuccess(
+      PaymentSuccessResponse response, User user, Service item) async {
+    paymentLoading.value = false;
     log("success", name: "RAZOR");
+    final trans = t.Transaction(response.paymentId.toString(), user.uid,
+        DateTime.now(), item.id, item.genre[0], item.price, response.orderId!);
+    final res = await _repo.addTransaction(trans);
+    if (res is Success<void>) {
+      log("transaction recorder", name: "TRANSACTION");
+    } else {
+      res as Failure<void>;
+      log("error", name: "TRANSACTION");
+    }
   }
 
   void _handlePaymentError(PaymentFailureResponse response) {
+    paymentLoading.value = false;
     log("fail", name: "RAZOR");
   }
 
   void _handleExternalWallet(ExternalWalletResponse response) {
+    paymentLoading.value = false;
     log("wallet", name: "RAZOR");
   }
 
-  @override
-  void onInit() {
-    _razorPay.on(Razorpay.EVENT_PAYMENT_SUCCESS, _handlePaymentSuccess);
-    _razorPay.on(Razorpay.EVENT_PAYMENT_ERROR, _handlePaymentError);
-    _razorPay.on(Razorpay.EVENT_EXTERNAL_WALLET, _handleExternalWallet);
-    _razorPay.on(Razorpay.EVENT_EXTERNAL_WALLET, _handleExternalWallet);
-  }
 
   @override
   void onClose() {
     _razorPay.clear();
   }
 
-  callOrderApi() async {
-    final key = dotenv.get(EnvVars.razorPayKey);
-    final secret = dotenv.get(EnvVars.razorPaySecret);
-    final basicAuth = 'Basic ${base64Encode(utf8.encode('$key:$secret'))}';
-    final order  = {
-      "amount":100,
-      "currency":"INR",
-      "receipt": "rcptid_1",
-    };
-    
-    final res = await http.post(Uri.https("api.razorpay.com","v1/orders"),headers: {
-      "Content-Type":"application/json",
-      "authorization":basicAuth
-    },body: jsonEncode(order));
-
-    if(res.statusCode==200){
-      final json = jsonDecode(res.body);
-      log(json["id"] , name: "ORDER ID");
-      openGateWay(json["id"]);
-    }
-
+  attachPaymentEventListeners(User user , Service item){
+    _razorPay.on(Razorpay.EVENT_PAYMENT_SUCCESS,(p0)=> _handlePaymentSuccess(p0,user,item));
+    _razorPay.on(Razorpay.EVENT_PAYMENT_ERROR, _handlePaymentError);
+    _razorPay.on(Razorpay.EVENT_EXTERNAL_WALLET, _handleExternalWallet);
+    _razorPay.on(Razorpay.EVENT_EXTERNAL_WALLET, _handleExternalWallet);
   }
 
-  void openGateWay(String orderId) {
-    final key =  dotenv.get(EnvVars.razorPayKey);
-    final json options = {
-      'key': key,
-      'amount': 100,
-      'order_id':orderId,
-      'currency':'INR',
-      'name': 'Acme Corp.',
-      'description': 'Fine T-Shirt',
-      'prefill': {'contact': '8936887652', 'email': 'test@razorpay.com'}
-    };
+  Future<Resource<Json>> callOrderApi(Service item) async {
+    final key = dotenv.get(EnvVars.razorPayKey);
+    final secret = dotenv.get(EnvVars.razorPaySecret);
+    final order =
+        RazorPayUtils.createOrderBody(item.price.toInt(), 'INR');
+    final header = RazorPayUtils.createOrderAuthorizationHeader(key, secret);
+    return await razorPayUtils.createOrder(header, order);
+  }
 
+  void openGateWay(Json options) {
     _razorPay.open(options);
+  }
+
+  void makePayment(Service item, String phNo, String email) async {
+    paymentLoading.value = true;
+    final key = dotenv.get(EnvVars.razorPayKey);
+    final response = await callOrderApi(item);
+    if (response.isSuccess) {
+      response as Success<Json>;
+      final orderId = response.data["id"];
+      final options = RazorPayUtils.createOptions(
+          key, orderId, (item.price * 100).toInt(), 'buying item', phNo, email);
+      openGateWay(options);
+    } else {
+      paymentLoading.value = false;
+      response as Failure<Json>;
+      Get.snackbar('fail', response.error);
+    }
   }
 
   selectImage() async {
@@ -257,43 +265,6 @@ class ServiceController extends GetxController {
     } else {
       value = value as Failure<List<QueryDocumentSnapshot<Service>>>;
       log(value.error, name: "SERVICE LIST FAILED");
-    }
-  }
-
-  Future<void> makePayment(
-      Service item, Function(String) onError, String uid) async {
-    try {
-      final body = {
-        'amount': "${(item.price * 100).toInt()}",
-        'currency': 'INR'
-      };
-
-      final res = await http.post(
-          Uri.parse('https://api.stripe.com/v1/payment_intents'),
-          body: body,
-          headers: {
-            'Authorization': 'Bearer ${dotenv.env["SECRETKEY"]}',
-            'Content-type': 'application/x-www-form-urlencoded',
-          });
-      final Map<String, dynamic> intent = jsonDecode(res.body.toString());
-
-      await Stripe.instance.initPaymentSheet(
-          paymentSheetParameters: SetupPaymentSheetParameters(
-              paymentIntentClientSecret: intent["client_secret"],
-              merchantDisplayName: 'Astroverse',
-              googlePay: const PaymentSheetGooglePay(
-                  merchantCountryCode: 'GB', testEnv: true)));
-
-      try {
-        Stripe.instance
-            .presentPaymentSheet(options: const PaymentSheetPresentOptions());
-      } on StripeException catch (e) {
-        onError(e.toString());
-      } on StripeConfigException catch (e) {
-        onError(e.message);
-      }
-    } catch (e) {
-      onError(e.toString());
     }
   }
 }
