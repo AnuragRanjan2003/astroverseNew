@@ -10,9 +10,11 @@ class AstrologerController extends GetxController {
   Rxn<QueryDocumentSnapshot<User>> lastDocument = Rxn();
   RxBool moreUsers = true.obs;
   RxString searchText = RxString("");
+  Rx<bool> nothingToShow = false.obs;
+  Rx<bool> loadingMore = false.obs;
 
-  void fetchAstrologers(GeoPoint geoPoint) {
-    _repo.fetchAstrologer(geoPoint).then((value) {
+  void fetchAstrologers(GeoPoint geoPoint, String uid) {
+    _repo.fetchAstrologer(geoPoint, uid).then((value) {
       if (value.isSuccess) {
         value as Success<List<QueryDocumentSnapshot<User>>>;
         final list = <User>[];
@@ -27,21 +29,22 @@ class AstrologerController extends GetxController {
     });
   }
 
-  void fetchMoreAstrologers(GeoPoint geoPoint) {
-    if (lastDocument.value == null) fetchAstrologers(geoPoint);
+  void fetchMoreAstrologers(GeoPoint geoPoint, String uid) {
+    if (lastDocument.value == null) fetchAstrologers(geoPoint, uid);
     final last = lastDocument.value!;
-    _repo.fetchMoreAstrologers(last).then((value) {
+    loadingMore.value = true;
+    _repo.fetchMoreAstrologers(last, uid).then((value) {
+      loadingMore.value = false;
       if (value.isSuccess) {
         value as Success<List<QueryDocumentSnapshot<User>>>;
         final list = <User>[];
         for (var it in value.data) {
           list.add(it.data());
         }
-        list.addAll(list);
-        if(value.data.isNotEmpty) lastDocument.value = value.data.last;
+        moreUsers.value = list.isNotEmpty;
+        this.list.addAll(list);
+        if (value.data.isNotEmpty) lastDocument.value = value.data.last;
       } else {}
     });
   }
-
-
 }

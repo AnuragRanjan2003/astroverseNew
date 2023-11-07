@@ -121,7 +121,7 @@ class MainScreenPortrait extends StatelessWidget {
       ),
       onTap: () {
         Get.toNamed(
-          Routes.publicProfile,
+          Routes.profile,
           arguments: auth.user.value!,
         );
       },

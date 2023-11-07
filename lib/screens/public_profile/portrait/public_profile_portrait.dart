@@ -1,13 +1,16 @@
 import 'package:astroverse/components/person_items.dart';
 import 'package:astroverse/components/person_posts.dart';
 import 'package:astroverse/controllers/public_profile_controller.dart';
+import 'package:astroverse/models/extra_info.dart';
 import 'package:astroverse/models/user.dart';
 import 'package:astroverse/res/img/images.dart';
 import 'package:astroverse/res/textStyles/text_styles.dart';
+import 'package:astroverse/utils/num_parser.dart';
 import 'package:astroverse/utils/zego_cloud_services.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
+import 'package:shimmer/shimmer.dart';
 
 class PublicProfilePortrait extends StatelessWidget {
   final BoxConstraints cons;
@@ -21,6 +24,9 @@ class PublicProfilePortrait extends StatelessWidget {
     final PublicProfileController public = Get.find();
     final zegoService = ZegoCloudServices();
     final ht = cons.maxHeight;
+    public.getExtraInfo(user.uid);
+    public.updateProfileViews(user.uid);
+
 
     return DefaultTabController(
       length: 2,
@@ -31,9 +37,7 @@ class PublicProfilePortrait extends StatelessWidget {
           child: Row(
             children: [
               Expanded(
-                  flex: 7,
-                  child: zegoService.callButton(
-                      user.uid, user.name)),
+                  flex: 7, child: zegoService.callButton(user.uid, user.name)),
               const Spacer(
                 flex: 1,
               ),
@@ -50,8 +54,8 @@ class PublicProfilePortrait extends StatelessWidget {
                       height: 80, // Set the height of the button
                       decoration: const BoxDecoration(
                         shape: BoxShape.circle, // Makes the container circular
-                        color:
-                            Colors.lightBlue, // Set the background color of the button
+                        color: Colors
+                            .lightBlue, // Set the background color of the button
                       ),
                       child: const Center(
                           child: Icon(
@@ -85,11 +89,21 @@ class PublicProfilePortrait extends StatelessWidget {
                   const SizedBox(
                     height: 15,
                   ),
-                  _buildDataChips(),
+                  Obx(() {
+                    if (public.info.value == null) {
+                      return _buildDataShimmerChips();
+                    }
+                    return _buildDataChips(
+                        public.info.value!, user.profileViews,user.points);
+                  }),
                   const SizedBox(
                     height: 25,
                   ),
-                  _buildDatesColumn(DateTime.now(), DateTime.now()),
+                  Obx(() {
+                    final info = public.info.value;
+                    if (info == null) return _buildDatesColumnShimmer();
+                    return _buildDatesColumn(info.joiningDate, info.lastActive);
+                  }),
                 ],
               ),
             ),
@@ -157,6 +171,63 @@ class PublicProfilePortrait extends StatelessWidget {
     );
   }
 
+  Container _buildDatesColumnShimmer() {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 12),
+      margin: const EdgeInsets.symmetric(horizontal: 15),
+      decoration: BoxDecoration(
+          borderRadius: const BorderRadius.all(Radius.circular(8)),
+          border: Border.all(width: 0.5)),
+      child: Column(
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              const Text(
+                "Joined on",
+                style: TextStyle(fontWeight: FontWeight.w500, fontSize: 13),
+              ),
+              Shimmer.fromColors(
+                baseColor: const Color(0xffd3d3d3),
+                highlightColor: const Color(0x0fe6e1e1),
+                child: Container(
+                  width: 80,
+                  height: 20,
+                  decoration: const BoxDecoration(
+                      color: Colors.grey,
+                      borderRadius: BorderRadius.all(Radius.circular(5))),
+                ),
+              )
+            ],
+          ),
+          const SizedBox(
+            height: 5,
+          ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              const Text(
+                "Last active on",
+                style: TextStyle(fontWeight: FontWeight.w500, fontSize: 13),
+              ),
+              Shimmer.fromColors(
+                baseColor: const Color(0xffd3d3d3),
+                highlightColor: const Color(0x0fe6e1e1),
+                child: Container(
+                  width: 80,
+                  height: 20,
+                  decoration: const BoxDecoration(
+                      color: Colors.grey,
+                      borderRadius: BorderRadius.all(Radius.circular(5))),
+                ),
+              )
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildTopBanner(double ht, String image) {
     return SizedBox(
       height: ht * 0.18 + _imageRadius,
@@ -189,15 +260,30 @@ class PublicProfilePortrait extends StatelessWidget {
     );
   }
 
-  Widget _buildDataChips() {
+  Widget _buildDataChips(ExtraInfo info, int views,int points) {
     return Wrap(
       direction: Axis.horizontal,
-      spacing: 5.0,
+      spacing: 8.0,
       runSpacing: 8.0,
       children: [
-        _buildChip(Icons.shopping_bag, 'sales', Colors.green),
-        _buildChip(Icons.data_exploration, 'posts', Colors.blue),
-        _buildChip(Icons.remove_red_eye, 'views', Colors.orangeAccent)
+        _buildChip(Icons.shopping_bag, NumberParser().toSocialMediaString(info.servicesSold), Colors.green),
+        _buildChip(Icons.data_exploration, NumberParser().toSocialMediaString(info.posts), Colors.blue),
+        _buildChip(Icons.remove_red_eye, NumberParser().toSocialMediaString(views), Colors.blueGrey),
+        _buildChip(Icons.monetization_on_outlined, NumberParser().toSocialMediaString(points), Colors.orange),
+      ],
+    );
+  }
+
+  Widget _buildDataShimmerChips() {
+    return Wrap(
+      direction: Axis.horizontal,
+      spacing: 8.0,
+      runSpacing: 8.0,
+      children: [
+        _buildChipShimmer(Icons.shopping_bag, Colors.green),
+        _buildChipShimmer(Icons.data_exploration, Colors.blue),
+        _buildChipShimmer(Icons.remove_red_eye, Colors.blueGrey),
+        _buildChipShimmer(Icons.monetization_on_outlined, Colors.orange),
       ],
     );
   }
@@ -228,4 +314,38 @@ class PublicProfilePortrait extends StatelessWidget {
       ),
     );
   }
+}
+
+Container _buildChipShimmer(IconData icon, Color color) {
+  return Container(
+    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
+    decoration: BoxDecoration(
+        borderRadius: const BorderRadius.all(Radius.circular(10)),
+        border: Border.all(width: 1, color: Colors.grey)),
+    child: IntrinsicWidth(
+      child: Row(
+        children: [
+          Icon(
+            icon,
+            size: 22,
+            color: color,
+          ),
+          const SizedBox(
+            width: 8,
+          ),
+          Shimmer.fromColors(
+            baseColor: const Color(0xffd3d3d3),
+            highlightColor: const Color(0x0fe6e1e1),
+            child: Container(
+              width: 30,
+              height: 20,
+              decoration: const BoxDecoration(
+                  color: Colors.grey,
+                  borderRadius: BorderRadius.all(Radius.circular(5))),
+            ),
+          )
+        ],
+      ),
+    ),
+  );
 }

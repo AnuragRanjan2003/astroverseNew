@@ -1,5 +1,6 @@
 import 'dart:developer';
 
+import 'package:astroverse/controllers/location_controller.dart';
 import 'package:astroverse/controllers/phone_auth_controller.dart';
 import 'package:astroverse/models/user.dart' as models;
 import 'package:astroverse/res/colors/project_colors.dart';
@@ -9,6 +10,7 @@ import 'package:astroverse/res/img/images.dart';
 import 'package:astroverse/res/textStyles/text_styles.dart';
 import 'package:astroverse/routes/routes.dart';
 import 'package:astroverse/screens/phoneAuth/portrait/phone_auth_portrait.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_otp_text_field/flutter_otp_text_field.dart';
@@ -26,6 +28,7 @@ class OtpScreenPortrait extends StatelessWidget {
   Widget build(BuildContext context) {
     final PhoneAuthController controller = Get.find();
     final AuthController auth = Get.find();
+    final LocationController location = Get.find();
     final wd = cons.maxWidth;
     final ht = cons.maxHeight;
     final PhoneDataParcel dataParcel = Get.arguments;
@@ -102,6 +105,14 @@ class OtpScreenPortrait extends StatelessWidget {
                                                     .toString());
                                         controller.checkOtp(cred, () {
                                           user!.phNo = number;
+                                          Get.dialog(const Text("using current location as your business location"));
+                                          final loc = location.location.value;
+                                          GeoPoint? geo;
+                                          if (loc != null) {
+                                            geo = GeoPoint(
+                                                loc.latitude!, loc.longitude!);
+                                          }
+                                          user!.location = geo;
                                           if (!google) {
                                             auth.createUserWithEmailForAstro(
                                                 user, auth.pass.value, (p0) {

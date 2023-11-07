@@ -21,8 +21,10 @@ class PeopleScreenPortrait extends StatelessWidget {
     final AuthController auth = Get.find();
     final TextEditingController search = TextEditingController();
     final AstrologerController astro = Get.put(AstrologerController());
+    if(auth.user.value!=null){
+      astro.fetchAstrologers(const GeoPoint(0, 0),auth.user.value!.uid);
+    }
 
-    astro.fetchAstrologers(const GeoPoint(0, 0));
 
     search.addListener(() {
       astro.searchText.value = search.value.text;
@@ -38,9 +40,10 @@ class PeopleScreenPortrait extends StatelessWidget {
         child: Column(
           children: [
             Padding(
-              padding: const EdgeInsets.symmetric(vertical: 10),
+              padding: const EdgeInsets.symmetric(vertical: 10,horizontal: 12),
               child: TextField(
                 controller: search,
+                style: const TextStyle(fontSize: 13),
                 decoration: const InputDecoration(
                     prefixIcon: Icon(Icons.search_sharp),
                     hintStyle: TextStyle(fontSize: 13),
@@ -61,7 +64,7 @@ class PeopleScreenPortrait extends StatelessWidget {
                             ? OutlinedButton(
                                 onPressed: () {
                                   astro.fetchMoreAstrologers(
-                                      const GeoPoint(0, 0));
+                                      const GeoPoint(0, 0),auth.user.value!.uid);
                                 },
                                 child: const Text(
                                   'load more',
@@ -69,9 +72,7 @@ class PeopleScreenPortrait extends StatelessWidget {
                                       color: ProjectColors.lightBlack),
                                 ))
                             : const SizedBox.shrink(),
-                    separatorBuilder: (context, index) => const SizedBox(
-                          height: 15,
-                        ),
+                    separatorBuilder: (context, index) => const Divider(),
                     itemCount: list.length + 1);
               },
             )),

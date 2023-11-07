@@ -1,7 +1,8 @@
 import 'package:astroverse/models/user.dart';
+import 'package:astroverse/res/colors/project_colors.dart';
 import 'package:astroverse/routes/routes.dart';
+import 'package:astroverse/utils/num_parser.dart';
 import 'package:flutter/material.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get/get.dart';
 
 class AstrologerItem extends StatelessWidget {
@@ -16,66 +17,64 @@ class AstrologerItem extends StatelessWidget {
         Get.toNamed(Routes.publicProfile, arguments: user);
       },
       child: Container(
-        height: 90,
-        decoration: const BoxDecoration(
-            color: Color(0x2ae1e0e0),
-            borderRadius: BorderRadius.all(Radius.circular(10))),
-        child: Row(
-          children: [
-            ClipRRect(
-                borderRadius: const BorderRadius.only(
-                  topLeft: Radius.circular(10),
-                  bottomLeft: Radius.circular(10),
-                ),
-                child: Image(
-                  image: NetworkImage(user.image),
-                  height: 90,
-                  width: 90,
-                  fit: BoxFit.cover,
-                )),
-            Expanded(
-                child: Padding(
-              padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 10),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 8),
+          decoration: const BoxDecoration(
+              borderRadius: BorderRadius.all(Radius.circular(10))),
+          child: Row(
+            children: [
+              CircleAvatar(
+                foregroundImage: NetworkImage(user.image),
+                radius: 24,
+              ),
+              const SizedBox(
+                width: 20,
+              ),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        user.name,
-                        style: const TextStyle(fontWeight: FontWeight.bold),
-                      ),
-                      user.plan == 4
-                          ? _featuredChip()
-                          : const SizedBox.shrink(),
-                    ],
+                  Text(
+                    user.name,
+                    style: const TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold,
+                        color: ProjectColors.lightBlack),
+                  ),
+                  const SizedBox(
+                    height: 8,
                   ),
                   Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
                     children: [
-                      _dataWidget(FontAwesomeIcons.eye, '250'),
-                      _dataWidget(FontAwesomeIcons.airbnb, '180'),
+                      _dataWidget(
+                          Icons.remove_red_eye,
+                          NumberParser().toSocialMediaString(user.profileViews),
+                          Colors.orange),
+                      const SizedBox(
+                        width: 20,
+                      ),
+                      _dataWidget(Icons.data_exploration_outlined, NumberParser().toSocialMediaString(user.points),
+                          Colors.blueAccent),
                     ],
                   )
                 ],
               ),
-            ))
-          ],
-        ),
-      ),
+            ],
+          )),
     );
   }
 
-  Widget _dataWidget(IconData icon, String text) {
+  Widget _dataWidget(IconData icon, String text, Color color) {
     return Wrap(
-      spacing: 5,
+      spacing: 4,
       children: [
         Icon(
           icon,
-          size: 15,
+          size: 17,
+          color: color,
         ),
-        Text(text)
+        Text(
+          text,
+          style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w500),
+        )
       ],
     );
   }

@@ -19,7 +19,7 @@ typedef SetInfo = String;
 typedef Json = Map<String, dynamic>;
 
 class Database {
-  static const int _limit = 2;
+  static const int _limit = 20;
   final _userCollection = FirebaseFirestore.instance
       .collection(BackEndStrings.userCollection)
       .withConverter<models.User>(
@@ -112,13 +112,13 @@ class Database {
 
   Future<Resource<List<QueryDocumentSnapshot<Service>>>>
       fetchServiceByGenreAndPage(List<String> genre, String uid) async =>
-          await ServiceUtils(uid).fetchByGenreAndPage(genre);
+          await ServiceUtils(uid).fetchByGenreAndPage(genre,uid);
 
   Future<Resource<List<QueryDocumentSnapshot<Service>>>> fetchMoreService(
           QueryDocumentSnapshot<Service> lastPost,
           List<String> genre,
           String uid) async =>
-      await ServiceUtils(uid).fetchMore(lastPost, genre);
+      await ServiceUtils(uid).fetchMore(lastPost, genre,uid);
 
   Future<Resource<int>> increaseServiceVote(String uid, String id) async =>
       await ServiceUtils(uid).like(id);
@@ -127,10 +127,12 @@ class Database {
       await ServiceUtils(uid).dislike(id);
 
   Future<Resource<List<QueryDocumentSnapshot<Post>>>> fetchPostsByGenreAndPage(
-      List<String> genre) async {
+      List<String> genre, String uid) async {
     try {
       QuerySnapshot<Post> res = await _postCollection
           .limit(_limit)
+          .where("authorId", isNotEqualTo: uid)
+          .orderBy("authorId")
           .orderBy("date", descending: true)
           .get();
       final data = res.docs;
@@ -143,10 +145,14 @@ class Database {
   }
 
   Future<Resource<List<QueryDocumentSnapshot<Post>>>> fetchMorePosts(
-      QueryDocumentSnapshot<Post> lastPost, List<String> genre) async {
+      QueryDocumentSnapshot<Post> lastPost,
+      List<String> genre,
+      String uid) async {
     try {
       final res = await _postCollection
           .limit(_limit)
+          .where("authorId", isNotEqualTo: uid)
+          .orderBy("authorId")
           .orderBy("date", descending: true)
           .startAfterDocument(lastPost)
           .get();
@@ -206,11 +212,11 @@ class Database {
 
   Future<Resource<List<QueryDocumentSnapshot<Comment>>>> fetchComments(
           String postId) async =>
-      await CommentUtils(postId).fetchByGenreAndPage([]);
+      await CommentUtils(postId).fetchByGenreAndPage([],"");
 
   Future<Resource<List<QueryDocumentSnapshot<Comment>>>> fetchMoreComments(
           String postId, QueryDocumentSnapshot<Comment> lastPost) async =>
-      await CommentUtils(postId).fetchMore(lastPost, []);
+      await CommentUtils(postId).fetchMore(lastPost, [],"");
 
   Future<Resource<Comment>> postComment(String postId, Comment post) async {
     await _postCollection
@@ -237,11 +243,12 @@ class Database {
           await _followingCollection(uid).doc(astrologer.uid).set(astrologer));
 
   Future<Resource<List<QueryDocumentSnapshot<models.User>>>> fetchAstrologers(
-      GeoPoint place) async {
+      String currentUid, GeoPoint place) async {
     try {
       QuerySnapshot<models.User> res = await _userCollection
           .limit(_limit)
           .where('astro', isEqualTo: true)
+          .where('uid', isNotEqualTo: currentUid)
           .get();
       final data = res.docs;
       return Success(data);
@@ -254,11 +261,13 @@ class Database {
   }
 
   Future<Resource<List<QueryDocumentSnapshot<models.User>>>>
-      fetchMoreAstrologers(QueryDocumentSnapshot<models.User> last) async {
+      fetchMoreAstrologers(
+          QueryDocumentSnapshot<models.User> last, String currentUid) async {
     try {
       final res = await _userCollection
           .limit(_limit)
           .where('astro', isEqualTo: true)
+          .where('uid', isNotEqualTo: currentUid)
           .startAfterDocument(last)
           .get();
       return Success(res.docs);

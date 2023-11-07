@@ -64,6 +64,8 @@ class AuthRepo {
           Map<String, dynamic> data, String uid) async =>
       await _db.updateExtraInfo(uid, data);
 
+  Future<Resource<Json>> updateUserInfo(Map<String,dynamic> data , String uid) async => await _db.updateUser(data, uid);
+
 
 
   Future<void> logOut() async => await _auth.logOut();

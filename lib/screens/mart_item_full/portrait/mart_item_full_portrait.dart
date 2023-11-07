@@ -1,3 +1,4 @@
+import 'package:astroverse/controllers/auth_controller.dart';
 import 'package:astroverse/controllers/service_controller.dart';
 import 'package:astroverse/models/service.dart';
 import 'package:astroverse/res/colors/project_colors.dart';
@@ -16,6 +17,7 @@ class MartItemFullPortrait extends StatelessWidget {
     final Service? item = Get.arguments;
     final sb = StringBuffer();
     final ServiceController service = Get.find();
+    final AuthController auth = Get.find();
     sb.writeAll(item!.genre, ", ");
 
     return Scaffold(
@@ -182,18 +184,26 @@ class MartItemFullPortrait extends StatelessWidget {
           ),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 10),
-            child: MaterialButton(
-              onPressed: () async {
-                await service.makePayment(item, (e) {});
-              },
-              color: const Color(0xff444040),
-              padding: const EdgeInsets.symmetric(horizontal: 70, vertical: 15),
-              shape: const RoundedRectangleBorder(
-                  borderRadius: BorderRadius.all(Radius.circular(30))),
-              child: Text("Buy for ₹ ${item.price.toInt()}",
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(fontSize: 13, color: Colors.white)),
-            ),
+            child: Obx(() {
+              final user = auth.user.value;
+              return MaterialButton(
+                onPressed: () async {
+                  if (user == null) {
+                    return;
+                  } else {
+                    service.callOrderApi();
+                  }
+                },
+                color: const Color(0xff444040),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 70, vertical: 15),
+                shape: const RoundedRectangleBorder(
+                    borderRadius: BorderRadius.all(Radius.circular(30))),
+                child: Text("Buy for ₹ ${item.price.toInt()}",
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(fontSize: 13, color: Colors.white)),
+              );
+            }),
           )
         ],
       ),

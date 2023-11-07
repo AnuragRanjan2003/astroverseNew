@@ -18,12 +18,12 @@ class PostRepo {
       await _storage.storePostImage(file, id);
 
   Future<Resource<List<QueryDocumentSnapshot<Post>>>> fetchPostsByGenreAndPage(
-          List<String> genre) async =>
-      await _db.fetchPostsByGenreAndPage(genre);
+          List<String> genre,String uid) async =>
+      await _db.fetchPostsByGenreAndPage(genre,uid);
 
   Future<Resource<List<QueryDocumentSnapshot<Post>>>> fetchMorePost(
-          QueryDocumentSnapshot<Post> lastPost, List<String> genre) async =>
-      await _db.fetchMorePosts(lastPost, genre);
+          QueryDocumentSnapshot<Post> lastPost, List<String> genre,String uid) async =>
+      await _db.fetchMorePosts(lastPost, genre,uid);
 
   Future<Resource<int>> increaseVote(String id, String uid) async =>
       await _db.increaseVote(id, uid);

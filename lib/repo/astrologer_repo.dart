@@ -7,10 +7,10 @@ class AstrologerRepo {
   final _db = Database();
 
   Future<Resource<List<QueryDocumentSnapshot<User>>>> fetchAstrologer(
-          GeoPoint geoPoint) async =>
-      await _db.fetchAstrologers(geoPoint);
+          GeoPoint geoPoint, String currentUid) async =>
+      await _db.fetchAstrologers(currentUid, geoPoint);
 
   Future<Resource<List<QueryDocumentSnapshot<User>>>> fetchMoreAstrologers(
-          QueryDocumentSnapshot<User> last) async =>
-      await _db.fetchMoreAstrologers(last);
+          QueryDocumentSnapshot<User> last, String currentUid) async =>
+      await _db.fetchMoreAstrologers(last, currentUid);
 }

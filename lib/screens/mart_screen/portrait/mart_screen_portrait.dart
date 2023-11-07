@@ -22,9 +22,13 @@ class MartScreenPortrait extends StatelessWidget {
     final AuthController auth = Get.find();
     final ServiceController service = Get.find();
     service.fetchServiceByGenreAndPage([], auth.user.value!.uid, (e) {});
-
+    final searchController = TextEditingController(text: "");
     service.selectedItem.listen((p0) {
       log(p0.toString(), name: "on select");
+    });
+
+    searchController.addListener(() {
+      service.searchText.value = searchController.value.text;
     });
 
     return Scaffold(
@@ -45,13 +49,19 @@ class MartScreenPortrait extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 10),
           child: Column(
             children: [
-              const TextField(
-                decoration: InputDecoration(
-                    prefixIcon: Icon(Icons.search_sharp),
-                    contentPadding: EdgeInsets.symmetric(vertical: 10),
-                    border: OutlineInputBorder(
-                        borderRadius: BorderRadius.all(Radius.circular(15))),
-                    hintText: "Search"),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 10),
+                child: TextField(
+                  controller: searchController,
+                  style: const TextStyle(fontSize: 13),
+                  decoration: const InputDecoration(
+                      prefixIcon: Icon(Icons.search_sharp),
+                      contentPadding: EdgeInsets.symmetric(vertical: 10),
+                      border: OutlineInputBorder(
+                          borderRadius: BorderRadius.all(Radius.circular(15))),
+                      hintStyle: TextStyle(fontSize: 13),
+                      hintText: "Search in Mart"),
+                ),
               ),
               const SizedBox(
                 height: 10,
@@ -91,13 +101,17 @@ class MartScreenPortrait extends StatelessWidget {
               Expanded(
                 child: RefreshIndicator(
                   onRefresh: () async {
-                    await service.onRefresh([], auth.user.value!.uid, (p0) => null);
+                    await service
+                        .onRefresh([], auth.user.value!.uid, (p0) => null);
                     return;
                   },
                   child: Obx(() {
                     var list = <Service>[];
-
+                    final st = service.searchText.value;
                     for (var element in service.serviceList) {
+                      if ((!element.title.contains(st)) && st.isNotEmpty) {
+                        continue;
+                      }
                       if (service.selectedItem.value == 0) {
                         list.add(element);
                       } else if (element.genre.contains(

@@ -23,11 +23,7 @@ class MainController extends GetxController {
   Rxn<User> user = Rxn();
   StreamSubscription<DocumentSnapshot<String>>? likes;
 
-  @override
-  void onInit() {
-    super.onInit();
-    fetchPostsByGenreAndPage(NewPageController.genresList);
-  }
+
 
   void setUser(User? user) {
     this.user.value = user;
@@ -39,7 +35,7 @@ class MainController extends GetxController {
     likes?.cancel();
   }
 
-  void fetchPostsByGenreAndPage(List<String> genre) {
+  void fetchPostsByGenreAndPage(List<String> genre , String uid) {
     log("loading  posts", name: "POST LIST");
     if (lastPost.value == null) {
       log("null", name: "LP");
@@ -47,7 +43,7 @@ class MainController extends GetxController {
       log(lastPost.value!.data().toString(), name: "LP");
     }
     loadingMorePosts.value = true;
-    _postRepo.fetchPostsByGenreAndPage(genre).then((value) {
+    _postRepo.fetchPostsByGenreAndPage(genre,uid).then((value) {
       loadingMorePosts.value = false;
       if (value.isSuccess) {
         value = value as Success<List<QueryDocumentSnapshot<Post>>>;
@@ -71,14 +67,14 @@ class MainController extends GetxController {
     });
   }
 
-  void fetchMorePosts(List<String> genre) {
+  void fetchMorePosts(List<String> genre , String uid) {
     log("loading more posts", name: "POST LIST");
     if (morePostsToLoad.value == false || postList.length >= _maxPostLimit) {
       return;
     }
     loadingMorePosts.value = true;
 
-    _postRepo.fetchMorePost(lastPost.value!, genre).then((value) {
+    _postRepo.fetchMorePost(lastPost.value!, genre , uid).then((value) {
       loadingMorePosts.value = false;
       if (value.isSuccess) {
         value = value as Success<List<QueryDocumentSnapshot<Post>>>;
@@ -103,10 +99,10 @@ class MainController extends GetxController {
     });
   }
 
-  void refreshPosts(List<String> genre) {
+  void refreshPosts(List<String> genre , String uid) {
     clearPosts();
     log(genre.toString(), name: "GENRES");
-    fetchPostsByGenreAndPage(genre);
+    fetchPostsByGenreAndPage(genre , uid);
   }
 
   void increaseVote(String id, String uid, Function() onComplete) {

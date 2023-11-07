@@ -52,6 +52,8 @@ class AuthController extends GetxController {
       final res = await _repo.checkForUserData(fUser.uid);
       if (res == true) {
         _analytics.logLogin(loginMethod: "remember me");
+        await _repo.updateExtraInfo(
+            {"lastActive": FieldValue.serverTimestamp()}, fUser.uid);
         await startListeningToUser(fUser.uid);
         emailVerified.value = _repo.checkIfEmailVerified();
         if (emailVerified.value == true) {
@@ -72,10 +74,15 @@ class AuthController extends GetxController {
       if (value.isSuccess) {
         value = value as Success<UserCredential>;
         _analytics.logLogin(loginMethod: "Email");
-        value.data.user ??
-            await startListeningToUser(
-              value.data.user!.uid,
-            );
+
+        if (value.data.user != null) {
+          await _repo.updateExtraInfo(
+              {"lastActive": FieldValue.serverTimestamp()},
+              value.data.user!.uid);
+          await startListeningToUser(
+            value.data.user!.uid,
+          );
+        }
         error.value = null;
       } else {
         value = value as Failure<UserCredential>;
@@ -98,18 +105,16 @@ class AuthController extends GetxController {
     });
   }
 
-  getExtraInfo(String uid){
+  getExtraInfo(String uid) {
     _repo.getExtraInfo(uid).then((value) {
-      if(value.isSuccess){
+      if (value.isSuccess) {
         value = value as Success<ExtraInfo>;
         info.value = value.data;
-      }else{
+      } else {
         info.value = null;
       }
     });
   }
-
-
 
   createUserWithEmail(
       models.User user, String password, void Function(Resource) updateUI) {
@@ -130,9 +135,16 @@ class AuthController extends GetxController {
               debugPrint("image uploaded");
               user.image = (task as Success<String>).data;
               saveData(user, (p0) {
-                _analytics.logSignUp(signUpMethod: "Email");
-                loading.value = false;
-                updateUI(p0);
+                final info = ExtraInfo(
+                    posts: 0,
+                    joiningDate: DateTime.now(),
+                    lastActive: DateTime.now(),
+                    servicesSold: 0);
+                _repo.setExtraInfo(info, user.uid).then((value) {
+                  _analytics.logSignUp(signUpMethod: "Email");
+                  loading.value = false;
+                  updateUI(p0);
+                });
               }, (event as Success<UserCredential>).data);
             } else {
               loading.value = false;
@@ -141,9 +153,16 @@ class AuthController extends GetxController {
         } else {
           user.image = BackEndStrings.defaultImage;
           saveData(user, (p0) {
-            loading.value = false;
-            _analytics.logSignUp(signUpMethod: "Email");
-            updateUI(p0);
+            final info = ExtraInfo(
+                posts: 0,
+                joiningDate: DateTime.now(),
+                lastActive: DateTime.now(),
+                servicesSold: 0);
+            _repo.setExtraInfo(info, user.uid).then((value) {
+              _analytics.logSignUp(signUpMethod: "Email");
+              loading.value = false;
+              updateUI(p0);
+            });
           }, event.data);
         }
       } else {
@@ -183,8 +202,16 @@ class AuthController extends GetxController {
               user.image = (task as Success<String>).data;
               saveData(user, (p0) {
                 _analytics.logEvent(name: "astro signup Email");
-                loading.value = false;
-                updateUI(p0);
+                final info = ExtraInfo(
+                    posts: 0,
+                    joiningDate: DateTime.now(),
+                    lastActive: DateTime.now(),
+                    servicesSold: 0);
+                _repo.setExtraInfo(info, user.uid).then((value) {
+                  _analytics.logSignUp(signUpMethod: "Email");
+                  loading.value = false;
+                  updateUI(p0);
+                });
               }, (event as Success<UserCredential>).data);
             } else {
               loading.value = false;
@@ -194,8 +221,16 @@ class AuthController extends GetxController {
           user.image = BackEndStrings.defaultImage;
           saveData(user, (p0) {
             _analytics.logEvent(name: "astro signup Email");
-            loading.value = false;
-            updateUI(p0);
+            final info = ExtraInfo(
+                posts: 0,
+                joiningDate: DateTime.now(),
+                lastActive: DateTime.now(),
+                servicesSold: 0);
+            _repo.setExtraInfo(info, user.uid).then((value) {
+              _analytics.logSignUp(signUpMethod: "Email");
+              loading.value = false;
+              updateUI(p0);
+            });
           }, event.data);
         }
       } else {
@@ -295,7 +330,8 @@ class AuthController extends GetxController {
     });
   }
 
-  signUpWithGoogle(void Function(models.User) onComplete, bool astro) {
+  signUpWithGoogle(
+      void Function(models.User) onComplete, bool astro, GeoPoint? loc) {
     _repo.signInWithGoogle().then((value) {
       if (value.isSuccess) {
         value = value as Success<UserCredential>;
@@ -308,6 +344,9 @@ class AuthController extends GetxController {
               _parseValueForModel(cred.email),
               _parseValueForModel(cred.photoURL),
               0,
+              location: loc,
+              points: 0,
+              profileViews: 0,
               _parseValueForModel(cred.uid),
               astro,
               _parseValueForModel(cred.phoneNumber),

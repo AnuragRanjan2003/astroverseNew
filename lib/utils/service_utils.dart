@@ -24,7 +24,7 @@ CollectionReference<SaveService> _usedServiceCollection(String uid) =>
           toFirestore: (value, options) => value.toJson(),
         );
 
-const _limit = 4;
+const _limit = 20;
 
 class ServiceUtils extends Postable<Service, SaveService> {
   String uid;
@@ -47,10 +47,14 @@ class ServiceUtils extends Postable<Service, SaveService> {
 
   @override
   Future<Resource<List<QueryDocumentSnapshot<Service>>>> fetchByGenreAndPage(
-      List<String> genre) async {
+      List<String> genre, String uid) async {
     try {
-      QuerySnapshot<Service> res =
-          await ref.limit(_limit).orderBy("date", descending: true).get();
+      QuerySnapshot<Service> res = await ref
+          .limit(_limit)
+          .where("authorId", isNotEqualTo: uid)
+          .orderBy("authorId")
+          .orderBy("date", descending: true)
+          .get();
       final data = res.docs;
       return Success(data);
     } on FirebaseException catch (e) {
@@ -76,10 +80,14 @@ class ServiceUtils extends Postable<Service, SaveService> {
 
   @override
   Future<Resource<List<QueryDocumentSnapshot<Service>>>> fetchMore(
-      QueryDocumentSnapshot<Service> lastPost, List<String> genre) async {
+      QueryDocumentSnapshot<Service> lastPost,
+      List<String> genre,
+      String uid) async {
     try {
       final res = await ref
           .limit(_limit)
+          .where("authorId", isNotEqualTo: uid)
+          .orderBy("authorId")
           .orderBy("date", descending: true)
           .startAfterDocument(lastPost)
           .get();

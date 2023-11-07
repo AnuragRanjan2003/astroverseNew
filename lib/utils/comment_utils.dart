@@ -30,7 +30,7 @@ class CommentUtils extends Postable<Comment, SaveComment> {
 
   @override
   Future<Resource<List<QueryDocumentSnapshot<Comment>>>> fetchByGenreAndPage(
-      List<String> genre) async {
+      List<String> genre , String uid) async {
     try {
       QuerySnapshot<Comment> res =
           await ref.limit(_limit).orderBy("date", descending: true).get();
@@ -46,7 +46,7 @@ class CommentUtils extends Postable<Comment, SaveComment> {
 
   @override
   Future<Resource<List<QueryDocumentSnapshot<Comment>>>> fetchMore(
-      QueryDocumentSnapshot<Comment> lastPost, List<String> genre) async {
+      QueryDocumentSnapshot<Comment> lastPost, List<String> genre , String uid) async {
     try {
       final res = await ref
           .limit(_limit)

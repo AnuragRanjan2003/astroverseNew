@@ -13,10 +13,10 @@ abstract class Postable<T,T2> {
   Future<Resource<T>> savePost(T post);
 
   Future<Resource<List<QueryDocumentSnapshot<T>>>> fetchByGenreAndPage(
-      List<String> genre);
+      List<String> genre , String uid);
 
   Future<Resource<List<QueryDocumentSnapshot<T>>>> fetchMore(
-      QueryDocumentSnapshot<T> lastPost, List<String> genre);
+      QueryDocumentSnapshot<T> lastPost, List<String> genre , String uid);
 
   Future<Resource<int>> like(String id);
 

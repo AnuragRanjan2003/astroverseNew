@@ -15,7 +15,6 @@ class MainScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final main = Get.put(MainController());
     final AuthController auth = Get.find();
-    Get.put(LocationController());
     main.setUser(auth.user.value);
     return Responsive(
         portrait: (cons) => MainScreenPortrait(cons: cons),

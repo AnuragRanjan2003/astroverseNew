@@ -1,3 +1,4 @@
+import 'package:astroverse/controllers/location_controller.dart';
 import 'package:astroverse/firebase_options.dart';
 import 'package:astroverse/res/colors/project_colors.dart';
 import 'package:astroverse/routes/routes.dart';
@@ -17,6 +18,7 @@ void main() async {
       options: DefaultFirebaseOptions.currentPlatform);
   await dotenv.load(fileName: '.env');
   Stripe.publishableKey = dotenv.env["PUBLISHABLEKEY"]!;
+
   await Stripe.instance.applySettings();
   await FirebaseAppCheck.instance
       .activate(androidProvider: AndroidProvider.playIntegrity);
@@ -39,6 +41,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     observer.analytics.logLogin(loginMethod: "gmail");
     analytics.logLogin(loginMethod: "Email");
+    Get.put(LocationController());
     return GetMaterialApp(
       title: 'Flutter Demo',
       navigatorKey: navigatorKey,

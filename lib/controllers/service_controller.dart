@@ -5,6 +5,7 @@ import 'dart:io';
 import 'package:astroverse/models/service.dart';
 import 'package:astroverse/repo/service_repo.dart';
 import 'package:astroverse/res/strings/backend_strings.dart';
+import 'package:astroverse/utils/env_vars.dart';
 import 'package:astroverse/utils/resource.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
@@ -12,9 +13,11 @@ import 'package:flutter_stripe/flutter_stripe.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 import 'package:image_picker/image_picker.dart';
+import 'package:razorpay_flutter/razorpay_flutter.dart';
 import 'package:uuid/uuid.dart';
 
 const tag = "SERVICE";
+typedef json = Map<String , dynamic>;
 
 class ServiceController extends GetxController {
   final _repo = ServiceRepo();
@@ -32,6 +35,73 @@ class ServiceController extends GetxController {
   Rx<bool> formValid = false.obs;
   Rx<int> selectedChip = Rx(-1);
   Rx<int> loading = 0.obs;
+  RxString searchText = "".obs;
+
+  final _razorPay = Razorpay();
+
+
+  void _handlePaymentSuccess(PaymentSuccessResponse response) {
+    log("success", name: "RAZOR");
+  }
+
+  void _handlePaymentError(PaymentFailureResponse response) {
+    log("fail", name: "RAZOR");
+  }
+
+  void _handleExternalWallet(ExternalWalletResponse response) {
+    log("wallet", name: "RAZOR");
+  }
+
+  @override
+  void onInit() {
+    _razorPay.on(Razorpay.EVENT_PAYMENT_SUCCESS, _handlePaymentSuccess);
+    _razorPay.on(Razorpay.EVENT_PAYMENT_ERROR, _handlePaymentError);
+    _razorPay.on(Razorpay.EVENT_EXTERNAL_WALLET, _handleExternalWallet);
+    _razorPay.on(Razorpay.EVENT_EXTERNAL_WALLET, _handleExternalWallet);
+  }
+
+  @override
+  void onClose() {
+    _razorPay.clear();
+  }
+
+  callOrderApi() async {
+    final key = dotenv.get(EnvVars.razorPayKey);
+    final secret = dotenv.get(EnvVars.razorPaySecret);
+    final basicAuth = 'Basic ${base64Encode(utf8.encode('$key:$secret'))}';
+    final order  = {
+      "amount":100,
+      "currency":"INR",
+      "receipt": "rcptid_1",
+    };
+    
+    final res = await http.post(Uri.https("api.razorpay.com","v1/orders"),headers: {
+      "Content-Type":"application/json",
+      "authorization":basicAuth
+    },body: jsonEncode(order));
+
+    if(res.statusCode==200){
+      final json = jsonDecode(res.body);
+      log(json["id"] , name: "ORDER ID");
+      openGateWay(json["id"]);
+    }
+
+  }
+
+  void openGateWay(String orderId) {
+    final key =  dotenv.get(EnvVars.razorPayKey);
+    final json options = {
+      'key': key,
+      'amount': 100,
+      'order_id':orderId,
+      'currency':'INR',
+      'name': 'Acme Corp.',
+      'description': 'Fine T-Shirt',
+      'prefill': {'contact': '8936887652', 'email': 'test@razorpay.com'}
+    };
+
+    _razorPay.open(options);
+  }
 
   selectImage() async {
     final img = await _imagePicker.pickImage(
@@ -84,40 +154,46 @@ class ServiceController extends GetxController {
     morePostsToLoad.value = true;
   }
 
-  fetchMoreServices(String uid, List<String> genre,
-      Function(List<Service>) onFetch) {
+  fetchMoreServices(
+      String uid, List<String> genre, Function(List<Service>) onFetch) {
     log("loading more posts", name: "POST LIST");
     if (morePostsToLoad.value == false || serviceList.length >= _maxPostLimit) {
       return;
     }
     loadingMorePosts.value = true;
-    _repo.fetchMorePost(lastPost.value!, genre, uid).then((value) {
-      loadingMorePosts.value = false;
-      if (value.isSuccess) {
-        value = value as Success<List<QueryDocumentSnapshot<Service>>>;
-        List<Service> list = [];
-        for (var s in value.data) {
-          if (s.exists) {
-            list.add(s.data());
-            lastPost.value = s;
+    if (lastPost.value == null) {
+      fetchServiceByGenreAndPage(genre, uid, (p0) {
+        onFetch(p0);
+      });
+    } else {
+      _repo.fetchMorePost(lastPost.value!, genre, uid).then((value) {
+        loadingMorePosts.value = false;
+        if (value.isSuccess) {
+          value = value as Success<List<QueryDocumentSnapshot<Service>>>;
+          List<Service> list = [];
+          for (var s in value.data) {
+            if (s.exists) {
+              list.add(s.data());
+              lastPost.value = s;
+            }
           }
+          log("${lastPost.value!.data()}", name: "IS NULL");
+          log(list.length.toString(), name: "GOT LIST SIZE");
+          log(list.toString(), name: "GOT LIST");
+          serviceList.addAll(list);
+          morePostsToLoad.value = list.isNotEmpty;
+          onFetch(list);
+          log(serviceList.length.toString(), name: "POST LIST SUCCESS");
+        } else {
+          value = value as Failure<List<QueryDocumentSnapshot<Service>>>;
+          log(value.error, name: tag);
         }
-        log("${lastPost.value!.data()}", name: "IS NULL");
-        log(list.length.toString(), name: "GOT LIST SIZE");
-        log(list.toString(), name: "GOT LIST");
-        serviceList.addAll(list);
-        morePostsToLoad.value = list.isNotEmpty;
-        onFetch(list);
-        log(serviceList.length.toString(), name: "POST LIST SUCCESS");
-      } else {
-        value = value as Failure<List<QueryDocumentSnapshot<Service>>>;
-        log(value.error, name: tag);
-      }
-    });
+      });
+    }
   }
 
-  void fetchServiceByGenreAndPage(List<String> genre, String uid,
-      Function(List<Service>) onFetch) {
+  void fetchServiceByGenreAndPage(
+      List<String> genre, String uid, Function(List<Service>) onFetch) {
     log("loading  posts", name: "POST LIST");
     if (lastPost.value == null) {
       log("null", name: "LP");
@@ -151,8 +227,8 @@ class ServiceController extends GetxController {
     });
   }
 
-  Future<void> onRefresh(List<String> genre, String uid,
-      Function(List<Service>) onFetch) async {
+  Future<void> onRefresh(
+      List<String> genre, String uid, Function(List<Service>) onFetch) async {
     clearList();
     log("loading  posts", name: "POST LIST");
     if (lastPost.value == null) {
@@ -184,7 +260,8 @@ class ServiceController extends GetxController {
     }
   }
 
-  Future<void> makePayment(Service item, Function(String) onError) async {
+  Future<void> makePayment(
+      Service item, Function(String) onError, String uid) async {
     try {
       final body = {
         'amount': "${(item.price * 100).toInt()}",
@@ -196,23 +273,20 @@ class ServiceController extends GetxController {
           body: body,
           headers: {
             'Authorization': 'Bearer ${dotenv.env["SECRETKEY"]}',
-            'Content-type': 'application/x-www-form-urlencoded'
+            'Content-type': 'application/x-www-form-urlencoded',
           });
       final Map<String, dynamic> intent = jsonDecode(res.body.toString());
 
       await Stripe.instance.initPaymentSheet(
           paymentSheetParameters: SetupPaymentSheetParameters(
-            paymentIntentClientSecret: intent["client_secret"],
-            merchantDisplayName: 'Astroverse',
-            googlePay: const PaymentSheetGooglePay(merchantCountryCode: 'GB' , testEnv: true)
-          ));
-      try {
-         await Stripe.instance
-            .presentPaymentSheet(options: const PaymentSheetPresentOptions()).then((value) {});
+              paymentIntentClientSecret: intent["client_secret"],
+              merchantDisplayName: 'Astroverse',
+              googlePay: const PaymentSheetGooglePay(
+                  merchantCountryCode: 'GB', testEnv: true)));
 
-         //final item = Transaction(Uuid().v4(), uid, date, itemId, itemType, amount, method)
-         //_repo.addTransaction(item);
-        
+      try {
+        Stripe.instance
+            .presentPaymentSheet(options: const PaymentSheetPresentOptions());
       } on StripeException catch (e) {
         onError(e.toString());
       } on StripeConfigException catch (e) {

@@ -1,9 +1,11 @@
 import 'package:astroverse/components/underlined_box.dart';
 import 'package:astroverse/controllers/auth_controller.dart';
+import 'package:astroverse/controllers/location_controller.dart';
 import 'package:astroverse/models/user.dart';
 import 'package:astroverse/res/img/images.dart';
 import 'package:astroverse/routes/routes.dart';
 import 'package:astroverse/screens/astroSignUp/portrait/astro_signup_portrait.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -22,6 +24,7 @@ class UserSignUpPortrait extends StatelessWidget {
   Widget build(BuildContext context) {
     final double wd = cons.maxWidth;
     final double ht = cons.maxHeight;
+    final LocationController location = Get.find();
     final TextEditingController email = TextEditingController();
     final TextEditingController password = TextEditingController();
     final TextEditingController name = TextEditingController();
@@ -106,6 +109,9 @@ class UserSignUpPortrait extends StatelessWidget {
                         ),
                         MaterialButton(
                           onPressed: () {
+                            final loc=  location.location.value;
+                            GeoPoint? geo ;
+                            if(loc!=null) geo = GeoPoint(loc.latitude!, loc.longitude!);
                             auth.signUpWithGoogle((p0) {
                               auth.saveGoogleData(
                                   p0,
@@ -118,7 +124,7 @@ class UserSignUpPortrait extends StatelessWidget {
                                     Get.toNamed(Routes.upiScreen,
                                         arguments: Parcel(data: p0, google: true));
                                   });
-                            }, false);
+                            }, false , geo);
                           },
                           shape: ButtonDecors.outlined,
                           padding: const EdgeInsets.symmetric(vertical: 12),

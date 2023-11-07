@@ -27,6 +27,7 @@ class NewPostsPage extends StatelessWidget {
     if (auth.user.value != null) {
       log("not null", name: "USER");
       mainController.startReadingUpVotedPosts(auth.user.value!.uid);
+      mainController.fetchPostsByGenreAndPage(NewPageController.genresList, auth.user.value!.uid);
     }
 
     const genres = NewPageController.genresList;
@@ -36,7 +37,7 @@ class NewPostsPage extends StatelessWidget {
         log('refreshing', name: "REFRESH");
         mainController.refreshPosts(newPage.selectedGenres.isEmpty
             ? NewPageController.genresList
-            : newPage.selectedGenres);
+            : newPage.selectedGenres,auth.user.value!.uid);
       },
       child: Column(
         children: [
@@ -65,7 +66,7 @@ class NewPostsPage extends StatelessWidget {
                             child: OutlinedButton(
                                 onPressed: () {
                                   mainController
-                                      .fetchMorePosts(newPage.selectedGenres);
+                                      .fetchMorePosts(newPage.selectedGenres,auth.user.value!.uid);
                                 },
                                 child: Text(
                                   "load more",

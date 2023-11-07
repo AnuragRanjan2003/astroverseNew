@@ -1,4 +1,6 @@
+import 'package:astroverse/controllers/location_controller.dart';
 import 'package:astroverse/res/dims/global.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_sign_in/google_sign_in.dart';
@@ -26,6 +28,7 @@ class AstroSignUpPortrait extends StatelessWidget {
     final TextEditingController password = TextEditingController();
     final TextEditingController name = TextEditingController();
     final AuthController auth = Get.find();
+    final LocationController location = Get.find();
     GoogleSignIn().signOut();
     return Scaffold(
       body: SingleChildScrollView(
@@ -121,6 +124,10 @@ class AstroSignUpPortrait extends StatelessWidget {
                         ),
                         MaterialButton(
                           onPressed: () {
+                            final loc = location.location.value;
+                            GeoPoint? geo;
+                            if (loc != null)
+                              geo = GeoPoint(loc.latitude!, loc.longitude!);
                             auth.signUpWithGoogle((p0) {
                               auth.saveGoogleData(
                                   p0,
@@ -133,9 +140,9 @@ class AstroSignUpPortrait extends StatelessWidget {
                                   () {
                                     Get.toNamed(Routes.upiScreen,
                                         arguments:
-                                        Parcel(data: p0, google: true));
+                                            Parcel(data: p0, google: true));
                                   });
-                            }, true);
+                            }, true, geo);
                           },
                           shape: ButtonDecors.outlined,
                           padding: const EdgeInsets.symmetric(vertical: 12),
