@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:astroverse/db/db.dart';
 import 'package:astroverse/db/storage.dart';
+import 'package:astroverse/models/purchase.dart';
 import 'package:astroverse/models/save_service.dart';
 import 'package:astroverse/models/service.dart';
 import 'package:astroverse/models/transaction.dart' as t;
@@ -39,4 +40,7 @@ class ServiceRepo {
 
   Future<Resource<void>> addTransaction(t.Transaction item) async =>
       await _db.addTransaction(item);
+
+  Future<Resource<Purchase>> postPurchase(Purchase p) async =>
+      await _db.postPurchase(p);
 }

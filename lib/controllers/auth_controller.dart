@@ -52,9 +52,9 @@ class AuthController extends GetxController {
       final res = await _repo.checkForUserData(fUser.uid);
       if (res == true) {
         _analytics.logLogin(loginMethod: "remember me");
+        await startListeningToUser(fUser.uid);
         await _repo.updateExtraInfo(
             {"lastActive": FieldValue.serverTimestamp()}, fUser.uid);
-        await startListeningToUser(fUser.uid);
         emailVerified.value = _repo.checkIfEmailVerified();
         if (emailVerified.value == true) {
           Get.toNamed(Routes.main);

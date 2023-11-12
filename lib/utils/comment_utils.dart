@@ -30,7 +30,7 @@ class CommentUtils extends Postable<Comment, SaveComment> {
 
   @override
   Future<Resource<List<QueryDocumentSnapshot<Comment>>>> fetchByGenreAndPage(
-      List<String> genre , String uid) async {
+      List<String> genre, String uid) async {
     try {
       QuerySnapshot<Comment> res =
           await ref.limit(_limit).orderBy("date", descending: true).get();
@@ -46,7 +46,9 @@ class CommentUtils extends Postable<Comment, SaveComment> {
 
   @override
   Future<Resource<List<QueryDocumentSnapshot<Comment>>>> fetchMore(
-      QueryDocumentSnapshot<Comment> lastPost, List<String> genre , String uid) async {
+      QueryDocumentSnapshot<Comment> lastPost,
+      List<String> genre,
+      String uid) async {
     try {
       final res = await ref
           .limit(_limit)
@@ -73,8 +75,7 @@ class CommentUtils extends Postable<Comment, SaveComment> {
   }
 
   @override
-  Future<Resource<Comment>> savePost(
-      Comment comment) async {
+  Future<Resource<Comment>> savePost(Comment comment) async {
     try {
       await ref.doc(comment.id).set(comment);
       await ref.doc(comment.id).update({"date": FieldValue.serverTimestamp()});
@@ -83,6 +84,18 @@ class CommentUtils extends Postable<Comment, SaveComment> {
       return Failure<Comment>(e.message.toString());
     } catch (e) {
       return Failure<Comment>(e.toString());
+    }
+  }
+
+  @override
+  Future<Resource<Json>> update(Map<String, dynamic> data, String id) async {
+    try {
+      await ref.doc(id).update(data);
+      return Success(data);
+    } on FirebaseException catch (e) {
+      return Failure<Json>(e.message.toString());
+    } catch (e) {
+      return Failure<Json>(e.toString());
     }
   }
 }

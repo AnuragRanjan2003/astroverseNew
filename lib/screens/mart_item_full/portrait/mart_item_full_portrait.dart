@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:astroverse/controllers/auth_controller.dart';
 import 'package:astroverse/controllers/service_controller.dart';
 import 'package:astroverse/models/service.dart';
@@ -19,6 +21,11 @@ class MartItemFullPortrait extends StatelessWidget {
     final ServiceController service = Get.find();
     final AuthController auth = Get.find();
     sb.writeAll(item!.genre, ", ");
+    log(item.toString() ,name:"ITEM");
+
+
+
+
 
     service.attachPaymentEventListeners(auth.user.value!, item);
 
@@ -27,24 +34,24 @@ class MartItemFullPortrait extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           item.imageUrl.isNotEmpty
-              ? Hero(
-                  tag: "service ${item.id}",
-                  child: Image(
-                    image: NetworkImage(item.imageUrl),
-                    height: cons.maxHeight * 0.40,
-                    fit: BoxFit.fitHeight,
-                    width: cons.maxWidth,
+                ? Hero(
+                    tag: "service ${item.id}",
+                    child: Image(
+                      image: NetworkImage(item.imageUrl),
+                      height: cons.maxHeight * 0.45,
+                      fit: BoxFit.fitHeight,
+                      width: cons.maxWidth,
+                    ),
+                  )
+                : Hero(
+                    tag: "service ${item.id}",
+                    child: Image(
+                      image: ProjectImages.planet,
+                      height: cons.maxHeight * 0.45,
+                      fit: BoxFit.fitHeight,
+                      width: cons.maxWidth,
+                    ),
                   ),
-                )
-              : Hero(
-                  tag: "service ${item.id}",
-                  child: Image(
-                    image: ProjectImages.planet,
-                    height: cons.maxHeight * 0.45,
-                    fit: BoxFit.fitHeight,
-                    width: cons.maxWidth,
-                  ),
-                ),
           const SizedBox(
             height: 10,
           ),

@@ -1,6 +1,7 @@
 import 'dart:developer';
 import 'dart:io';
 
+import 'package:astroverse/models/purchase.dart';
 import 'package:astroverse/models/service.dart';
 import 'package:astroverse/models/transaction.dart' as t;
 import 'package:astroverse/models/user.dart';
@@ -38,6 +39,7 @@ class ServiceController extends GetxController {
   Rx<int> loading = 0.obs;
   RxString searchText = "".obs;
   RxBool paymentLoading = false.obs;
+  RxDouble imageSize = 0.45.obs;
 
   final razorPayUtils = RazorPayUtils();
 
@@ -47,14 +49,36 @@ class ServiceController extends GetxController {
       PaymentSuccessResponse response, User user, Service item) async {
     paymentLoading.value = false;
     log("success", name: "RAZOR");
+    log(item.toString(), name: "RAZOR ITEM");
     final trans = t.Transaction(response.paymentId.toString(), user.uid,
         DateTime.now(), item.id, item.genre[0], item.price, response.orderId!);
     final res = await _repo.addTransaction(trans);
-    if (res is Success<void>) {
+    final purchase = Purchase(
+        itemId: item.id,
+        purchaseId: response.orderId.toString(),
+        paymentId: response.paymentId.toString(),
+        itemName: item.title,
+        itemImage: item.imageUrl,
+        itemPrice: item.price.toString(),
+        totalPrice: _computeFinalPrice(item.price).toString(),
+        buyerId: user.uid,
+        buyerName: user.name,
+        sellerId: item.authorId,
+        sellerName: item.authorName,
+        boughtOn: DateTime.now(),
+        delivered: false,
+        review: null,
+        deliveredOn: null);
+    final res1 = await _repo.postPurchase(purchase);
+
+    if (res is Success<void> && res1.isSuccess) {
       log("transaction recorder", name: "TRANSACTION");
+      log("purchase recorder", name: "PURCHASE");
     } else {
       res as Failure<void>;
+      res1 as Failure<Purchase>;
       log("error", name: "TRANSACTION");
+      log(res1.error, name: "PURCHASE");
     }
   }
 
@@ -68,24 +92,23 @@ class ServiceController extends GetxController {
     log("wallet", name: "RAZOR");
   }
 
-
   @override
   void onClose() {
     _razorPay.clear();
   }
 
-  attachPaymentEventListeners(User user , Service item){
-    _razorPay.on(Razorpay.EVENT_PAYMENT_SUCCESS,(p0)=> _handlePaymentSuccess(p0,user,item));
+  attachPaymentEventListeners(User user, Service item) {
+    log(item.toString(), name: "ITEM GOT");
+    _razorPay.on(Razorpay.EVENT_PAYMENT_SUCCESS,
+        (p0) => _handlePaymentSuccess(p0, user, item));
     _razorPay.on(Razorpay.EVENT_PAYMENT_ERROR, _handlePaymentError);
-    _razorPay.on(Razorpay.EVENT_EXTERNAL_WALLET, _handleExternalWallet);
     _razorPay.on(Razorpay.EVENT_EXTERNAL_WALLET, _handleExternalWallet);
   }
 
   Future<Resource<Json>> callOrderApi(Service item) async {
     final key = dotenv.get(EnvVars.razorPayKey);
     final secret = dotenv.get(EnvVars.razorPaySecret);
-    final order =
-        RazorPayUtils.createOrderBody(item.price.toInt(), 'INR');
+    final order = RazorPayUtils.createOrderBody(item.price.toInt(), 'INR');
     final header = RazorPayUtils.createOrderAuthorizationHeader(key, secret);
     return await razorPayUtils.createOrder(header, order);
   }
@@ -266,5 +289,9 @@ class ServiceController extends GetxController {
       value = value as Failure<List<QueryDocumentSnapshot<Service>>>;
       log(value.error, name: "SERVICE LIST FAILED");
     }
+  }
+
+  static double _computeFinalPrice(double price) {
+    return price;
   }
 }

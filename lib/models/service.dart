@@ -1,14 +1,15 @@
 import 'package:astroverse/models/post.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:json_annotation/json_annotation.dart';
 
 part 'service.g.dart';
 
-@JsonSerializable()
+@JsonSerializable(anyMap: true)
 class Service extends Post {
   double price;
   int uses;
   String place;
-  DateTime lastDate;
+  String lastDate;
 
   Service({
     required this.price,
@@ -35,4 +36,6 @@ class Service extends Post {
   String toString() {
     return "Service(id : $id ,title : $title ,descr: $description , genre : ${genre.toString()} , date : ${date.toString()} , image : $imageUrl , upVotes : $upVotes , comments : $comments , author : $authorName , authorId : $authorId )\n";
   }
+
+
 }

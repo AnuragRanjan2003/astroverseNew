@@ -9,6 +9,7 @@ class BackEndStrings {
   static const comments = "comments";
   static const followingCollection = "comments";
   static const metaDataCollection = "metaData";
+  static const purchasesCollection = "purchases";
 
   static const profileImage = "profileImage";
   static const serviceImage = "serviceImage";

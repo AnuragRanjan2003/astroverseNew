@@ -1,12 +1,13 @@
 import 'package:astroverse/controllers/auth_controller.dart';
-import 'package:astroverse/models/user.dart';
 import 'package:astroverse/res/colors/project_colors.dart';
 import 'package:astroverse/res/textStyles/text_styles.dart';
 import 'package:astroverse/routes/routes.dart';
 import 'package:astroverse/screens/mart_screen/mart_screen.dart';
 import 'package:astroverse/screens/peopleScreen/portrait/people_screen_portrait.dart';
+import 'package:astroverse/screens/purchasesScreen/purchases_screen.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get/get.dart';
 import 'package:google_nav_bar/google_nav_bar.dart';
 import 'package:shimmer/shimmer.dart';
@@ -29,35 +30,31 @@ class MainScreenPortrait extends StatelessWidget {
     final AuthController auth = Get.find();
 
     final tabs = [
-      GButton(
-        icon: Icons.home_outlined,
-        text: "Discover",
+      const GButton(
+        icon: FontAwesomeIcons.globe,
+        iconSize: 20,
         iconColor: ProjectColors.onBackground,
-        textStyle: TextStylesLight().coloredSmallThick(Colors.lightBlue),
-        padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 20),
+        padding: EdgeInsets.symmetric(vertical: 14, horizontal: 20),
       ),
-      GButton(
-        icon: Icons.shopping_cart_outlined,
-        text: "Mart",
+      const GButton(
+        icon: Icons.shopping_bag_outlined,
         iconColor: ProjectColors.onBackground,
-        textStyle: TextStylesLight().coloredSmallThick(Colors.lightBlue),
-        padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 20),
+        padding: EdgeInsets.symmetric(vertical: 14, horizontal: 20),
       ),
-      GButton(
+      const GButton(
         icon: Icons.people_outline,
-        text: "Astrologers",
         iconColor: ProjectColors.onBackground,
-        textStyle: TextStylesLight().coloredSmallThick(Colors.lightBlue),
-        padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 20),
+        padding: EdgeInsets.symmetric(vertical: 14, horizontal: 20),
+      ),
+      const GButton(
+        icon: Icons.shopping_cart_outlined,
+        iconColor: ProjectColors.onBackground,
+        padding: EdgeInsets.symmetric(vertical: 14, horizontal: 20),
       ),
     ];
 
-    final receiver =
-        User("abcde", '', '', 1, 'qR0IiDisDnPxziZhyZtPrNJPPfC3', false, '', '');
-
     return Scaffold(
       backgroundColor: ProjectColors.background,
-      appBar: _customAppBar(auth, "Explore"),
       bottomNavigationBar: Container(
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
         color: Colors.transparent,
@@ -85,7 +82,8 @@ class MainScreenPortrait extends StatelessWidget {
               children: [
                 const DiscoverScreen(color: ProjectColors.background),
                 const MartScreen(),
-                PeopleScreenPortrait(cons: cons)
+                PeopleScreenPortrait(cons: cons),
+                const PurchasesScreen()
               ],
             )),
       ),
@@ -155,10 +153,12 @@ class MainScreenPortrait extends StatelessWidget {
                   children: [
                     GestureDetector(
                       child: const Icon(
-                        Icons.notifications,
+                        Icons.shopping_cart,
                         color: Colors.black54,
                       ),
-                      onTap: () {},
+                      onTap: () {
+                        Get.toNamed(Routes.purchasesScreen);
+                      },
                     ),
                     GestureDetector(
                       child: CircleAvatar(

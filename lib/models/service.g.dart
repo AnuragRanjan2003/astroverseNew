@@ -6,10 +6,10 @@ part of 'service.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-Service _$ServiceFromJson(Map<String, dynamic> json) => Service(
+Service _$ServiceFromJson(Map json) => Service(
       price: (json['price'] as num).toDouble(),
       uses: json['uses'] as int,
-      lastDate: DateTime.parse(json['lastDate'] as String),
+      lastDate: json['lastDate'] as String,
       lat: (json['lat'] as num).toDouble(),
       lng: (json['lng'] as num).toDouble(),
       title: json['title'] as String,
@@ -39,5 +39,5 @@ Map<String, dynamic> _$ServiceToJson(Service instance) => <String, dynamic>{
       'price': instance.price,
       'uses': instance.uses,
       'place': instance.place,
-      'lastDate': instance.lastDate.toIso8601String(),
+      'lastDate': instance.lastDate,
     };

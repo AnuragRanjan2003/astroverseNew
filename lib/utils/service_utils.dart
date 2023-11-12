@@ -115,4 +115,17 @@ class ServiceUtils extends Postable<Service, SaveService> {
       return Failure<Service>(e.toString());
     }
   }
+
+  @override
+  Future<Resource<Json>> update(Json data, String id)async {
+    try {
+      await ref.doc(id).update(data);
+      return Success<Json>(data);
+    } on FirebaseException catch (e) {
+      return Failure<Json>(e.message.toString());
+    } catch (e) {
+      return Failure<Json>(e.toString());
+    }
+
+  }
 }

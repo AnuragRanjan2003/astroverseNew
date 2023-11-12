@@ -13,8 +13,11 @@ class CreatePostController extends GetxController {
   Rxn<XFile> image = Rxn();
   final _postRepo = PostRepo();
   Rx<bool> loading = false.obs;
+  Rx<int> selectedItem = 0.obs;
+  RxBool formValid = false.obs;
 
-  void pickImage() async {
+
+  Future<void> pickImage() async {
     final ip = ImagePicker();
     final file =
         await ip.pickImage(source: ImageSource.gallery, imageQuality: 30);
