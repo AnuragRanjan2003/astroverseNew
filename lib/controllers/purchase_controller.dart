@@ -4,6 +4,7 @@ import 'package:astroverse/models/purchase.dart';
 import 'package:astroverse/repo/purchase_repo.dart';
 import 'package:astroverse/utils/resource.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
 
 class PurchaseController extends GetxController {
@@ -15,6 +16,8 @@ class PurchaseController extends GetxController {
   static const _maxPostLimit = 50;
   Rx<bool> nothingToShow = false.obs;
   Rx<bool> loadingMorePosts = false.obs;
+  RxString searchText = "".obs;
+  final searchController = TextEditingController(text: "");
 
   void fetchPurchases(String buyerId) {
     loadingMorePosts.value = true;

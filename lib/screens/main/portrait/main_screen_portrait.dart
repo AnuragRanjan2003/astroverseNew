@@ -4,6 +4,7 @@ import 'package:astroverse/res/textStyles/text_styles.dart';
 import 'package:astroverse/routes/routes.dart';
 import 'package:astroverse/screens/mart_screen/mart_screen.dart';
 import 'package:astroverse/screens/peopleScreen/portrait/people_screen_portrait.dart';
+import 'package:astroverse/screens/profile/profile_screen.dart';
 import 'package:astroverse/screens/purchasesScreen/purchases_screen.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/material.dart';
@@ -22,7 +23,7 @@ class MainScreenPortrait extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     var observer =
-        FirebaseAnalyticsObserver(analytics: FirebaseAnalytics.instance);
+    FirebaseAnalyticsObserver(analytics: FirebaseAnalytics.instance);
     final PageController pageController = PageController(initialPage: 0);
     final double wd = cons.maxWidth;
     final double ht = cons.maxHeight;
@@ -31,61 +32,76 @@ class MainScreenPortrait extends StatelessWidget {
 
     final tabs = [
       const GButton(
-        icon: FontAwesomeIcons.globe,
+        icon: FontAwesomeIcons.message,
         iconSize: 20,
         iconColor: ProjectColors.onBackground,
-        padding: EdgeInsets.symmetric(vertical: 14, horizontal: 20),
+        padding: EdgeInsets.symmetric(vertical: 14, horizontal: 10),
       ),
       const GButton(
         icon: Icons.shopping_bag_outlined,
         iconColor: ProjectColors.onBackground,
-        padding: EdgeInsets.symmetric(vertical: 14, horizontal: 20),
+        padding: EdgeInsets.symmetric(vertical: 14, horizontal: 10),
+      ),
+      const GButton(
+        icon: Icons.person,
+        iconColor: ProjectColors.onBackground,
+        padding: EdgeInsets.symmetric(vertical: 14, horizontal: 10),
       ),
       const GButton(
         icon: Icons.people_outline,
         iconColor: ProjectColors.onBackground,
-        padding: EdgeInsets.symmetric(vertical: 14, horizontal: 20),
+        padding: EdgeInsets.symmetric(vertical: 14, horizontal: 10),
       ),
       const GButton(
         icon: Icons.shopping_cart_outlined,
         iconColor: ProjectColors.onBackground,
-        padding: EdgeInsets.symmetric(vertical: 14, horizontal: 20),
+        padding: EdgeInsets.symmetric(vertical: 14, horizontal: 10),
       ),
     ];
 
     return Scaffold(
       backgroundColor: ProjectColors.background,
-      bottomNavigationBar: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
-        color: Colors.transparent,
-        child: GNav(
-          backgroundColor: Colors.transparent,
-          gap: 10,
-          onTabChange: (e) {
-            pageController.animateToPage(e,
-                duration: const Duration(milliseconds: 200),
-                curve: Curves.linear);
-            auth.page.value = e;
-          },
-          tabs: tabs,
-          activeColor: Colors.lightBlue,
-          tabBackgroundColor: Colors.white,
-        ),
-      ),
       body: SafeArea(
         child: SizedBox(
             width: wd,
-            height: ht * 0.9,
-            child: PageView(
-              controller: pageController,
-              physics: const NeverScrollableScrollPhysics(),
-              children: [
-                const DiscoverScreen(color: ProjectColors.background),
-                const MartScreen(),
-                PeopleScreenPortrait(cons: cons),
-                const PurchasesScreen()
-              ],
-            )),
+            child: Stack(children: [
+              PageView(
+                controller: pageController,
+                physics: const NeverScrollableScrollPhysics(),
+                children: [
+                  const DiscoverScreen(),
+                  const MartScreen(),
+                  const ProfileScreen(),
+                  PeopleScreenPortrait(cons: cons),
+                  const PurchasesScreen()
+                ],
+              ),
+              Align(alignment:Alignment.bottomCenter,child: buildBottomNav(pageController, auth, tabs))
+            ])),
+      ),
+    );
+  }
+
+  Container buildBottomNav(PageController pageController, AuthController auth, List<GButton> tabs) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+      margin: const EdgeInsets.only(left: 15, right: 15,bottom: 20),
+      decoration: const BoxDecoration(
+          borderRadius: BorderRadius.all(Radius.circular(25)),
+          color: Colors.white
+      ),
+      child: GNav(
+        backgroundColor: Colors.transparent,
+        gap: 10,
+        onTabChange: (e) {
+          pageController.animateToPage(e,
+              duration: const Duration(milliseconds: 200),
+              curve: Curves.linear);
+          auth.page.value = e;
+        },
+        tabs: tabs,
+        activeColor: Colors.lightBlue,
+        tabBackgroundColor: Colors.white,
       ),
     );
   }
@@ -177,10 +193,10 @@ class MainScreenPortrait extends StatelessWidget {
                   ],
                 ),
                 Obx(() => Text(
-                      _pageName(auth.page.value),
-                      style: const TextStyle(
-                          fontSize: 28, fontWeight: FontWeight.bold),
-                    ))
+                  _pageName(auth.page.value),
+                  style: const TextStyle(
+                      fontSize: 28, fontWeight: FontWeight.bold),
+                ))
               ],
             )));
   }

@@ -4,13 +4,12 @@ import 'package:astroverse/utils/responsive.dart';
 import 'package:flutter/material.dart';
 
 class DiscoverScreen extends StatelessWidget {
-  final Color color;
-  const DiscoverScreen({super.key, required this.color});
+  const DiscoverScreen({super.key,});
 
   @override
   Widget build(BuildContext context) {
     return Responsive(
-      portrait: (cons) => DiscoverScreenPortrait(cons: cons, color: color,),
+      portrait: (cons) => DiscoverScreenPortrait(cons: cons,),
       landscape: (cons) => DiscoverScreenLandscape(cons: cons),
     );
   }

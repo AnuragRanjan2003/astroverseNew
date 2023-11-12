@@ -24,8 +24,12 @@ class PostItem extends StatelessWidget {
         Get.toNamed(Routes.postFullScreen, arguments: post);
       },
       child: Container(
+        decoration: const BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.all(Radius.circular(20))),
+        margin: const EdgeInsets.symmetric(horizontal: 10),
         padding:
-            const EdgeInsets.only(left: 18, right: 18, top: 15, bottom: 10),
+        const EdgeInsets.only(left: 18, right: 18, top: 15, bottom: 10),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
@@ -42,26 +46,33 @@ class PostItem extends StatelessWidget {
                         textAlign: TextAlign.left,
                       ),
                     ),
-                    Text(
-                      "@${post.authorName}",
-                      style: TextStylesLight()
-                          .coloredSmall(ProjectColors.onBackground),
+                    const SizedBox(
+                      height: 2,
                     ),
-                    Text(
-                      toTimeDelay(post.date),
-                      style: TextStylesLight().small,
+                    Text("@${post.authorName}",
+                        style: const TextStyle(fontSize: 12)),
+                    const SizedBox(
+                      height: 5,
                     ),
+                    _buildChip(
+                        toTimeDelay(post.date),
+                        const Icon(
+                          Icons.history,
+                          size: 15,
+                        ),
+                        ProjectColors.disabled,
+                        ProjectColors.lightBlack)
                   ],
                 ),
               ],
             ),
             post.imageUrl.isNotEmpty
                 ? const SizedBox(
-                    height: 15,
-                  )
+              height: 15,
+            )
                 : const SizedBox(
-                    height: 0,
-                  ),
+              height: 0,
+            ),
             Hero(
                 tag: HeroTag().forPost(post, PostFields.image),
                 child: buildContent(post)),
@@ -84,54 +95,28 @@ class PostItem extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
-                Expanded(
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const Icon(
-                        FontAwesomeIcons.comments,
-                        size: 20,
-                        color: ProjectColors.onBackground,
-                      ),
-                      const SizedBox(
-                        width: 10,
-                      ),
-                      Text(post.comments.toString())
-                    ],
+                buildDataChip(
+                  post.comments.toString(),
+                  const Icon(
+                    FontAwesomeIcons.comments,
+                    size: 14,
+                    color: Colors.lightGreen,
                   ),
                 ),
-                Expanded(
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const Icon(
-                        FontAwesomeIcons.heart,
-                        size: 20,
-                        color: ProjectColors.onBackground,
-                      ),
-                      const SizedBox(
-                        width: 10,
-                      ),
-                      Text(post.upVotes.toString())
-                    ],
-                  ),
-                ),
-                Expanded(
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const Icon(
-                        FontAwesomeIcons.eye,
-                        size: 20,
-                        color: ProjectColors.onBackground,
-                      ),
-                      const SizedBox(
-                        width: 10,
-                      ),
-                      Text(post.views.toString())
-                    ],
-                  ),
-                ),
+                buildDataChip(
+                    post.upVotes.toString(),
+                    const Icon(
+                      FontAwesomeIcons.heart,
+                      size: 14,
+                      color: Colors.red,
+                    )),
+                buildDataChip(
+                    post.views.toString(),
+                    const Icon(
+                      FontAwesomeIcons.eye,
+                      size: 14,
+                      color: ProjectColors.lightBlack,
+                    )),
               ],
             ),
             const SizedBox(
@@ -139,6 +124,32 @@ class PostItem extends StatelessWidget {
             )
           ],
         ),
+      ),
+    );
+  }
+
+  Container buildDataChip(String text, Icon icon) {
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 15),
+      decoration: BoxDecoration(
+        borderRadius: const BorderRadius.all(Radius.circular(10)),
+        border: Border.all(color: ProjectColors.disabled),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          icon,
+          const SizedBox(
+            width: 10,
+          ),
+          Text(
+            text,
+            style: const TextStyle(
+                fontWeight: FontWeight.bold,
+                color: ProjectColors.lightBlack,
+                fontSize: 12),
+          )
+        ],
       ),
     );
   }
@@ -161,17 +172,40 @@ class PostItem extends StatelessWidget {
   Widget buildContent(Post post) {
     return post.imageUrl.isNotEmpty
         ? AspectRatio(
-            aspectRatio: 4 / 3,
-            child: ClipRRect(
-              borderRadius: const BorderRadius.all(Radius.circular(15)),
-              child: Image(
-                image: CachedNetworkImageProvider(post.imageUrl),
-                width: double.infinity,
-                fit: BoxFit.cover,
-              ),
-            ))
+        aspectRatio: 4 / 3,
+        child: ClipRRect(
+          borderRadius: const BorderRadius.all(Radius.circular(15)),
+          child: Image(
+            image: CachedNetworkImageProvider(post.imageUrl),
+            width: double.infinity,
+            fit: BoxFit.cover,
+          ),
+        ))
         : const SizedBox(
-            height: 0,
-          );
+      height: 0,
+    );
+  }
+
+  Container _buildChip(String text, Icon? icon, Color color, Color textColor) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+      decoration: BoxDecoration(
+        border: Border.all(color: color),
+        borderRadius: const BorderRadius.all(Radius.circular(8)),
+      ),
+      child: Wrap(
+        direction: Axis.horizontal,
+        spacing: 2,
+        crossAxisAlignment: WrapCrossAlignment.center,
+        children: [
+          if (icon != null) icon,
+          Text(
+            text,
+            style: TextStyle(
+                fontSize: 10, fontWeight: FontWeight.w600, color: textColor),
+          ),
+        ],
+      ),
+    );
   }
 }

@@ -1,4 +1,3 @@
-import 'package:astroverse/controllers/location_controller.dart';
 import 'package:astroverse/controllers/main_controller.dart';
 import 'package:astroverse/screens/main/landscape/main_screen_landscape.dart';
 import 'package:astroverse/screens/main/portrait/main_screen_portrait.dart';

@@ -11,6 +11,7 @@ import 'package:astroverse/utils/env_vars.dart';
 import 'package:astroverse/utils/razor_pay_utils.dart';
 import 'package:astroverse/utils/resource.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
@@ -40,6 +41,7 @@ class ServiceController extends GetxController {
   RxString searchText = "".obs;
   RxBool paymentLoading = false.obs;
   RxDouble imageSize = 0.45.obs;
+  final searchController= TextEditingController(text: "");
 
   final razorPayUtils = RazorPayUtils();
 

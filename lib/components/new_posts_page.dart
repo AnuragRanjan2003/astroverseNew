@@ -10,6 +10,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../models/post.dart';
+import '../res/colors/project_colors.dart';
 
 class NewPostsPage extends StatelessWidget {
   final BoxConstraints cons;
@@ -42,14 +43,14 @@ class NewPostsPage extends StatelessWidget {
       child: Column(
         children: [
           Obx(() => Row(
-                children: List.generate(
-                    genres.length,
+            children: List.generate(
+                genres.length,
                     (index) => buildFilterChip(
-                        mainController, newPage, index, genres)),
-              )),
+                    mainController, newPage, index, genres)),
+          )),
           Expanded(
             child: Obx(
-              () {
+                  () {
                 final list = filterPostList(
                     mainController.postList, newPage.selectedGenres);
                 return ListView.separated(
@@ -61,17 +62,31 @@ class NewPostsPage extends StatelessWidget {
                           return const CupertinoActivityIndicator();
                         } else if (mainController.morePostsToLoad.isTrue) {
                           return Padding(
-                            padding: EdgeInsets.symmetric(
-                                horizontal: 0.25 * wd, vertical: 10),
-                            child: OutlinedButton(
+                            padding:
+                            EdgeInsets.only(left: cons.maxWidth * 0.2,right: cons.maxWidth * 0.2,bottom: 200),
+                            child: MaterialButton(
+                                color: Colors.white,
+                                padding: const EdgeInsets.symmetric(vertical: 10),
+                                shape: const RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.all(Radius.circular(10))),
                                 onPressed: () {
                                   mainController
                                       .fetchMorePosts(newPage.selectedGenres,auth.user.value!.uid);
                                 },
-                                child: Text(
-                                  "load more",
-                                  style: TextStylesLight().small,
-                                )),
+                                child: const Wrap(
+                                    crossAxisAlignment: WrapCrossAlignment.center,
+                                    spacing: 8,
+                                    children: [
+                                      Text(
+                                        "load more",
+                                        style: TextStyle(color: ProjectColors.disabled),
+                                      ),
+                                      Icon(
+                                        Icons.refresh,
+                                        color: Colors.lightBlue,
+                                        size: 18,
+                                      )
+                                    ])),
                           );
                         } else {
                           return const SizedBox(
@@ -117,22 +132,7 @@ class NewPostsPage extends StatelessWidget {
   }
 
   Widget separator() {
-    return const Row(
-      children: [
-        SizedBox(
-          width: 8,
-        ),
-        Expanded(
-          child: Divider(
-            thickness: 1,
-            height: 1,
-          ),
-        ),
-        SizedBox(
-          width: 8,
-        )
-      ],
-    );
+    return const SizedBox(height: 20,);
   }
 
   Widget listItem(Post post) => PostItem(post: post);
@@ -153,4 +153,6 @@ class NewPostsPage extends StatelessWidget {
 
     return filter;
   }
+
+
 }
