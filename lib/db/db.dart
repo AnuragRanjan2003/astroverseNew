@@ -11,7 +11,6 @@ import 'package:astroverse/models/transaction.dart' as t;
 import 'package:astroverse/models/user.dart' as models;
 import 'package:astroverse/res/strings/backend_strings.dart';
 import 'package:astroverse/utils/comment_utils.dart';
-import 'package:astroverse/utils/postable.dart';
 import 'package:astroverse/utils/purchase_utils.dart';
 import 'package:astroverse/utils/resource.dart';
 import 'package:astroverse/utils/safe_call.dart';
@@ -23,6 +22,7 @@ typedef Json = Map<String, dynamic>;
 
 class Database {
   static const int _limit = 20;
+  final _fireStore = FirebaseFirestore.instance;
   final _userCollection = FirebaseFirestore.instance
       .collection(BackEndStrings.userCollection)
       .withConverter<models.User>(
@@ -37,6 +37,15 @@ class Database {
         fromFirestore: (snapshot, options) => Post.fromJson(snapshot.data()!),
         toFirestore: (value, options) => value.toJson(),
       );
+
+  CollectionReference<Post> _userPostCollection(String uid) => FirebaseFirestore.instance
+      .collection(BackEndStrings.userCollection)
+      .doc(uid)
+      .collection(BackEndStrings.postCollection)
+      .withConverter<Post>(
+    fromFirestore: (snapshot, options) => Post.fromJson(snapshot.data()!),
+    toFirestore: (value, options) => value.toJson(),
+  );
 
   final _transactionCollection = FirebaseFirestore.instance
       .collection(BackEndStrings.transactionCollection)
@@ -112,7 +121,10 @@ class Database {
 
   Future<Resource<Post>> savePost(Post post) async {
     try {
-      await _postCollection.doc(post.id).set(post);
+      final batch = _fireStore.batch();
+      batch.set(_postCollection.doc(post.id), post);
+      batch.set(_userPostCollection(post.authorId).doc(post.id), post);
+      await batch.commit();
       return Success(post);
     } on FirebaseException catch (e) {
       return Failure<Post>(e.message.toString());
@@ -178,14 +190,14 @@ class Database {
     }
   }
 
-  Future<Resource<int>> increaseVote(String id, String uid) async {
+  Future<Resource<int>> increaseVote(String id, String uid,String authorId) async {
     try {
-      final res = await _postCollection
-          .doc(id)
-          .update({"upVotes": FieldValue.increment(1)});
-      await _upVotedCollection(uid)
-          .doc(id)
-          .set(PostSave(id, DateTime.now().toString()));
+      final batch = _fireStore.batch();
+      batch.update(_postCollection.doc(id), {"upVotes": FieldValue.increment(1)});
+      batch.set(_upVotedCollection(uid).doc(id), PostSave(id, DateTime.now().toString()));
+      final document = _userPostCollection(authorId).doc(id);
+      batch.update(document, {"upVotes": FieldValue.increment(1)});
+      await batch.commit();
       return Success(1);
     } on FirebaseException catch (e) {
       return Failure<int>(e.message.toString());
@@ -194,12 +206,14 @@ class Database {
     }
   }
 
-  Future<Resource<int>> decreaseVote(String id, String uid) async {
+  Future<Resource<int>> decreaseVote(String id, String uid , String authorId) async {
     try {
-      final res = await _postCollection
-          .doc(id)
-          .update({"upVotes": FieldValue.increment(-1)});
-      await _upVotedCollection(uid).doc(id).delete();
+      final batch = _fireStore.batch();
+      batch.update(_postCollection.doc(id), {"upVotes": FieldValue.increment(-1)});
+      batch.delete(_upVotedCollection(uid).doc(id));
+      final document = _userPostCollection(authorId).doc(id);
+      batch.update(document, {"upVotes": FieldValue.increment(-1)});
+      await batch.commit();
       return Success(1);
     } on FirebaseException catch (e) {
       return Failure<int>(e.message.toString());

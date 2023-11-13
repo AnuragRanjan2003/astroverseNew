@@ -1,6 +1,7 @@
 import 'package:astroverse/models/user.dart';
 import 'package:astroverse/res/colors/project_colors.dart';
 import 'package:astroverse/routes/routes.dart';
+import 'package:astroverse/utils/hero_tag.dart';
 import 'package:astroverse/utils/num_parser.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -17,14 +18,23 @@ class AstrologerItem extends StatelessWidget {
         Get.toNamed(Routes.publicProfile, arguments: user);
       },
       child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 8),
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 15),
           decoration: const BoxDecoration(
-              borderRadius: BorderRadius.all(Radius.circular(10))),
+              color: Colors.white,
+              borderRadius: BorderRadius.all(Radius.circular(15))),
           child: Row(
             children: [
-              CircleAvatar(
-                foregroundImage: NetworkImage(user.image),
-                radius: 24,
+              ClipRRect(
+                borderRadius: const BorderRadius.all(Radius.circular(15)),
+                child: Hero(
+                  tag: HeroTag.forAstro(user, HeroTag.IMAGE),
+                  child: Image(
+                    image: NetworkImage(user.image),
+                    height: 50,
+                    width: 50,
+                    fit: BoxFit.fill,
+                  ),
+                ),
               ),
               const SizedBox(
                 width: 20,
@@ -51,7 +61,9 @@ class AstrologerItem extends StatelessWidget {
                       const SizedBox(
                         width: 20,
                       ),
-                      _dataWidget(Icons.data_exploration_outlined, NumberParser().toSocialMediaString(user.points),
+                      _dataWidget(
+                          Icons.data_exploration_outlined,
+                          NumberParser().toSocialMediaString(user.points),
                           Colors.blueAccent),
                     ],
                   )
@@ -63,19 +75,26 @@ class AstrologerItem extends StatelessWidget {
   }
 
   Widget _dataWidget(IconData icon, String text, Color color) {
-    return Wrap(
-      spacing: 4,
-      children: [
-        Icon(
-          icon,
-          size: 17,
-          color: color,
-        ),
-        Text(
-          text,
-          style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w500),
-        )
-      ],
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
+      decoration: BoxDecoration(
+          borderRadius: const BorderRadius.all(Radius.circular(8)),
+          border: Border.all(color: ProjectColors.disabled)),
+      child: Wrap(
+        spacing: 4,
+        crossAxisAlignment: WrapCrossAlignment.center,
+        children: [
+          Icon(
+            icon,
+            size: 17,
+            color: color,
+          ),
+          Text(
+            text,
+            style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
+          )
+        ],
+      ),
     );
   }
 

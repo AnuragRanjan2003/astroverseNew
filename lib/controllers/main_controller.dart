@@ -106,11 +106,12 @@ class MainController extends GetxController {
     fetchPostsByGenreAndPage(genre, uid);
   }
 
-  void increaseVote(String id, String uid, Function() onComplete) {
+  void increaseVote(
+      String id, String uid, String authorId, Function() onComplete) {
     final e = postList.indexWhere((element) => element.id == id);
     postList[e].upVotes++;
     postList.refresh();
-    _postRepo.increaseVote(id, uid).then((value) {
+    _postRepo.increaseVote(id, uid, authorId).then((value) {
       if (value.isSuccess) {
         log("up voted");
 
@@ -120,11 +121,12 @@ class MainController extends GetxController {
     });
   }
 
-  void decrementVote(String id, String uid, Function() onComplete) {
+  void decrementVote(
+      String id, String uid, String authorId, Function() onComplete) {
     final e = postList.indexWhere((element) => element.id == id);
     postList[e].upVotes--;
     postList.refresh();
-    _postRepo.decreaseVote(id, uid).then((value) {
+    _postRepo.decreaseVote(id, uid, authorId).then((value) {
       if (value.isSuccess) {
         log("down voted");
         log('upvoted to : ${postList[e].upVotes}', name: "UPVOTES");

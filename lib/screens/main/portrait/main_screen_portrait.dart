@@ -1,5 +1,6 @@
 import 'dart:ui';
 
+import 'package:astroverse/components/glass_morph_container.dart';
 import 'package:astroverse/controllers/auth_controller.dart';
 import 'package:astroverse/res/colors/project_colors.dart';
 import 'package:astroverse/res/textStyles/text_styles.dart';
@@ -85,36 +86,22 @@ class MainScreenPortrait extends StatelessWidget {
   }
 
   Widget buildBottomNav(PageController pageController, AuthController auth, List<GButton> tabs) {
-    return Container(
-      margin:  const EdgeInsets.only(left: 12, right: 12,bottom: 20),
-      decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.3),
-          borderRadius: const BorderRadius.all(Radius.circular(25)),
-        border: Border.all(color: Colors.white.withOpacity(0.4),width: 1.5)
+    return GlassMorphContainer(borderRadius: 20, blur: 5, opacity: 0.5,margin: const EdgeInsets.only(left: 12, right: 12, bottom: 20), child: Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+      child: GNav(
+        backgroundColor: Colors.transparent,
+        gap: 10,
+        onTabChange: (e) {
+          pageController.animateToPage(e,
+              duration: const Duration(milliseconds: 200),
+              curve: Curves.linear);
+          auth.page.value = e;
+        },
+        tabs: tabs,
+        activeColor: Colors.lightBlue,
+        tabBackgroundColor: Colors.transparent,
       ),
-      child: ClipRRect(
-        borderRadius: const BorderRadius.all(Radius.circular(25)),
-        child: BackdropFilter(
-          filter: ImageFilter.blur(sigmaX:5,sigmaY: 5),
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
-            child: GNav(
-              backgroundColor: Colors.transparent,
-              gap: 10,
-              onTabChange: (e) {
-                pageController.animateToPage(e,
-                    duration: const Duration(milliseconds: 200),
-                    curve: Curves.linear);
-                auth.page.value = e;
-              },
-              tabs: tabs,
-              activeColor: Colors.lightBlue,
-              tabBackgroundColor: Colors.transparent,
-            ),
-          ),
-        ),
-      ),
-    );
+    ),);
   }
 
   Text nameText(AuthController auth) {
@@ -167,59 +154,7 @@ class MainScreenPortrait extends StatelessWidget {
     );
   }
 
-  _customAppBar(AuthController auth, String page) {
-    return PreferredSize(
-        preferredSize: const Size.fromHeight(90),
-        child: Container(
-            padding: const EdgeInsets.only(top: 35, right: 30, left: 30),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    GestureDetector(
-                      child: const Icon(
-                        Icons.shopping_cart,
-                        color: Colors.black54,
-                      ),
-                      onTap: () {
-                        Get.toNamed(Routes.purchasesScreen);
-                      },
-                    ),
-                    GestureDetector(
-                      child: CircleAvatar(
-                        radius: 20,
-                        child: Obx(() {
-                          if (auth.user.value == null) {
-                            return profileImagePlaceholder();
-                          }
-                          return profileImage(auth);
-                        }),
-                      ),
-                      onTap: () {
-                        //Get.toNamed(Routes.publicProfile);
-                      },
-                    )
-                  ],
-                ),
-                Obx(() => Text(
-                  _pageName(auth.page.value),
-                  style: const TextStyle(
-                      fontSize: 28, fontWeight: FontWeight.bold),
-                ))
-              ],
-            )));
-  }
 
-  String _pageName(int i) {
-    if (i == 0) {
-      return "Discover";
-    } else if (i == 1) {
-      return "Mart";
-    }
-    return "Astrologers";
-  }
 
   Widget loadingShimmer(Widget child) {
     return Shimmer.fromColors(

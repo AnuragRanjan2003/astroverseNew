@@ -105,14 +105,14 @@ class PostFullPortrait extends StatelessWidget {
                 height: 10,
               ),
               Hero(
-                tag: HeroTag().forPost(post, PostFields.image),
+                tag: HeroTag.forPost(post, PostFields.image),
                 child: buildContent(post),
               ),
               const SizedBox(
                 height: 10,
               ),
               Hero(
-                tag: HeroTag().forPost(post, PostFields.description),
+                tag: HeroTag.forPost(post, PostFields.description),
                 child: Text(
                   post.description,
                   style: TextStylesLight().small,
@@ -150,12 +150,14 @@ class PostFullPortrait extends StatelessWidget {
                               main.increaseVote(
                                 post.id,
                                 auth.user.value!.uid,
+                                post.authorId,
                                 () {},
                               );
                             } else {
                               main.decrementVote(
                                 post.id,
                                 auth.user.value!.uid,
+                                post.authorId,
                                 () {},
                               );
                             }

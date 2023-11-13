@@ -117,7 +117,7 @@ class PurchaseController extends GetxController {
         sellerId,
       );
     } else {
-      _repo.fetchMorePurchases(lastPost.value!, sellerId).then((value) {
+      _repo.fetchMorePurchases(lastPostForSold.value!, sellerId).then((value) {
         loadingMorePostsForSold.value = false;
         if (value.isSuccess) {
           value = value as Success<List<QueryDocumentSnapshot<Purchase>>>;

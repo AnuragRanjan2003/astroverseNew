@@ -1,3 +1,4 @@
+import 'package:astroverse/components/glass_morph_container.dart';
 import 'package:astroverse/components/new_posts_page.dart';
 import 'package:astroverse/controllers/main_controller.dart';
 import 'package:astroverse/res/colors/project_colors.dart';
@@ -51,58 +52,61 @@ class DiscoverScreenPortrait extends StatelessWidget {
         }),
         body: SizedBox(
             width: wd,
-            child: Column(
+            child: Stack(
               children: [
+                TabBarView(children: [
+                  Center(
+                    child: NewPostsPage(
+                      cons: cons,
+                    ),
+                  ),
+                  const Center(
+                    child: Text("following"),
+                  ),
+                ]),
                 buildTabBar(theme),
-                Expanded(
-                  child: TabBarView(children: [
-                    Center(
-                      child: NewPostsPage(
-                        cons: cons,
-                      ),
-                    ),
-                    const Center(
-                      child: Text("following"),
-                    ),
-                  ]),
-                ),
               ],
             )),
       ),
     );
   }
 
-  Container buildTabBar(ThemeData theme) {
-    return Container(
+  Widget buildTabBar(ThemeData theme) {
+    return GlassMorphContainer(
+      borderRadius: 20,
+      blur: 3,
+      opacity: 0.5,
       margin: EdgeInsets.only(
-          left: 10, right: cons.maxWidth * 0.30, top: 10),
-      padding: const EdgeInsets.only(left: 10, top: 5, bottom: 5,right: 10),
-      decoration: const BoxDecoration(
-          borderRadius: BorderRadius.all(Radius.circular(20)),
-          color: Colors.white),
-      child: Theme(
-        data: theme.copyWith(
-          colorScheme: theme.colorScheme.copyWith(
-            surfaceVariant: Colors.transparent,
-          ),
-        ),
-        child: const TabBar(
-          indicatorPadding: EdgeInsets.symmetric(horizontal: 0,vertical: 2),
-            indicator: BoxDecoration(
-              borderRadius: BorderRadius.all(Radius.circular(15)),
-              color: Colors.blue
+        left: 10, right: cons.maxWidth * 0.30, top: 10),
+      child: Container(
+        padding: const EdgeInsets.only(left: 10, top: 5, bottom: 5,right: 10),
+        decoration: const BoxDecoration(
+            borderRadius: BorderRadius.all(Radius.circular(20)),
+            color: Colors.transparent),
+        child: Theme(
+          data: theme.copyWith(
+            colorScheme: theme.colorScheme.copyWith(
+              surfaceVariant: Colors.transparent,
             ),
-            indicatorColor: Colors.transparent,
-            indicatorSize: TabBarIndicatorSize.tab,
-            labelColor: Colors.white,
-            tabs: [
-              Tab(
-                text: 'new',
+          ),
+          child: const TabBar(
+            indicatorPadding: EdgeInsets.symmetric(horizontal: 0,vertical: 2),
+              indicator: BoxDecoration(
+                borderRadius: BorderRadius.all(Radius.circular(15)),
+                color: Colors.blue
               ),
-              Tab(
-                text: 'following',
-              ),
-            ]),
+              indicatorColor: Colors.transparent,
+              indicatorSize: TabBarIndicatorSize.tab,
+              labelColor: Colors.white,
+              tabs: [
+                Tab(
+                  text: 'new',
+                ),
+                Tab(
+                  text: 'following',
+                ),
+              ]),
+        ),
       ),
     );
   }

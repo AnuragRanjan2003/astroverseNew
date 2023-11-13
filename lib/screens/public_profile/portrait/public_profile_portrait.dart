@@ -5,6 +5,7 @@ import 'package:astroverse/models/extra_info.dart';
 import 'package:astroverse/models/user.dart';
 import 'package:astroverse/res/img/images.dart';
 import 'package:astroverse/res/textStyles/text_styles.dart';
+import 'package:astroverse/utils/hero_tag.dart';
 import 'package:astroverse/utils/num_parser.dart';
 import 'package:astroverse/utils/zego_cloud_services.dart';
 import 'package:flutter/material.dart';
@@ -24,6 +25,7 @@ class PublicProfilePortrait extends StatelessWidget {
     final PublicProfileController public = Get.find();
     final zegoService = ZegoCloudServices();
     final ht = cons.maxHeight;
+
     public.getExtraInfo(user.uid);
     public.updateProfileViews(user.uid);
 
@@ -72,7 +74,7 @@ class PublicProfilePortrait extends StatelessWidget {
         body: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            _buildTopBanner(ht, user.image),
+            _buildTopBanner(ht,user),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 10),
               child: Column(
@@ -228,7 +230,7 @@ class PublicProfilePortrait extends StatelessWidget {
     );
   }
 
-  Widget _buildTopBanner(double ht, String image) {
+  Widget _buildTopBanner(double ht,User user) {
     return SizedBox(
       height: ht * 0.18 + _imageRadius,
       child: Stack(
@@ -247,10 +249,13 @@ class PublicProfilePortrait extends StatelessWidget {
               child: ClipRRect(
                 borderRadius:
                     const BorderRadius.all(Radius.circular(_imageRadius)),
-                child: Image(
-                  image: NetworkImage(image),
-                  fit: BoxFit.fill,
-                  height: 2 * (_imageRadius - 5),
+                child: Hero(
+                  tag: HeroTag.forAstro(user, HeroTag.IMAGE),
+                  child: Image(
+                    image: NetworkImage(user.image),
+                    fit: BoxFit.fill,
+                    height: 2 * (_imageRadius - 5),
+                  ),
                 ),
               ),
             ),

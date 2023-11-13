@@ -1,6 +1,8 @@
 import 'dart:developer';
 
+import 'package:astroverse/components/load_more_button.dart';
 import 'package:astroverse/components/mart_item.dart';
+import 'package:astroverse/components/search_box.dart';
 import 'package:astroverse/controllers/service_controller.dart';
 import 'package:astroverse/models/service.dart';
 import 'package:astroverse/res/colors/project_colors.dart';
@@ -31,19 +33,22 @@ class MartScreenPortrait extends StatelessWidget {
       service.searchText.value = service.searchController.value.text;
     });
 
+    loadMore() =>
+        service.fetchMoreServices(auth.user.value!.uid, [], (p0) => null);
+
     return Scaffold(
       backgroundColor: ProjectColors.greyBackground,
       floatingActionButtonLocation: FloatingActionButtonLocation.endDocked,
       floatingActionButton: (auth.user.value?.astro == true)
           ? FloatingActionButton(
-        onPressed: _postItemScreen,
-        backgroundColor: Colors.lightBlue.shade300,
-        elevation: 0,
-        child: const Icon(
-          Icons.add,
-          color: Colors.white,
-        ),
-      )
+              onPressed: _postItemScreen,
+              backgroundColor: Colors.lightBlue.shade300,
+              elevation: 0,
+              child: const Icon(
+                Icons.add,
+                color: Colors.white,
+              ),
+            )
           : null,
       body: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 10),
@@ -86,43 +91,10 @@ class MartScreenPortrait extends StatelessWidget {
                           }
                           if (index == len + 1) {
                             return service.morePostsToLoad.isTrue
-                                ? Padding(
-                              padding: EdgeInsets.only(
-                                  left: cons.maxWidth * 0.2,right: cons.maxWidth*0.2 , bottom: 100),
-                              child: MaterialButton(
-                                  color: Colors.white,
-                                  padding: const EdgeInsets.symmetric(
-                                      vertical: 10),
-                                  shape: const RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.all(
-                                          Radius.circular(10))),
-                                  onPressed: () {
-                                    service.fetchMoreServices(
-                                        auth.user.value!.uid,
-                                        [],
-                                            (p0) => null);
-                                  },
-                                  child: const Wrap(
-                                      crossAxisAlignment:
-                                      WrapCrossAlignment.center,
-                                      spacing: 8,
-                                      children: [
-                                        Text(
-                                          "load more",
-                                          style: TextStyle(
-                                              color:
-                                              ProjectColors.disabled),
-                                        ),
-                                        Icon(
-                                          Icons.refresh,
-                                          color: Colors.lightBlue,
-                                          size: 18,
-                                        )
-                                      ])),
-                            )
+                                ? LoadMoreButton(cons: cons, loadMore: loadMore)
                                 : const SizedBox(
-                              height: 0,
-                            );
+                                    height: 0,
+                                  );
                           }
                           return Row(
                             children: [
@@ -130,12 +102,12 @@ class MartScreenPortrait extends StatelessWidget {
                                   child: MartItem(item: list[2 * (index - 1)])),
                               (2 * (index - 1) + 1 < list.length)
                                   ? Expanded(
-                                  child: MartItem(
-                                      item: list[2 * (index - 1) + 1]))
+                                      child: MartItem(
+                                          item: list[2 * (index - 1) + 1]))
                                   : const Expanded(
-                                  child: SizedBox(
-                                    width: 50,
-                                  )),
+                                      child: SizedBox(
+                                      width: 50,
+                                    )),
                             ],
                           );
                         },
@@ -146,38 +118,41 @@ class MartScreenPortrait extends StatelessWidget {
                     }),
                     Column(
                       children: [
-                        _buildSearchBox(
-                          service.searchController,
-                          SizedBox(
+                        SearchBox(
+                          controller: service.searchController,
+                          bottom: SizedBox(
                             height: 50,
                             child: ListView(
                               scrollDirection: Axis.horizontal,
                               children: [
                                 Obx(() => buildFilterChip(chipNames[0], (e) {
-                                  e
-                                      ? service.selectedItem.value = 1
-                                      : service.selectedItem.value = 0;
-                                }, service.selectedItem.value == 1)),
+                                      e
+                                          ? service.selectedItem.value = 1
+                                          : service.selectedItem.value = 0;
+                                    }, service.selectedItem.value == 1)),
                                 const SizedBox(
                                   width: 5,
                                 ),
                                 Obx(() => buildFilterChip(chipNames[1], (e) {
-                                  e
-                                      ? service.selectedItem.value = 2
-                                      : service.selectedItem.value = 0;
-                                }, service.selectedItem.value == 2)),
+                                      e
+                                          ? service.selectedItem.value = 2
+                                          : service.selectedItem.value = 0;
+                                    }, service.selectedItem.value == 2)),
                                 const SizedBox(
                                   width: 5,
                                 ),
                                 Obx(() => buildFilterChip(chipNames[2], (e) {
-                                  e
-                                      ? service.selectedItem.value = 3
-                                      : service.selectedItem.value = 0;
-                                }, service.selectedItem.value == 3)),
+                                      e
+                                          ? service.selectedItem.value = 3
+                                          : service.selectedItem.value = 0;
+                                    }, service.selectedItem.value == 3)),
                               ],
                             ),
                           ),
-                        ),
+                          hint: 'Search in Mart',
+                          width: cons.maxWidth * 0.9,
+                          bottomSpacing: 5,
+                        )
                       ],
                     )
                   ],
@@ -220,7 +195,7 @@ class MartScreenPortrait extends StatelessWidget {
         margin: const EdgeInsets.symmetric(horizontal: 0, vertical: 10),
         decoration: BoxDecoration(
             color: Colors.white,
-            border: Border.all(width: 0.5,color: ProjectColors.disabled),
+            border: Border.all(width: 0.5, color: ProjectColors.disabled),
             borderRadius: const BorderRadius.all(Radius.circular(20))),
         child: Column(
           children: [
@@ -234,7 +209,7 @@ class MartScreenPortrait extends StatelessWidget {
                   border: InputBorder.none,
                   hintText: 'Search in store',
                   hintStyle:
-                  TextStyle(fontSize: 14, color: ProjectColors.disabled)),
+                      TextStyle(fontSize: 14, color: ProjectColors.disabled)),
               style: const TextStyle(fontSize: 14),
             ),
             const SizedBox(
