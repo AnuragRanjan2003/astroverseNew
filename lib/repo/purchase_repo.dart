@@ -19,8 +19,15 @@ class PurchaseRepo {
           String buyerId) async =>
       await _db.fetchPurchases(buyerId);
 
-
   Future<Resource<List<QueryDocumentSnapshot<Purchase>>>> fetchMorePurchases(
           QueryDocumentSnapshot<Purchase> lastPurchase, String buyerId) async =>
       await _db.fetchMorePurchases(lastPurchase, buyerId);
+
+  Future<Resource<List<QueryDocumentSnapshot<Purchase>>>> fetchSoldItems(
+          String uid) async =>
+      await _db.fetchSoldItems(uid);
+
+  Future<Resource<List<QueryDocumentSnapshot<Purchase>>>> fetchMoreSoldItems(
+          QueryDocumentSnapshot<Purchase> lastPost, String uid) async =>
+      await _db.fetchMoreSoldItems(lastPost, uid);
 }

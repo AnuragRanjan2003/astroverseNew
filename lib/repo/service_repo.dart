@@ -9,12 +9,18 @@ import 'package:astroverse/models/transaction.dart' as t;
 import 'package:astroverse/utils/resource.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
+typedef Json = Map<String, dynamic>;
+
 class ServiceRepo {
   final _db = Database();
   final _storage = Storage();
 
   Future<Resource<Service>> saveService(Service post, String uid) async =>
       await _db.saveService(post, uid);
+
+  Future<Resource<Json>> updateService(
+          Json data, String serviceId, String uid) async =>
+      await _db.updateService(data, serviceId, uid);
 
   Future<Resource<String>> storeServiceImage(File file, String id) async =>
       await _storage.storeServiceImage(file, id);

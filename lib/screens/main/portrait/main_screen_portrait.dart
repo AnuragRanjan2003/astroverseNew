@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:astroverse/controllers/auth_controller.dart';
 import 'package:astroverse/res/colors/project_colors.dart';
 import 'package:astroverse/res/textStyles/text_styles.dart';
@@ -43,7 +45,7 @@ class MainScreenPortrait extends StatelessWidget {
         padding: EdgeInsets.symmetric(vertical: 14, horizontal: 10),
       ),
       const GButton(
-        icon: Icons.person,
+        icon: Icons.person_outline,
         iconColor: ProjectColors.onBackground,
         padding: EdgeInsets.symmetric(vertical: 14, horizontal: 10),
       ),
@@ -82,26 +84,35 @@ class MainScreenPortrait extends StatelessWidget {
     );
   }
 
-  Container buildBottomNav(PageController pageController, AuthController auth, List<GButton> tabs) {
+  Widget buildBottomNav(PageController pageController, AuthController auth, List<GButton> tabs) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-      margin: const EdgeInsets.only(left: 15, right: 15,bottom: 20),
-      decoration: const BoxDecoration(
-          borderRadius: BorderRadius.all(Radius.circular(25)),
-          color: Colors.white
+      margin:  const EdgeInsets.only(left: 12, right: 12,bottom: 20),
+      decoration: BoxDecoration(
+        color: Colors.white.withOpacity(0.3),
+          borderRadius: const BorderRadius.all(Radius.circular(25)),
+        border: Border.all(color: Colors.white.withOpacity(0.4),width: 1.5)
       ),
-      child: GNav(
-        backgroundColor: Colors.transparent,
-        gap: 10,
-        onTabChange: (e) {
-          pageController.animateToPage(e,
-              duration: const Duration(milliseconds: 200),
-              curve: Curves.linear);
-          auth.page.value = e;
-        },
-        tabs: tabs,
-        activeColor: Colors.lightBlue,
-        tabBackgroundColor: Colors.white,
+      child: ClipRRect(
+        borderRadius: const BorderRadius.all(Radius.circular(25)),
+        child: BackdropFilter(
+          filter: ImageFilter.blur(sigmaX:5,sigmaY: 5),
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+            child: GNav(
+              backgroundColor: Colors.transparent,
+              gap: 10,
+              onTabChange: (e) {
+                pageController.animateToPage(e,
+                    duration: const Duration(milliseconds: 200),
+                    curve: Curves.linear);
+                auth.page.value = e;
+              },
+              tabs: tabs,
+              activeColor: Colors.lightBlue,
+              tabBackgroundColor: Colors.transparent,
+            ),
+          ),
+        ),
       ),
     );
   }

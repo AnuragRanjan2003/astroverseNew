@@ -39,6 +39,7 @@ class Routes {
   static const createServiceScreen = '/create_service_screen';
   static const publicProfile = '/public_profile_screen';
   static const purchasesScreen = '/purchases_screen';
+  static const purchaseFullScreen = '/purchase_full_screen';
 }
 
 class AppRoutes {
@@ -118,6 +119,10 @@ class AppRoutes {
         GetPage(
           name: Routes.purchasesScreen,
           page: () => const PurchasesScreen(),
+        ),
+        GetPage(
+          name: Routes.purchaseFullScreen,
+          page: () => const PostFullScreen(),
         ),
       ];
 }

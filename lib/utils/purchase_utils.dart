@@ -36,6 +36,24 @@ class PurchaseUtils extends Postable<Purchase, Purchase> {
     }
   }
 
+  Future<Resource<List<QueryDocumentSnapshot<Purchase>>>> fetchSoldItems(String uid) async{
+    try {
+      final QuerySnapshot<Purchase> res = await ref
+          .orderBy("boughtOn", descending: true)
+          .where("sellerId", isEqualTo: uid)
+          .limit(_limit)
+          .get();
+      final List<QueryDocumentSnapshot<Purchase>> data = res.docs;
+      return Success(data);
+    } on FirebaseException catch (e) {
+      return Failure<List<QueryDocumentSnapshot<Purchase>>>(
+          e.message.toString());
+    } catch (e) {
+      return Failure<List<QueryDocumentSnapshot<Purchase>>>(e.toString());
+    }
+
+  }
+
   @override
   Future<Resource<List<QueryDocumentSnapshot<Purchase>>>> fetchMore(
       QueryDocumentSnapshot<Purchase> lastPost,
@@ -56,6 +74,27 @@ class PurchaseUtils extends Postable<Purchase, Purchase> {
       return Failure<List<QueryDocumentSnapshot<Purchase>>>(e.toString());
     }
   }
+
+  Future<Resource<List<QueryDocumentSnapshot<Purchase>>>> fetchMoreSoldItems(
+      QueryDocumentSnapshot<Purchase> lastPost,
+      List<String> genre,
+      String uid) async {
+    try {
+      final res = await ref
+          .limit(_limit)
+          .orderBy("boughtOn", descending: true)
+          .where("sellerId", isEqualTo: uid)
+          .startAfterDocument(lastPost)
+          .get();
+      return Success(res.docs);
+    } on FirebaseException catch (e) {
+      return Failure<List<QueryDocumentSnapshot<Purchase>>>(
+          e.message.toString());
+    } catch (e) {
+      return Failure<List<QueryDocumentSnapshot<Purchase>>>(e.toString());
+    }
+  }
+
 
   @override
   Future<Resource<int>> like(String id) {

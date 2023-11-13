@@ -90,7 +90,7 @@ class NewPostsPage extends StatelessWidget {
                           );
                         } else {
                           return const SizedBox(
-                            height: 0,
+                            height: 100,
                           );
                         }
                       }

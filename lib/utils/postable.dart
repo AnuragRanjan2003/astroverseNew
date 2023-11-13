@@ -24,5 +24,7 @@ abstract class Postable<T, T2> {
 
   Stream<QuerySnapshot<T2>> likedStream(String uid);
 
-  Future<Resource<Json>> update(Json data, String id) ;
+  static Future<Resource<Json>> update(Json data, String id) async {
+    return Failure("unimplemented");
+  }
 }

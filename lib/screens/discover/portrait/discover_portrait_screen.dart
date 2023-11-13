@@ -17,7 +17,6 @@ class DiscoverScreenPortrait extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final AuthController auth = Get.find();
-    final MainController main = Get.find();
     var theme = Theme.of(context);
     final ht = cons.maxHeight;
     final wd = cons.maxWidth;
@@ -34,7 +33,7 @@ class DiscoverScreenPortrait extends StatelessWidget {
                 onPressed: () {
                   Get.toNamed(Routes.createPostScreen);
                 },
-                backgroundColor: Colors.lightBlue.shade300,
+                backgroundColor: Colors.lightBlue,
                 elevation: 0,
                 shape: const RoundedRectangleBorder(
                     borderRadius: BorderRadius.all(Radius.circular(20))),
@@ -88,11 +87,14 @@ class DiscoverScreenPortrait extends StatelessWidget {
           ),
         ),
         child: const TabBar(
-            indicatorPadding: EdgeInsets.symmetric(horizontal: 10),
-            indicator: BoxDecoration(),
+          indicatorPadding: EdgeInsets.symmetric(horizontal: 0,vertical: 2),
+            indicator: BoxDecoration(
+              borderRadius: BorderRadius.all(Radius.circular(15)),
+              color: Colors.blue
+            ),
             indicatorColor: Colors.transparent,
-            indicatorSize: TabBarIndicatorSize.label,
-            labelColor: Colors.lightBlue,
+            indicatorSize: TabBarIndicatorSize.tab,
+            labelColor: Colors.white,
             tabs: [
               Tab(
                 text: 'new',

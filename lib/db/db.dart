@@ -11,6 +11,7 @@ import 'package:astroverse/models/transaction.dart' as t;
 import 'package:astroverse/models/user.dart' as models;
 import 'package:astroverse/res/strings/backend_strings.dart';
 import 'package:astroverse/utils/comment_utils.dart';
+import 'package:astroverse/utils/postable.dart';
 import 'package:astroverse/utils/purchase_utils.dart';
 import 'package:astroverse/utils/resource.dart';
 import 'package:astroverse/utils/safe_call.dart';
@@ -66,8 +67,6 @@ class Database {
                 Purchase.fromJson(snapshot.data()!),
             toFirestore: (value, options) => value.toJson(),
           );
-
-
 
   CollectionReference<models.User> _followingCollection(String uid) =>
       FirebaseFirestore.instance
@@ -347,13 +346,14 @@ class Database {
 
   Future<Resource<Json>> updatePurchase(
           Json data, String id, String buyerId, String sellerId) async =>
-      await PurchaseUtils(_purchasesCollection(sellerId),
-              _purchasesCollection(buyerId))
+      await PurchaseUtils(
+              _purchasesCollection(sellerId), _purchasesCollection(buyerId))
           .update(data, id);
 
   Future<Resource<List<QueryDocumentSnapshot<Purchase>>>> fetchPurchases(
           String buyerUid) async =>
-      await PurchaseUtils(_purchasesCollection(buyerUid), _purchasesCollection(buyerUid))
+      await PurchaseUtils(
+              _purchasesCollection(buyerUid), _purchasesCollection(buyerUid))
           .fetchByGenreAndPage([], buyerUid);
 
   Future<Resource<List<QueryDocumentSnapshot<Purchase>>>> fetchMorePurchases(
@@ -361,5 +361,15 @@ class Database {
       await PurchaseUtils(_purchasesCollection(buyerUid), null)
           .fetchMore(lastPost, [], buyerUid);
 
-  updateService(Json data, String serviceId) async {}
+  Future<Resource<List<QueryDocumentSnapshot<Purchase>>>> fetchSoldItems(
+          String uid) async =>
+      await PurchaseUtils(_purchasesCollection(uid), _purchasesCollection(uid))
+          .fetchSoldItems(uid);
+
+  Future<Resource<List<QueryDocumentSnapshot<Purchase>>>> fetchMoreSoldItems(
+          QueryDocumentSnapshot<Purchase> lastPost, String uid) async =>
+      await PurchaseUtils(_purchasesCollection(uid), null)
+          .fetchMore(lastPost, [], uid);
+
+  Future<Resource<Json>> updateService(Json data, String serviceId , String uid) async => await ServiceUtils(uid).update(data, serviceId);
 }
