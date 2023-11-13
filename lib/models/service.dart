@@ -9,23 +9,26 @@ class Service extends Post {
   double price;
   int uses;
   String place;
-  String lastDate;
+  DateTime lastDate;
+  DateTime date;
 
   Service({
     required this.price,
     required this.uses,
+    @JsonKey(fromJson: _dateFromTimeStamp, toJson: _dateAsIs)
     required this.lastDate,
     required super.lat,
     required super.lng,
     required super.title,
     required super.description,
     required super.genre,
-    required super.date,
+    @JsonKey(fromJson: _dateFromTimeStamp, toJson: _dateAsIs)
+    required this.date,
     required super.imageUrl,
     required super.authorName,
     required super.authorId,
     required this.place,
-  });
+  }):super(date: date);
 
   factory Service.fromJson(json) => _$ServiceFromJson(json);
 
@@ -36,6 +39,10 @@ class Service extends Post {
   String toString() {
     return "Service(id : $id ,title : $title ,descr: $description , genre : ${genre.toString()} , date : ${date.toString()} , image : $imageUrl , upVotes : $upVotes , comments : $comments , author : $authorName , authorId : $authorId )\n";
   }
+  static DateTime _dateFromTimeStamp(Timestamp timestamp) =>
+      DateTime.parse(timestamp.toDate().toString());
+
+  static DateTime _dateAsIs(DateTime dateTime) => dateTime;
 
 
 }

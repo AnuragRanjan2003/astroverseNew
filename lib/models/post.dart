@@ -1,8 +1,9 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:json_annotation/json_annotation.dart';
 
 part 'post.g.dart';
 
-@JsonSerializable()
+@JsonSerializable(anyMap: true)
 class Post {
   String id; // no need to provide id ,  will be automatically generated
   final String title;
@@ -25,6 +26,7 @@ class Post {
     required this.title,
     required this.description,
     required this.genre,
+    @JsonKey(fromJson: _dateFromTimeStamp, toJson: _dateAsIs)
     required this.date,
     required this.imageUrl,
     this.upVotes = 0,
@@ -42,4 +44,9 @@ class Post {
   String toString() {
     return "Post(id : $id ,title : $title ,descr: $description , genre : ${genre.toString()} , date : ${date.toString()} , image : $imageUrl , upVotes : $upVotes , comments : $comments , views : $views , author : $authorName , authorId : $authorId )";
   }
+  static DateTime _dateFromTimeStamp(Timestamp timestamp) =>
+      DateTime.parse(timestamp.toDate().toString());
+
+  static DateTime _dateAsIs(DateTime dateTime) => dateTime;
+
 }

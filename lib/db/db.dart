@@ -31,6 +31,13 @@ class Database {
         toFirestore: (user, options) => user.toJson(),
       );
 
+  final _serviceCollection = FirebaseFirestore.instance
+      .collection(BackEndStrings.serviceCollection)
+      .withConverter<Service>(
+    fromFirestore: (snapshot, options) => Service.fromJson(snapshot.data()),
+    toFirestore: (item, options) => item.toJson(),
+  );
+
   final _postCollection = FirebaseFirestore.instance
       .collection(BackEndStrings.postCollection)
       .withConverter<Post>(
@@ -88,7 +95,7 @@ class Database {
             toFirestore: (value, options) => value.toJson(),
           );
 
-  DocumentReference<ExtraInfo> _extraInfoCollection(String uid) =>
+  DocumentReference<ExtraInfo> _extraInfoDocument(String uid) =>
       FirebaseFirestore.instance
           .collection(BackEndStrings.userCollection)
           .doc(uid)
@@ -309,7 +316,7 @@ class Database {
 
   Future<Resource<ExtraInfo>> getExtraInfo(String uid) async {
     try {
-      final res = await _extraInfoCollection(uid).get();
+      final res = await _extraInfoDocument(uid).get();
       if (res.data() != null) return Success<ExtraInfo>(res.data()!);
       return Failure<ExtraInfo>("null returned");
     } on FirebaseException catch (e) {
@@ -321,7 +328,7 @@ class Database {
 
   Future<Resource<SetInfo>> setExtraInfo(ExtraInfo info, String uid) async {
     try {
-      await _extraInfoCollection(uid).set(info, SetOptions(merge: true));
+      await _extraInfoDocument(uid).set(info, SetOptions(merge: true));
       return Success<SetInfo>("set data");
     } on FirebaseException catch (e) {
       return Failure<SetInfo>(e.message.toString());
@@ -332,7 +339,7 @@ class Database {
 
   Future<Resource<SetInfo>> updateExtraInfo(String uid, Json data) async {
     try {
-      await _extraInfoCollection(uid).update(data);
+      await _extraInfoDocument(uid).update(data);
       return Success<SetInfo>("done");
     } on FirebaseException catch (e) {
       return Failure<SetInfo>(e.message.toString());
@@ -354,35 +361,35 @@ class Database {
 
   Future<Resource<Purchase>> postPurchase(Purchase purchase) async {
     return await PurchaseUtils(_purchasesCollection(purchase.buyerId),
-            _purchasesCollection(purchase.sellerId))
+            _purchasesCollection(purchase.sellerId),_serviceCollection,_extraInfoDocument(purchase.sellerId))
         .savePost(purchase);
   }
 
   Future<Resource<Json>> updatePurchase(
           Json data, String id, String buyerId, String sellerId) async =>
       await PurchaseUtils(
-              _purchasesCollection(sellerId), _purchasesCollection(buyerId))
+              _purchasesCollection(sellerId), _purchasesCollection(buyerId),null,null)
           .update(data, id);
 
   Future<Resource<List<QueryDocumentSnapshot<Purchase>>>> fetchPurchases(
           String buyerUid) async =>
       await PurchaseUtils(
-              _purchasesCollection(buyerUid), _purchasesCollection(buyerUid))
+              _purchasesCollection(buyerUid), _purchasesCollection(buyerUid),null,null)
           .fetchByGenreAndPage([], buyerUid);
 
   Future<Resource<List<QueryDocumentSnapshot<Purchase>>>> fetchMorePurchases(
           QueryDocumentSnapshot<Purchase> lastPost, String buyerUid) async =>
-      await PurchaseUtils(_purchasesCollection(buyerUid), null)
+      await PurchaseUtils(_purchasesCollection(buyerUid), null,null,null)
           .fetchMore(lastPost, [], buyerUid);
 
   Future<Resource<List<QueryDocumentSnapshot<Purchase>>>> fetchSoldItems(
           String uid) async =>
-      await PurchaseUtils(_purchasesCollection(uid), _purchasesCollection(uid))
+      await PurchaseUtils(_purchasesCollection(uid), _purchasesCollection(uid),null,null)
           .fetchSoldItems(uid);
 
   Future<Resource<List<QueryDocumentSnapshot<Purchase>>>> fetchMoreSoldItems(
           QueryDocumentSnapshot<Purchase> lastPost, String uid) async =>
-      await PurchaseUtils(_purchasesCollection(uid), null)
+      await PurchaseUtils(_purchasesCollection(uid), null,null,null)
           .fetchMore(lastPost, [], uid);
 
   Future<Resource<Json>> updateService(Json data, String serviceId , String uid) async => await ServiceUtils(uid).update(data, serviceId);

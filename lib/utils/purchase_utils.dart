@@ -7,9 +7,12 @@ typedef Json = Map<String, dynamic>;
 
 class PurchaseUtils extends Postable<Purchase, Purchase> {
   final _db = FirebaseFirestore.instance;
+  final CollectionReference? servicesCollection;
+  final DocumentReference? extraInfoDocument;
   static const int _limit = 20;
 
-  PurchaseUtils(super.ref, super.likeRef);
+  PurchaseUtils(super.ref, super.likeRef, this.servicesCollection,
+      this.extraInfoDocument);
 
   @override
   Future<Resource<int>> dislike(String id) {
@@ -36,7 +39,8 @@ class PurchaseUtils extends Postable<Purchase, Purchase> {
     }
   }
 
-  Future<Resource<List<QueryDocumentSnapshot<Purchase>>>> fetchSoldItems(String uid) async{
+  Future<Resource<List<QueryDocumentSnapshot<Purchase>>>> fetchSoldItems(
+      String uid) async {
     try {
       final QuerySnapshot<Purchase> res = await ref
           .orderBy("boughtOn", descending: true)
@@ -51,7 +55,6 @@ class PurchaseUtils extends Postable<Purchase, Purchase> {
     } catch (e) {
       return Failure<List<QueryDocumentSnapshot<Purchase>>>(e.toString());
     }
-
   }
 
   @override
@@ -95,7 +98,6 @@ class PurchaseUtils extends Postable<Purchase, Purchase> {
     }
   }
 
-
   @override
   Future<Resource<int>> like(String id) {
     // TODO: implement like
@@ -114,6 +116,12 @@ class PurchaseUtils extends Postable<Purchase, Purchase> {
       final batch = _db.batch();
       batch.set(ref.doc(purchase.purchaseId), purchase);
       batch.set(likeRef!.doc(purchase.purchaseId), purchase);
+      batch.update(servicesCollection!.doc(purchase.itemId), {
+        "uses": FieldValue.increment(1),
+        "lastDate": FieldValue.serverTimestamp()
+      });
+      batch
+          .update(extraInfoDocument!, {"servicesSold": FieldValue.increment(1)});
       await batch.commit();
       return Success<Purchase>(purchase);
     } on FirebaseException catch (e) {
