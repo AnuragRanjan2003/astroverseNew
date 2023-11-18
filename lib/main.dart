@@ -1,9 +1,11 @@
+import 'dart:developer';
+
 import 'package:astroverse/controllers/location_controller.dart';
 import 'package:astroverse/firebase_options.dart';
 import 'package:astroverse/res/colors/project_colors.dart';
 import 'package:astroverse/routes/routes.dart';
+import 'package:astroverse/utils/crypt.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
-import 'package:firebase_app_check/firebase_app_check.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
@@ -16,20 +18,24 @@ void main() async {
   final app = await Firebase.initializeApp(
       options: DefaultFirebaseOptions.currentPlatform);
   await dotenv.load(fileName: '.env');
-  await FirebaseAppCheck.instance
-      .activate(
-    webProvider: ReCaptchaV3Provider('recaptcha-v3-site-key'),
-    androidProvider: AndroidProvider.playIntegrity,
-    appleProvider: AppleProvider.appAttest,
-  );
+
+  // await FirebaseAppCheck.instance
+  //     .activate(
+  //   webProvider: ReCaptchaV3Provider('recaptcha-v3-site-key'),
+  //   androidProvider: AndroidProvider.playIntegrity,
+  //   appleProvider: AppleProvider.appAttest,
+  // );
   final analytics = FirebaseAnalytics.instanceFor(app: app);
   analytics.logEvent(name: "login");
   ZegoUIKitPrebuiltCallInvitationService().setNavigatorKey(navigatorKey);
-  runApp(MyApp(navigatorKey: navigatorKey,));
+  runApp(MyApp(
+    navigatorKey: navigatorKey,
+  ));
 }
 
 class MyApp extends StatelessWidget {
   final GlobalKey<NavigatorState> navigatorKey;
+
   const MyApp({super.key, required this.navigatorKey});
 
   static FirebaseAnalytics analytics = FirebaseAnalytics.instance;
@@ -47,7 +53,6 @@ class MyApp extends StatelessWidget {
       navigatorKey: navigatorKey,
       debugShowCheckedModeBanner: false,
       getPages: AppRoutes.getPages,
-
       theme: ThemeData(
         fontFamily: 'Poppins',
         colorScheme: ColorScheme.fromSeed(seedColor: ProjectColors.primary),

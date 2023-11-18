@@ -117,7 +117,7 @@ class PurchasesPortrait extends StatelessWidget {
             itemBuilder: (context, index) {
               if (index == 0) {
                 return const SizedBox(
-                  height: 60,
+                  height: 130,
                 );
               } else if (index == list.length + 1) {
                 return Padding(

@@ -41,7 +41,7 @@ class ServiceController extends GetxController {
   RxString searchText = "".obs;
   RxBool paymentLoading = false.obs;
   RxDouble imageSize = 0.45.obs;
-  final searchController= TextEditingController(text: "");
+  final searchController = TextEditingController(text: "");
 
   final razorPayUtils = RazorPayUtils();
 
@@ -72,15 +72,19 @@ class ServiceController extends GetxController {
         review: null,
         deliveredOn: null);
     final res1 = await _repo.postPurchase(purchase);
+    final res2 = await _repo.updateService(
+        {"lastDate": FieldValue.serverTimestamp()}, item.id, item.authorId);
 
-    if (res is Success<void> && res1.isSuccess) {
+    if (res is Success<void> && res1.isSuccess && res2.isSuccess) {
       log("transaction recorder", name: "TRANSACTION");
       log("purchase recorder", name: "PURCHASE");
     } else {
       res as Failure<void>;
       res1 as Failure<Purchase>;
+      res2 as Failure<Json>;
       log("error", name: "TRANSACTION");
       log(res1.error, name: "PURCHASE");
+      log(res2.error, name: "UPDATE SERVICE");
     }
   }
 
@@ -142,7 +146,7 @@ class ServiceController extends GetxController {
     image.value = img;
   }
 
-  postService(Service s) {
+  postService(Service s, Function() updateUI) {
     final id = const Uuid().v4();
     s.id = id;
     loading.value = 1;
@@ -150,6 +154,7 @@ class ServiceController extends GetxController {
       s.imageUrl = BackEndStrings.defaultServiceImage;
       _repo.saveService(s, id).then((value) {
         loading.value = 0;
+        updateUI();
         if (value.isSuccess) {
           log('service posted', name: tag);
         } else {
@@ -166,12 +171,14 @@ class ServiceController extends GetxController {
         s.imageUrl = (value as Success<String>).data;
         _repo.saveService(s, id).then((value) {
           loading.value = 0;
-
+          updateUI();
           if (value.isSuccess) {
             log('service posted', name: tag);
+            updateUI();
           } else {
             value = value as Failure<Service>;
             log('failed ${value.error}', name: tag);
+            updateUI();
           }
         });
       } else {

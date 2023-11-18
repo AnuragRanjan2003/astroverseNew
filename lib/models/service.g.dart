@@ -17,6 +17,8 @@ Service _$ServiceFromJson(Map json) => Service(
       genre: (json['genre'] as List<dynamic>).map((e) => e as String).toList(),
       date: Service._dateFromTimeStamp(json['date'] as Timestamp),
       imageUrl: json['imageUrl'] as String,
+      geoHash: Service._genGeoHashNullSafe((json['lat'] as num).toDouble(),
+          (json['lng'] as num).toDouble(), json["geoHash"]),
       authorName: json['authorName'] as String,
       authorId: json['authorId'] as String,
       place: json['place'] as String,
@@ -38,6 +40,7 @@ Map<String, dynamic> _$ServiceToJson(Service instance) => <String, dynamic>{
       'price': instance.price,
       'uses': instance.uses,
       'place': instance.place,
-      'lastDate': instance.lastDate.toIso8601String(),
-      'date1': instance.date.toIso8601String(),
+      'geoHash': instance.geoHash,
+      'lastDate': Service._dateAsIs(instance.lastDate),
+      'date': Service._dateAsIs(instance.date),
     };

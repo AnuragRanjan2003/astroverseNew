@@ -121,8 +121,8 @@ class Database {
 
   Future<bool> checkForUserData(String uid) async {
     final res =
-        await _userCollection.where('uid', isEqualTo: uid).count().get();
-    if (res.count == 0) return false;
+        await _userCollection.where('uid', isEqualTo: uid).get();
+    if (res.docs.isEmpty) return false;
     return true;
   }
 

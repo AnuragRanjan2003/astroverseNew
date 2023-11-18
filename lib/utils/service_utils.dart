@@ -3,6 +3,7 @@ import 'package:astroverse/models/service.dart';
 import 'package:astroverse/utils/postable.dart';
 import 'package:astroverse/utils/resource.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:dart_geohash/dart_geohash.dart';
 
 import '../res/strings/backend_strings.dart';
 
@@ -106,6 +107,8 @@ class ServiceUtils extends Postable<Service, SaveService> {
 
   @override
   Future<Resource<Service>> savePost(Service post) async {
+    final point = GeoHasher().encode(post.lat, post.lng);
+    post.geoHash = point;
     try {
       await ref.doc(post.id).set(post);
       return Success(post);
@@ -117,7 +120,7 @@ class ServiceUtils extends Postable<Service, SaveService> {
   }
 
   @override
-  Future<Resource<Json>> update(Json data, String id)async {
+  Future<Resource<Json>> update(Json data, String id) async {
     try {
       await ref.doc(id).update(data);
       return Success<Json>(data);
@@ -126,6 +129,5 @@ class ServiceUtils extends Postable<Service, SaveService> {
     } catch (e) {
       return Failure<Json>(e.toString());
     }
-
   }
 }

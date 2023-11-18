@@ -65,8 +65,16 @@ class CreateServicePortrait extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text('Create\na Gig',style: TextStyle(fontSize: 30,color: ProjectColors.lightBlack , fontWeight: FontWeight.bold),),
-                const SizedBox(height: 8,),
+                const Text(
+                  'Create\na Gig',
+                  style: TextStyle(
+                      fontSize: 30,
+                      color: ProjectColors.lightBlack,
+                      fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(
+                  height: 8,
+                ),
                 Expanded(
                   child: SingleChildScrollView(
                     child: Column(
@@ -260,12 +268,18 @@ class CreateServicePortrait extends StatelessWidget {
                                         _list.keys.toList()[
                                             service.selectedItem.value]
                                       ],
+                                      geoHash: "",
                                       date: DateTime.now(),
                                       place: place.value.text,
                                       imageUrl: '',
                                       authorName: user.name,
                                       authorId: user.uid);
-                                  service.postService(res);
+                                  service.postService(res, () {
+                                    price.clear();
+                                    title.clear();
+                                    body.clear();
+                                    place.clear();
+                                  });
                                 }
                               : null,
                           color: ProjectColors.lightBlack,
