@@ -3,13 +3,16 @@ import 'dart:developer';
 import 'package:astroverse/components/load_more_button.dart';
 import 'package:astroverse/components/mart_item.dart';
 import 'package:astroverse/components/search_box.dart';
+import 'package:astroverse/controllers/location_controller.dart';
 import 'package:astroverse/controllers/service_controller.dart';
 import 'package:astroverse/models/service.dart';
 import 'package:astroverse/res/colors/project_colors.dart';
 import 'package:astroverse/routes/routes.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:location/location.dart';
 
 import '../../../controllers/auth_controller.dart';
 
@@ -23,7 +26,12 @@ class MartScreenPortrait extends StatelessWidget {
   Widget build(BuildContext context) {
     final AuthController auth = Get.find();
     final ServiceController service = Get.find();
-    service.fetchServiceByGenreAndPage([], auth.user.value!.uid, (e) {});
+    final LocationController location = Get.find();
+    service.fetchServiceByLocation(
+      auth.user.value!.uid,
+      (e) {},
+      location.location.value!.geoPointFromLocationData()!,
+    );
 
     service.selectedItem.listen((p0) {
       log(p0.toString(), name: "on select");
@@ -58,7 +66,7 @@ class MartScreenPortrait extends StatelessWidget {
               child: RefreshIndicator(
                 onRefresh: () async {
                   await service
-                      .onRefresh([], auth.user.value!.uid, (p0) => null);
+                      .onRefresh(auth.user.value!.uid, (p0) => null,location.location.value!.geoPointFromLocationData()!);
                   return;
                 },
                 child: Stack(
@@ -221,4 +229,11 @@ class MartScreenPortrait extends StatelessWidget {
   }
 
   void _postItemScreen() => Get.toNamed(Routes.createServiceScreen);
+}
+
+extension on LocationData {
+  GeoPoint? geoPointFromLocationData() {
+    if (latitude == null || longitude == null) return null;
+    return GeoPoint(latitude!, longitude!);
+  }
 }

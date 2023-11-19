@@ -232,6 +232,41 @@ class ServiceController extends GetxController {
     }
   }
 
+  void fetchServiceByLocation(
+      String uid, Function(List<Service>) onFetch, GeoPoint userLocation) {
+    log("loading  posts", name: "POST LIST");
+    if (lastPost.value == null) {
+      log("null", name: "LP");
+    } else {
+      log(lastPost.value!.data().toString(), name: "LP");
+      return;
+    }
+    loadingMorePosts.value = true;
+    _repo.fetchByLocation(uid, userLocation).then((value) {
+      loadingMorePosts.value = false;
+      if (value.isSuccess) {
+        value = value as Success<List<QueryDocumentSnapshot<Service>>>;
+        List<Service> list = [];
+        for (var element in value.data) {
+          if (element.exists ) {
+            if(element.data().authorId!=uid)list.add(element.data());
+            lastPost.value = element;
+          }
+        }
+        //log("${lastPost.value!.data()}", name: "IS NULL");
+        log(list.length.toString(), name: "GOT SERVICE LIST");
+        log(list.toString(), name: "GOT SERVICE LIST");
+        serviceList.value = list;
+        nothingToShow.value = list.isEmpty;
+        onFetch(list);
+        log(serviceList.length.toString(), name: "SERVICE LIST SUCCESS");
+      } else {
+        value = value as Failure<List<QueryDocumentSnapshot<Service>>>;
+        log(value.error, name: "SERVICE LIST FAILED");
+      }
+    });
+  }
+
   void fetchServiceByGenreAndPage(
       List<String> genre, String uid, Function(List<Service>) onFetch) {
     log("loading  posts", name: "POST LIST");
@@ -267,8 +302,8 @@ class ServiceController extends GetxController {
     });
   }
 
-  Future<void> onRefresh(
-      List<String> genre, String uid, Function(List<Service>) onFetch) async {
+  Future<void> onRefresh(String uid, Function(List<Service>) onFetch,
+      GeoPoint userLocation) async {
     clearList();
     log("loading  posts", name: "POST LIST");
     if (lastPost.value == null) {
@@ -277,12 +312,12 @@ class ServiceController extends GetxController {
       log(lastPost.value!.data().toString(), name: "LP");
       return;
     }
-    var value = await _repo.fetchPostsByGenreAndPage(genre, uid);
+    var value = await _repo.fetchByLocation(uid, userLocation);
     if (value.isSuccess) {
       value = value as Success<List<QueryDocumentSnapshot<Service>>>;
       List<Service> list = [];
       for (var element in value.data) {
-        if (element.exists) {
+        if (element.exists && element.data().authorId != uid) {
           list.add(element.data());
           lastPost.value = element;
         }

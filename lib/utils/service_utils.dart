@@ -1,5 +1,6 @@
 import 'package:astroverse/models/save_service.dart';
 import 'package:astroverse/models/service.dart';
+import 'package:astroverse/utils/geo.dart';
 import 'package:astroverse/utils/postable.dart';
 import 'package:astroverse/utils/resource.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -57,6 +58,36 @@ class ServiceUtils extends Postable<Service, SaveService> {
           .orderBy("date", descending: true)
           .get();
       final data = res.docs;
+      return Success(data);
+    } on FirebaseException catch (e) {
+      return Failure<List<QueryDocumentSnapshot<Service>>>(
+          e.message.toString());
+    } catch (e) {
+      return Failure<List<QueryDocumentSnapshot<Service>>>(e.toString());
+    }
+  }
+
+  Future<Resource<List<QueryDocumentSnapshot<Service>>>> fetchByLocation(
+      String uid, GeoPoint userLocation) async {
+    try {
+      Query<Service> queryLocality = Geo()
+          .createGeoQuery(ref, Ranges.localityRadius, userLocation)
+          .where("range", isEqualTo: Ranges.locality)
+          .orderBy("geoHash")
+          .orderBy("date", descending: true)
+          .limit(_limit);
+
+      Query<Service> queryCity = Geo()
+          .createGeoQuery(ref, Ranges.cityRadius, userLocation)
+          .where("range", isEqualTo: Ranges.city)
+          .orderBy("geoHash")
+          .orderBy("date", descending: true)
+          .limit(_limit);
+      final List<QueryDocumentSnapshot<Service>> data = [];
+      final res1 = await queryLocality.get();
+      final res2 = await queryCity.get();
+      data.addIfNotUser(uid, res1.docs);
+      data.addIfNotUser(uid, res2.docs);
       return Success(data);
     } on FirebaseException catch (e) {
       return Failure<List<QueryDocumentSnapshot<Service>>>(
@@ -128,6 +159,14 @@ class ServiceUtils extends Postable<Service, SaveService> {
       return Failure<Json>(e.message.toString());
     } catch (e) {
       return Failure<Json>(e.toString());
+    }
+  }
+}
+
+extension on List<QueryDocumentSnapshot<Service>> {
+  addIfNotUser(String userId, Iterable<QueryDocumentSnapshot<Service>> itr) {
+    for (var it in itr) {
+      if (it.data().authorId != userId) add(it);
     }
   }
 }

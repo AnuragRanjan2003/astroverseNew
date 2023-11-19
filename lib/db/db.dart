@@ -34,9 +34,9 @@ class Database {
   final _serviceCollection = FirebaseFirestore.instance
       .collection(BackEndStrings.serviceCollection)
       .withConverter<Service>(
-    fromFirestore: (snapshot, options) => Service.fromJson(snapshot.data()),
-    toFirestore: (item, options) => item.toJson(),
-  );
+        fromFirestore: (snapshot, options) => Service.fromJson(snapshot.data()),
+        toFirestore: (item, options) => item.toJson(),
+      );
 
   final _postCollection = FirebaseFirestore.instance
       .collection(BackEndStrings.postCollection)
@@ -45,14 +45,15 @@ class Database {
         toFirestore: (value, options) => value.toJson(),
       );
 
-  CollectionReference<Post> _userPostCollection(String uid) => FirebaseFirestore.instance
+  CollectionReference<Post> _userPostCollection(String uid) => FirebaseFirestore
+      .instance
       .collection(BackEndStrings.userCollection)
       .doc(uid)
       .collection(BackEndStrings.postCollection)
       .withConverter<Post>(
-    fromFirestore: (snapshot, options) => Post.fromJson(snapshot.data()!),
-    toFirestore: (value, options) => value.toJson(),
-  );
+        fromFirestore: (snapshot, options) => Post.fromJson(snapshot.data()!),
+        toFirestore: (value, options) => value.toJson(),
+      );
 
   final _transactionCollection = FirebaseFirestore.instance
       .collection(BackEndStrings.transactionCollection)
@@ -120,8 +121,7 @@ class Database {
           () async => await _userCollection.doc(uid).get());
 
   Future<bool> checkForUserData(String uid) async {
-    final res =
-        await _userCollection.where('uid', isEqualTo: uid).get();
+    final res = await _userCollection.where('uid', isEqualTo: uid).get();
     if (res.docs.isEmpty) return false;
     return true;
   }
@@ -197,11 +197,14 @@ class Database {
     }
   }
 
-  Future<Resource<int>> increaseVote(String id, String uid,String authorId) async {
+  Future<Resource<int>> increaseVote(
+      String id, String uid, String authorId) async {
     try {
       final batch = _fireStore.batch();
-      batch.update(_postCollection.doc(id), {"upVotes": FieldValue.increment(1)});
-      batch.set(_upVotedCollection(uid).doc(id), PostSave(id, DateTime.now().toString()));
+      batch.update(
+          _postCollection.doc(id), {"upVotes": FieldValue.increment(1)});
+      batch.set(_upVotedCollection(uid).doc(id),
+          PostSave(id, DateTime.now().toString()));
       final document = _userPostCollection(authorId).doc(id);
       batch.update(document, {"upVotes": FieldValue.increment(1)});
       await batch.commit();
@@ -213,10 +216,12 @@ class Database {
     }
   }
 
-  Future<Resource<int>> decreaseVote(String id, String uid , String authorId) async {
+  Future<Resource<int>> decreaseVote(
+      String id, String uid, String authorId) async {
     try {
       final batch = _fireStore.batch();
-      batch.update(_postCollection.doc(id), {"upVotes": FieldValue.increment(-1)});
+      batch.update(
+          _postCollection.doc(id), {"upVotes": FieldValue.increment(-1)});
       batch.delete(_upVotedCollection(uid).doc(id));
       final document = _userPostCollection(authorId).doc(id);
       batch.update(document, {"upVotes": FieldValue.increment(-1)});
@@ -360,37 +365,47 @@ class Database {
   }
 
   Future<Resource<Purchase>> postPurchase(Purchase purchase) async {
-    return await PurchaseUtils(_purchasesCollection(purchase.buyerId),
-            _purchasesCollection(purchase.sellerId),_serviceCollection,_extraInfoDocument(purchase.sellerId))
+    return await PurchaseUtils(
+            _purchasesCollection(purchase.buyerId),
+            _purchasesCollection(purchase.sellerId),
+            _serviceCollection,
+            _extraInfoDocument(purchase.sellerId))
         .savePost(purchase);
   }
 
   Future<Resource<Json>> updatePurchase(
           Json data, String id, String buyerId, String sellerId) async =>
-      await PurchaseUtils(
-              _purchasesCollection(sellerId), _purchasesCollection(buyerId),null,null)
+      await PurchaseUtils(_purchasesCollection(sellerId),
+              _purchasesCollection(buyerId), null, null)
           .update(data, id);
 
   Future<Resource<List<QueryDocumentSnapshot<Purchase>>>> fetchPurchases(
           String buyerUid) async =>
-      await PurchaseUtils(
-              _purchasesCollection(buyerUid), _purchasesCollection(buyerUid),null,null)
+      await PurchaseUtils(_purchasesCollection(buyerUid),
+              _purchasesCollection(buyerUid), null, null)
           .fetchByGenreAndPage([], buyerUid);
 
   Future<Resource<List<QueryDocumentSnapshot<Purchase>>>> fetchMorePurchases(
           QueryDocumentSnapshot<Purchase> lastPost, String buyerUid) async =>
-      await PurchaseUtils(_purchasesCollection(buyerUid), null,null,null)
+      await PurchaseUtils(_purchasesCollection(buyerUid), null, null, null)
           .fetchMore(lastPost, [], buyerUid);
 
   Future<Resource<List<QueryDocumentSnapshot<Purchase>>>> fetchSoldItems(
           String uid) async =>
-      await PurchaseUtils(_purchasesCollection(uid), _purchasesCollection(uid),null,null)
+      await PurchaseUtils(
+              _purchasesCollection(uid), _purchasesCollection(uid), null, null)
           .fetchSoldItems(uid);
 
   Future<Resource<List<QueryDocumentSnapshot<Purchase>>>> fetchMoreSoldItems(
           QueryDocumentSnapshot<Purchase> lastPost, String uid) async =>
-      await PurchaseUtils(_purchasesCollection(uid), null,null,null)
+      await PurchaseUtils(_purchasesCollection(uid), null, null, null)
           .fetchMore(lastPost, [], uid);
 
-  Future<Resource<Json>> updateService(Json data, String serviceId , String uid) async => await ServiceUtils(uid).update(data, serviceId);
+  Future<Resource<Json>> updateService(
+          Json data, String serviceId, String uid) async =>
+      await ServiceUtils(uid).update(data, serviceId);
+
+  Future<Resource<List<QueryDocumentSnapshot<Service>>>> fetchServiceByLocation(
+          String uid, GeoPoint userLocation) async =>
+      await ServiceUtils(uid).fetchByLocation(uid, userLocation);
 }

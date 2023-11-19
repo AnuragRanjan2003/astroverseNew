@@ -14,7 +14,7 @@ import 'package:astroverse/screens/post_full_screen/post_full_screen.dart';
 import 'package:astroverse/screens/profile/profile_screen.dart';
 import 'package:astroverse/screens/public_profile/public_profile_screen.dart';
 import 'package:astroverse/screens/purchasesScreen/purchases_screen.dart';
-import 'package:astroverse/screens/upiscreen/enter_upi_screen.dart';
+import 'package:astroverse/screens/askLocationScreen/ask_location_screen.dart';
 import 'package:astroverse/screens/userLogin/user_login_screen.dart';
 import 'package:astroverse/screens/userSignUp/user_sign_up_screen.dart';
 import 'package:get/get.dart';

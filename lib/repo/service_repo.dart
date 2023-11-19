@@ -49,4 +49,8 @@ class ServiceRepo {
 
   Future<Resource<Purchase>> postPurchase(Purchase p) async =>
       await _db.postPurchase(p);
+
+  Future<Resource<List<QueryDocumentSnapshot<Service>>>> fetchByLocation(
+          String uid, GeoPoint userLocation) async =>
+      await _db.fetchServiceByLocation(uid, userLocation);
 }

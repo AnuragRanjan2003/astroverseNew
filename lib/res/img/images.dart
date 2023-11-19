@@ -7,8 +7,9 @@ class ProjectImages{
   static const login = AssetImage('lib/assets/images/login.png');
   static const signup = AssetImage('lib/assets/images/signup.png');
   static const bank = AssetImage('lib/assets/images/bank.png');
-  static const phone = AssetImage('lib/assets/images/phone.png');
+  static const phone = AssetImage('lib/assets/images/otp_screen.png');
   static const planet = AssetImage('lib/assets/images/planet.png');
   static const emptyBox = AssetImage('lib/assets/images/empty_box.png');
   static const background = AssetImage('lib/assets/images/background.png');
+  static const location = AssetImage('lib/assets/images/location_map.png');
 }
