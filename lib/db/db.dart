@@ -11,6 +11,7 @@ import 'package:astroverse/models/transaction.dart' as t;
 import 'package:astroverse/models/user.dart' as models;
 import 'package:astroverse/res/strings/backend_strings.dart';
 import 'package:astroverse/utils/comment_utils.dart';
+import 'package:astroverse/utils/geo.dart';
 import 'package:astroverse/utils/purchase_utils.dart';
 import 'package:astroverse/utils/resource.dart';
 import 'package:astroverse/utils/safe_call.dart';
@@ -301,6 +302,80 @@ class Database {
   }
 
   Future<Resource<List<QueryDocumentSnapshot<models.User>>>>
+      fetchAstrologersByLocation(
+          String currentUid, GeoPoint userLocation) async {
+    try {
+      final Query<models.User> queryLocality = Geo()
+          .createGeoQuery(
+              _userCollection, VisibilityPlans.localityRadius, userLocation)
+          .where('plan', isEqualTo: VisibilityPlans.locality)
+          .where('astro', isEqualTo: true)
+          .limit(_limit);
+
+      final Query<models.User> queryCity = Geo()
+          .createGeoQuery(
+              _userCollection, VisibilityPlans.cityRadius, userLocation)
+          .where('astro', isEqualTo: true)
+          .where('plan', isEqualTo: VisibilityPlans.city)
+          .limit(_limit);
+
+      final resLocality = await queryLocality.get();
+      final resCity = await queryCity.get();
+
+      final List<QueryDocumentSnapshot<models.User>> data = [];
+      data.addOtherPeople(currentUid, resLocality.docs);
+      data.addOtherPeople(currentUid, resCity.docs);
+      return Success(data);
+    } on FirebaseException catch (e) {
+      return Failure<List<QueryDocumentSnapshot<models.User>>>(
+          e.message.toString());
+    } catch (e) {
+      return Failure<List<QueryDocumentSnapshot<models.User>>>(e.toString());
+    }
+  }
+
+  Future<Resource<List<QueryDocumentSnapshot<models.User>>>>
+      fetchMoreAstrologersByLocation(
+          QueryDocumentSnapshot<models.User>? lastForLocality,
+          QueryDocumentSnapshot<models.User>? lastForCity,
+          String currentUid,
+          GeoPoint userLocation) async {
+    try {
+      final List<QueryDocumentSnapshot<models.User>> data = [];
+      if (lastForLocality != null) {
+        final Query<models.User> queryLocality = Geo()
+            .createGeoQuery(
+                _userCollection, VisibilityPlans.localityRadius, userLocation)
+            .where('plan', isEqualTo: VisibilityPlans.locality)
+            .where('astro', isEqualTo: true)
+            .startAfterDocument(lastForLocality)
+            .limit(_limit);
+
+        final resLocality = await queryLocality.get();
+        data.addOtherPeople(currentUid, resLocality.docs);
+      }
+      if (lastForCity != null) {
+        final Query<models.User> queryCity = Geo()
+            .createGeoQuery(
+                _userCollection, VisibilityPlans.cityRadius, userLocation)
+            .where('astro', isEqualTo: true)
+            .where('plan', isEqualTo: VisibilityPlans.city)
+            .startAfterDocument(lastForCity)
+            .limit(_limit);
+        final resCity = await queryCity.get();
+        data.addOtherPeople(currentUid, resCity.docs);
+      }
+
+      return Success(data);
+    } on FirebaseException catch (e) {
+      return Failure<List<QueryDocumentSnapshot<models.User>>>(
+          e.message.toString());
+    } catch (e) {
+      return Failure<List<QueryDocumentSnapshot<models.User>>>(e.toString());
+    }
+  }
+
+  Future<Resource<List<QueryDocumentSnapshot<models.User>>>>
       fetchMoreAstrologers(
           QueryDocumentSnapshot<models.User> last, String currentUid) async {
     try {
@@ -408,4 +483,27 @@ class Database {
   Future<Resource<List<QueryDocumentSnapshot<Service>>>> fetchServiceByLocation(
           String uid, GeoPoint userLocation) async =>
       await ServiceUtils(uid).fetchByLocation(uid, userLocation);
+
+  Future<Resource<List<QueryDocumentSnapshot<Service>>>>
+      fetchMoreServicesByLocation(
+    String uid,
+    GeoPoint userLocation,
+    QueryDocumentSnapshot<Service>? lastForLocality,
+    QueryDocumentSnapshot<Service>? lastForCity,
+  ) =>
+          ServiceUtils(uid).fetchMoreByLocation(
+            lastForLocality,
+            lastForCity,
+            userLocation,
+            uid,
+          );
+}
+
+extension on List<QueryDocumentSnapshot<models.User>> {
+  addOtherPeople(
+      String userId, Iterable<QueryDocumentSnapshot<models.User>> itr) {
+    for (var it in itr) {
+      if (it.data().uid != userId) add(it);
+    }
+  }
 }

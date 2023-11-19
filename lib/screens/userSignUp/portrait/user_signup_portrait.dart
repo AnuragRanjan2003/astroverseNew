@@ -94,8 +94,17 @@ class UserSignUpPortrait extends StatelessWidget {
                                 password.value.text.isEmpty ||
                                 name.value.text.isEmpty) return;
                             auth.pass.value = password.value.text;
-                            final User user = User(name.value.text,
-                                email.value.text, "", 0, "", false, "", "");
+                            final User user = User(
+                              name.value.text,
+                              email.value.text,
+                              "",
+                              0,
+                              "",
+                              false,
+                              "",
+                              "",
+                              ""
+                            );
                             Get.toNamed(Routes.upiScreen,
                                 arguments: Parcel(data: user, google: false));
                           },
@@ -109,22 +118,25 @@ class UserSignUpPortrait extends StatelessWidget {
                         ),
                         MaterialButton(
                           onPressed: () {
-                            final loc=  location.location.value;
-                            GeoPoint? geo ;
-                            if(loc!=null) geo = GeoPoint(loc.latitude!, loc.longitude!);
+                            final loc = location.location.value;
+                            GeoPoint? geo;
+                            if (loc != null)
+                              geo = GeoPoint(loc.latitude!, loc.longitude!);
                             auth.signUpWithGoogle((p0) {
                               auth.saveGoogleData(
                                   p0,
                                   (value) {
                                     Get.toNamed(Routes.upiScreen,
-                                        arguments: Parcel(data: p0, google: true));
+                                        arguments:
+                                            Parcel(data: p0, google: true));
                                   },
                                   false,
                                   () {
                                     Get.toNamed(Routes.upiScreen,
-                                        arguments: Parcel(data: p0, google: true));
+                                        arguments:
+                                            Parcel(data: p0, google: true));
                                   });
-                            }, false , geo);
+                            }, false, geo);
                           },
                           shape: ButtonDecors.outlined,
                           padding: const EdgeInsets.symmetric(vertical: 12),

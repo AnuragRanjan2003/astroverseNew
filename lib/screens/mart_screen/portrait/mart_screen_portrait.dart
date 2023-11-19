@@ -41,8 +41,8 @@ class MartScreenPortrait extends StatelessWidget {
       service.searchText.value = service.searchController.value.text;
     });
 
-    loadMore() =>
-        service.fetchMoreServices(auth.user.value!.uid, [], (p0) => null);
+    loadMore() => service.fetchMoreServicesByLocation(auth.user.value!.uid,
+        location.location.value!.geoPointFromLocationData()!, (p0) => null);
 
     return Scaffold(
       backgroundColor: ProjectColors.greyBackground,
@@ -65,8 +65,8 @@ class MartScreenPortrait extends StatelessWidget {
             Expanded(
               child: RefreshIndicator(
                 onRefresh: () async {
-                  await service
-                      .onRefresh(auth.user.value!.uid, (p0) => null,location.location.value!.geoPointFromLocationData()!);
+                  await service.onRefresh(auth.user.value!.uid, (p0) => null,
+                      location.location.value!.geoPointFromLocationData()!);
                   return;
                 },
                 child: Stack(

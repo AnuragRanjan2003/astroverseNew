@@ -15,6 +15,7 @@ class Service extends Post {
   DateTime lastDate;
   DateTime date;
   String geoHash;
+  final int range;
 
   Service({
     required this.price,
@@ -25,6 +26,7 @@ class Service extends Post {
     required super.lng,
     required super.title,
     required this.geoHash,
+    required this.range,
     required super.description,
     required super.genre,
     @JsonKey(fromJson: _dateFromTimeStamp, toJson: _dateAsIs)

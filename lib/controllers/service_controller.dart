@@ -8,6 +8,7 @@ import 'package:astroverse/models/user.dart';
 import 'package:astroverse/repo/service_repo.dart';
 import 'package:astroverse/res/strings/backend_strings.dart';
 import 'package:astroverse/utils/env_vars.dart';
+import 'package:astroverse/utils/geo.dart';
 import 'package:astroverse/utils/razor_pay_utils.dart';
 import 'package:astroverse/utils/resource.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -27,7 +28,8 @@ class ServiceController extends GetxController {
 
   RxList<Service> serviceList = <Service>[].obs;
   Rx<bool> morePostsToLoad = true.obs;
-  Rxn<QueryDocumentSnapshot<Service>> lastPost = Rxn();
+  Rxn<QueryDocumentSnapshot<Service>> lastPostForLocality = Rxn();
+  Rxn<QueryDocumentSnapshot<Service>> lastPostForCity = Rxn();
   static const _maxPostLimit = 50;
   Rx<bool> nothingToShow = false.obs;
   Rx<bool> loadingMorePosts = false.obs;
@@ -190,7 +192,8 @@ class ServiceController extends GetxController {
 
   clearList() {
     serviceList.clear();
-    lastPost.value = null;
+    lastPostForLocality.value = null;
+    lastPostForCity.value = null;
     morePostsToLoad.value = true;
   }
 
@@ -201,12 +204,12 @@ class ServiceController extends GetxController {
       return;
     }
     loadingMorePosts.value = true;
-    if (lastPost.value == null) {
+    if (lastPostForLocality.value == null && lastPostForCity.value == null) {
       fetchServiceByGenreAndPage(genre, uid, (p0) {
         onFetch(p0);
       });
     } else {
-      _repo.fetchMorePost(lastPost.value!, genre, uid).then((value) {
+      _repo.fetchMorePost(lastPostForCity.value!, genre, uid).then((value) {
         loadingMorePosts.value = false;
         if (value.isSuccess) {
           value = value as Success<List<QueryDocumentSnapshot<Service>>>;
@@ -214,10 +217,58 @@ class ServiceController extends GetxController {
           for (var s in value.data) {
             if (s.exists) {
               list.add(s.data());
-              lastPost.value = s;
+              if (s.data().range == Ranges.locality)
+                lastPostForLocality.value = s;
+              if (s.data().range == Ranges.city) lastPostForCity.value = s;
             }
           }
-          log("${lastPost.value!.data()}", name: "IS NULL");
+          log("${lastPostForLocality.value!.data()}", name: "IS NULL");
+          log(list.length.toString(), name: "GOT LIST SIZE");
+          log(list.toString(), name: "GOT LIST");
+          serviceList.addAll(list);
+          morePostsToLoad.value = list.isNotEmpty;
+          onFetch(list);
+          log(serviceList.length.toString(), name: "POST LIST SUCCESS");
+        } else {
+          value = value as Failure<List<QueryDocumentSnapshot<Service>>>;
+          log(value.error, name: tag);
+        }
+      });
+    }
+  }
+
+  fetchMoreServicesByLocation(
+      String uid, GeoPoint userLocation, Function(List<Service>) onFetch) {
+    log("loading more posts", name: "POST LIST");
+    if (morePostsToLoad.value == false || serviceList.length >= _maxPostLimit) {
+      return;
+    }
+    loadingMorePosts.value = true;
+    if (lastPostForLocality.value == null && lastPostForCity.value==null) {
+      fetchServiceByLocation(uid, (p0) {
+        onFetch(p0);
+      }, userLocation);
+    } else {
+      _repo
+          .fetchMoreByLocation(
+        uid,
+        userLocation,
+        lastPostForLocality.value,
+        lastPostForCity.value,
+      )
+          .then((value) {
+        loadingMorePosts.value = false;
+        if (value.isSuccess) {
+          value = value as Success<List<QueryDocumentSnapshot<Service>>>;
+          List<Service> list = [];
+          for (var s in value.data) {
+            if (s.exists) {
+              list.add(s.data());
+              if(s.data().range==Ranges.locality)lastPostForLocality.value = s;
+              if(s.data().range==Ranges.city)lastPostForCity.value = s;
+            }
+          }
+          log("${lastPostForLocality.value!.data()}", name: "IS NULL");
           log(list.length.toString(), name: "GOT LIST SIZE");
           log(list.toString(), name: "GOT LIST");
           serviceList.addAll(list);
@@ -235,10 +286,10 @@ class ServiceController extends GetxController {
   void fetchServiceByLocation(
       String uid, Function(List<Service>) onFetch, GeoPoint userLocation) {
     log("loading  posts", name: "POST LIST");
-    if (lastPost.value == null) {
+    if (lastPostForLocality.value == null || lastPostForCity.value==null) {
       log("null", name: "LP");
     } else {
-      log(lastPost.value!.data().toString(), name: "LP");
+      log(lastPostForLocality.value!.data().toString(), name: "LP");
       return;
     }
     loadingMorePosts.value = true;
@@ -248,9 +299,12 @@ class ServiceController extends GetxController {
         value = value as Success<List<QueryDocumentSnapshot<Service>>>;
         List<Service> list = [];
         for (var element in value.data) {
-          if (element.exists ) {
-            if(element.data().authorId!=uid)list.add(element.data());
-            lastPost.value = element;
+          if (element.exists) {
+            if (element.data().authorId != uid) list.add(element.data());
+            if (element.data().range == Ranges.locality) {
+              lastPostForLocality.value = element;
+            }
+            if (element.data().range == Ranges.city) lastPostForCity.value = element;
           }
         }
         //log("${lastPost.value!.data()}", name: "IS NULL");
@@ -270,10 +324,10 @@ class ServiceController extends GetxController {
   void fetchServiceByGenreAndPage(
       List<String> genre, String uid, Function(List<Service>) onFetch) {
     log("loading  posts", name: "POST LIST");
-    if (lastPost.value == null) {
+    if (lastPostForLocality.value == null) {
       log("null", name: "LP");
     } else {
-      log(lastPost.value!.data().toString(), name: "LP");
+      log(lastPostForLocality.value!.data().toString(), name: "LP");
       return;
     }
     loadingMorePosts.value = true;
@@ -285,7 +339,7 @@ class ServiceController extends GetxController {
         for (var element in value.data) {
           if (element.exists) {
             list.add(element.data());
-            lastPost.value = element;
+            lastPostForLocality.value = element;
           }
         }
         //log("${lastPost.value!.data()}", name: "IS NULL");
@@ -306,10 +360,10 @@ class ServiceController extends GetxController {
       GeoPoint userLocation) async {
     clearList();
     log("loading  posts", name: "POST LIST");
-    if (lastPost.value == null) {
+    if (lastPostForLocality.value == null && lastPostForCity.value==null) {
       log("null", name: "LP");
     } else {
-      log(lastPost.value!.data().toString(), name: "LP");
+      log(lastPostForLocality.value!.data().toString(), name: "LP");
       return;
     }
     var value = await _repo.fetchByLocation(uid, userLocation);
@@ -319,7 +373,7 @@ class ServiceController extends GetxController {
       for (var element in value.data) {
         if (element.exists && element.data().authorId != uid) {
           list.add(element.data());
-          lastPost.value = element;
+          lastPostForLocality.value = element;
         }
       }
       //log("${lastPost.value!.data()}", name: "IS NULL");

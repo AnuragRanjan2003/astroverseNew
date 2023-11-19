@@ -265,6 +265,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.17.2"
+  cometchat:
+    dependency: "direct main"
+    description:
+      name: cometchat
+      sha256: "678af0c162456313d377be741c8042ac9a023428d9ea6de1839c556a5c9b2b41"
+      url: "https://pub.dev"
+    source: hosted
+    version: "3.0.10"
   convert:
     dependency: transitive
     description:

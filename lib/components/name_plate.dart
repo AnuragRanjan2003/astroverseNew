@@ -114,8 +114,8 @@ class NamePlate extends StatelessWidget {
                                 color: Colors.blue,
                                 size: _sizeIcon,
                               ),
-                              'UPI',
-                              user.upiID),
+                              'Plan',
+                              user.plan.toString()),
                           divider,
                           nameItem(
                               const Icon(
@@ -241,6 +241,15 @@ class NamePlate extends StatelessWidget {
                           divider,
                           nameItemWithButton(
                               const Icon(
+                                Icons.request_page_outlined,
+                                color: Colors.blue,
+                                size: _sizeIcon,
+                              ),
+                              'Terms of Service',
+                                  () {}),
+                          divider,
+                          nameItemWithButton(
+                              const Icon(
                                 Icons.upgrade_rounded,
                                 color: Colors.blue,
                                 size: _sizeIcon,
@@ -308,7 +317,7 @@ class NamePlate extends StatelessWidget {
   Widget nameItemWithButton(Icon icon, String label, void Function() onTap) {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 20),
-      padding: const EdgeInsets.symmetric(vertical: 2),
+      padding: const EdgeInsets.symmetric(vertical: 4),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         crossAxisAlignment: CrossAxisAlignment.center,
@@ -325,12 +334,15 @@ class NamePlate extends StatelessWidget {
               ),
             ],
           ),
-          IconButton(
-              onPressed: onTap,
-              icon: const Icon(
-                Icons.keyboard_arrow_right,
-                color: Colors.blue,
-              ))
+          SizedBox(
+            height: 35,
+            child: IconButton(
+                onPressed: onTap,
+                icon: const Icon(
+                  Icons.keyboard_arrow_right,
+                  color: Colors.blue,
+                )),
+          )
         ],
       ),
     );

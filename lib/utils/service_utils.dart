@@ -97,6 +97,44 @@ class ServiceUtils extends Postable<Service, SaveService> {
     }
   }
 
+  Future<Resource<List<QueryDocumentSnapshot<Service>>>> fetchMoreByLocation(
+      QueryDocumentSnapshot<Service>? lastPostForLocality,
+      QueryDocumentSnapshot<Service>? lastPostForCity,
+      GeoPoint userLocation,
+      String uid) async {
+    try {
+      final List<QueryDocumentSnapshot<Service>> data = [];
+      if (lastPostForLocality != null) {
+        Query<Service> queryLocality = Geo()
+            .createGeoQuery(ref, Ranges.localityRadius, userLocation)
+            .where("range", isEqualTo: Ranges.locality)
+            .orderBy("geoHash")
+            .orderBy("date", descending: true)
+            .startAfterDocument(lastPostForLocality)
+            .limit(_limit);
+        final res1 = await queryLocality.get();
+        data.addIfNotUser(uid, res1.docs);
+      }
+      if (lastPostForCity != null) {
+        Query<Service> queryCity = Geo()
+            .createGeoQuery(ref, Ranges.cityRadius, userLocation)
+            .where("range", isEqualTo: Ranges.city)
+            .orderBy("geoHash")
+            .orderBy("date", descending: true)
+            .startAfterDocument(lastPostForCity)
+            .limit(_limit);
+        final res2 = await queryCity.get();
+        data.addIfNotUser(uid, res2.docs);
+      }
+      return Success(data);
+    } on FirebaseException catch (e) {
+      return Failure<List<QueryDocumentSnapshot<Service>>>(
+          e.message.toString());
+    } catch (e) {
+      return Failure<List<QueryDocumentSnapshot<Service>>>(e.toString());
+    }
+  }
+
   @override
   Future<Resource<int>> like(String id) async {
     try {

@@ -42,6 +42,15 @@ class Ranges {
   static const city = 1;
   static const cityRadius = 20000.00;
   static const all = 2;
+
+}
+
+class VisibilityPlans{
+  static const locality = 0;
+  static const localityRadius = 5000.00; // in meters
+  static const city = 1;
+  static const cityRadius = 20000.00;
+  static const all = 2;
 }
 
 class GeoRange {

@@ -7,6 +7,7 @@ import 'package:astroverse/controllers/service_controller.dart';
 import 'package:astroverse/models/service.dart';
 import 'package:astroverse/res/colors/project_colors.dart';
 import 'package:astroverse/res/img/images.dart';
+import 'package:astroverse/utils/geo.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
@@ -269,6 +270,7 @@ class CreateServicePortrait extends StatelessWidget {
                                             service.selectedItem.value]
                                       ],
                                       geoHash: "",
+                                      range: Ranges.city,
                                       date: DateTime.now(),
                                       place: place.value.text,
                                       imageUrl: '',

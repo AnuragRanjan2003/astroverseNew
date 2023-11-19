@@ -7,6 +7,7 @@ import 'package:astroverse/models/user.dart' as models;
 import 'package:astroverse/repo/auth_repo.dart';
 import 'package:astroverse/res/strings/backend_strings.dart';
 import 'package:astroverse/routes/routes.dart';
+import 'package:astroverse/utils/geo.dart';
 import 'package:astroverse/utils/resource.dart';
 import 'package:astroverse/utils/zego_cloud_services.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -351,6 +352,7 @@ class AuthController extends GetxController {
               astro,
               _parseValueForModel(cred.phoneNumber),
               "",
+              Geo().getHash(loc!),
             );
             final info = ExtraInfo(
                 joiningDate: DateTime.now(),
