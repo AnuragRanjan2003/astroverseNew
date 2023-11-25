@@ -353,6 +353,7 @@ class Database {
 
         final resLocality = await queryLocality.get();
         data.addOtherPeople(currentUid, resLocality.docs);
+
       }
       if (lastForCity != null) {
         final Query<models.User> queryCity = Geo()

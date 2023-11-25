@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:astroverse/models/user.dart';
 import 'package:astroverse/repo/astrologer_repo.dart';
 import 'package:astroverse/utils/geo.dart';
@@ -21,7 +23,6 @@ class AstrologerController extends GetxController {
         value as Success<List<QueryDocumentSnapshot<User>>>;
         final list = <User>[];
         moreUsers.value = value.data.isNotEmpty;
-
         for (QueryDocumentSnapshot<User> it in value.data) {
           list.add(it.data());
           if (it.data().plan == VisibilityPlans.locality) {
@@ -32,6 +33,7 @@ class AstrologerController extends GetxController {
           }
         }
         this.list.value = list;
+        log("$list" , name: "ASTRO");
       } else {}
     });
   }

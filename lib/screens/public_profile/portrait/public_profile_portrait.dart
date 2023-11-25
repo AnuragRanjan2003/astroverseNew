@@ -1,5 +1,8 @@
+import 'dart:developer';
+
 import 'package:astroverse/components/person_items.dart';
 import 'package:astroverse/components/person_posts.dart';
+import 'package:astroverse/controllers/auth_controller.dart';
 import 'package:astroverse/controllers/public_profile_controller.dart';
 import 'package:astroverse/models/extra_info.dart';
 import 'package:astroverse/models/user.dart';
@@ -22,13 +25,13 @@ class PublicProfilePortrait extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final User user = Get.arguments;
+    log("$user", name: "ASTRO USER");
     final PublicProfileController public = Get.find();
     final zegoService = ZegoCloudServices();
     final ht = cons.maxHeight;
 
     public.getExtraInfo(user.uid);
     public.updateProfileViews(user.uid);
-
 
     return DefaultTabController(
       length: 2,
@@ -39,7 +42,9 @@ class PublicProfilePortrait extends StatelessWidget {
           child: Row(
             children: [
               Expanded(
-                  flex: 7, child: zegoService.callButton(user.uid, user.name)),
+                  flex: 7,
+                  child: zegoService.callButton(
+                      user.uid, user.name)),
               const Spacer(
                 flex: 1,
               ),
@@ -74,7 +79,7 @@ class PublicProfilePortrait extends StatelessWidget {
         body: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            _buildTopBanner(ht,user),
+            _buildTopBanner(ht, user),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 10),
               child: Column(
@@ -96,7 +101,7 @@ class PublicProfilePortrait extends StatelessWidget {
                       return _buildDataShimmerChips();
                     }
                     return _buildDataChips(
-                        public.info.value!, user.profileViews,user.points);
+                        public.info.value!, user.profileViews, user.points);
                   }),
                   const SizedBox(
                     height: 25,
@@ -230,7 +235,7 @@ class PublicProfilePortrait extends StatelessWidget {
     );
   }
 
-  Widget _buildTopBanner(double ht,User user) {
+  Widget _buildTopBanner(double ht, User user) {
     return SizedBox(
       height: ht * 0.18 + _imageRadius,
       child: Stack(
@@ -265,16 +270,22 @@ class PublicProfilePortrait extends StatelessWidget {
     );
   }
 
-  Widget _buildDataChips(ExtraInfo info, int views,int points) {
+  Widget _buildDataChips(ExtraInfo info, int views, int points) {
     return Wrap(
       direction: Axis.horizontal,
       spacing: 8.0,
       runSpacing: 8.0,
       children: [
-        _buildChip(Icons.shopping_bag, NumberParser().toSocialMediaString(info.servicesSold), Colors.green),
-        _buildChip(Icons.data_exploration, NumberParser().toSocialMediaString(info.posts), Colors.blue),
-        _buildChip(Icons.remove_red_eye, NumberParser().toSocialMediaString(views), Colors.blueGrey),
-        _buildChip(Icons.monetization_on_outlined, NumberParser().toSocialMediaString(points), Colors.orange),
+        _buildChip(
+            Icons.shopping_bag,
+            NumberParser().toSocialMediaString(info.servicesSold),
+            Colors.green),
+        _buildChip(Icons.data_exploration,
+            NumberParser().toSocialMediaString(info.posts), Colors.blue),
+        _buildChip(Icons.remove_red_eye,
+            NumberParser().toSocialMediaString(views), Colors.blueGrey),
+        _buildChip(Icons.monetization_on_outlined,
+            NumberParser().toSocialMediaString(points), Colors.orange),
       ],
     );
   }

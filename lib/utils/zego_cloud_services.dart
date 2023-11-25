@@ -25,8 +25,8 @@ class ZegoCloudServices {
   Future<void> disposeCallInvitationService() async =>
       await ZegoUIKitPrebuiltCallInvitationService().uninit();
 
-  ZegoSendCallInvitationButton callButton(
-          String receiverId, String receiverName) =>
+  ZegoSendCallInvitationButton callButton(String receiverId,
+          String receiverName) =>
       ZegoSendCallInvitationButton(
         isVideoCall: false,
         resourceID: "zegouikit_call", // For offline call notification
@@ -37,6 +37,4 @@ class ZegoCloudServices {
           ),
         ],
       );
-
-
 }

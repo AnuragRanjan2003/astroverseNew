@@ -61,7 +61,7 @@ dependencies:
   encrypt: ^5.0.3
   flutter_geo_hash: ^0.0.4
   dart_geohash: ^2.0.2
-  cometchat: ^3.0.10
+  cometchat_chat_uikit: any
 
 dev_dependencies:
   flutter_test:
