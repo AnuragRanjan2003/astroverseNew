@@ -6,6 +6,7 @@ import 'package:astroverse/res/colors/project_colors.dart';
 import 'package:astroverse/res/textStyles/text_styles.dart';
 import 'package:astroverse/routes/routes.dart';
 import 'package:astroverse/screens/mart_screen/mart_screen.dart';
+import 'package:astroverse/screens/messaging.dart';
 import 'package:astroverse/screens/peopleScreen/portrait/people_screen_portrait.dart';
 import 'package:astroverse/screens/profile/profile_screen.dart';
 import 'package:astroverse/screens/purchasesScreen/purchases_screen.dart';
@@ -58,11 +59,19 @@ class MainScreenPortrait extends StatelessWidget {
           debugPrint("Initialization failed with exception: ${e.message}");
         });
 
-    c.CometChatUIKit.login(_testCometUid, onSuccess: (e) {
+    c.CometChatUIKit.login(auth.user.value!.uid, onSuccess: (e) {
       log("login completed successfully  ${e.toString()}", name: "CHAT");
     }, onError: (e) {
       log("login failed with exception: ${e.message}", name: "CHAT");
     });
+
+    /*c.CometChatUIKit.createUser(
+        c.User(name: authUser.name, uid: authUser.uid, avatar: authUser.image),
+        onSuccess: (e) {
+      log("sign up completed successfully  ${e.toString()}", name: "CHAT");
+    }, onError: (e) {
+      log("sign up failed with exception: ${e.message}", name: "CHAT");
+    });*/
 
     final tabs = [
       const GButton(
@@ -95,19 +104,6 @@ class MainScreenPortrait extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: ProjectColors.background,
-      floatingActionButton: FloatingActionButton(
-          child: const Icon(Icons.add),
-          onPressed: () {
-            final user = c.User(name: "SpiderMan", uid: "SUPERHERO3");
-            Navigator.of(context).push(MaterialPageRoute(
-              builder: (context) => c.CometChatMessages(
-                user: user,
-                disableSoundForMessages: true,
-                messageListConfiguration: const c.MessageListConfiguration(
-                    alignment: c.ChatAlignment.leftAligned),
-              ),
-            ));
-          }),
       body: SafeArea(
         child: SizedBox(
             width: wd,

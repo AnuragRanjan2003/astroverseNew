@@ -2,15 +2,16 @@ import 'dart:developer';
 
 import 'package:astroverse/components/person_items.dart';
 import 'package:astroverse/components/person_posts.dart';
-import 'package:astroverse/controllers/auth_controller.dart';
 import 'package:astroverse/controllers/public_profile_controller.dart';
 import 'package:astroverse/models/extra_info.dart';
 import 'package:astroverse/models/user.dart';
 import 'package:astroverse/res/img/images.dart';
 import 'package:astroverse/res/textStyles/text_styles.dart';
+import 'package:astroverse/screens/messaging.dart';
 import 'package:astroverse/utils/hero_tag.dart';
 import 'package:astroverse/utils/num_parser.dart';
 import 'package:astroverse/utils/zego_cloud_services.dart';
+import 'package:cometchat_chat_uikit/cometchat_chat_uikit.dart' as comet;
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
@@ -42,9 +43,7 @@ class PublicProfilePortrait extends StatelessWidget {
           child: Row(
             children: [
               Expanded(
-                  flex: 7,
-                  child: zegoService.callButton(
-                      user.uid, user.name)),
+                  flex: 7, child: zegoService.callButton(user.uid, user.name)),
               const Spacer(
                 flex: 1,
               ),
@@ -54,7 +53,13 @@ class PublicProfilePortrait extends StatelessWidget {
                   padding: const EdgeInsets.all(8.0),
                   child: InkWell(
                     onTap: () {
-                      // Add your button click logic here
+                      comet.User receiver = comet.User(
+                          uid: user.uid, name: user.name, avatar: user.image);
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (context) => Messaging(receiver: receiver),
+                        ),
+                      );
                     },
                     child: Container(
                       width: 80, // Set the width of the button

@@ -11,6 +11,7 @@ import 'package:astroverse/utils/geo.dart';
 import 'package:astroverse/utils/resource.dart';
 import 'package:astroverse/utils/zego_cloud_services.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:cometchat_chat_uikit/cometchat_chat_uikit.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
@@ -425,12 +426,16 @@ class AuthController extends GetxController {
   }
 
   void logOut() {
-    _repo.logOut().then((value) {
-      _zegoService.disposeCallInvitationService().then((value) {
-        Get.offAllNamed(Routes.ask);
-        _analytics.logEvent(name: "logout");
-      });
-    });
+    CometChatUIKit.logout(
+        onSuccess: (p0) {
+          _repo.logOut().then((value) {
+            _zegoService.disposeCallInvitationService().then((value) {
+              Get.offAllNamed(Routes.ask);
+              _analytics.logEvent(name: "logout");
+            });
+          });
+        },
+        onError: (_) {});
   }
 
   _onNoUserEmailLogin() {}

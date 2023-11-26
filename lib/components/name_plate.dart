@@ -246,7 +246,7 @@ class NamePlate extends StatelessWidget {
                                 size: _sizeIcon,
                               ),
                               'Terms of Service',
-                                  () {}),
+                              () {}),
                           divider,
                           nameItemWithButton(
                               const Icon(
@@ -306,7 +306,8 @@ class NamePlate extends StatelessWidget {
               style: const TextStyle(
                   color: ProjectColors.disabled,
                   fontSize: 13,
-                  fontWeight: FontWeight.w500,overflow: TextOverflow.ellipsis),
+                  fontWeight: FontWeight.w500,
+                  overflow: TextOverflow.ellipsis),
             ),
           )
         ],

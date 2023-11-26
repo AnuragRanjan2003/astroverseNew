@@ -38,13 +38,10 @@ class PostItem extends StatelessWidget {
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Hero(
-                      tag: HeroTag.forPost(post, PostFields.userBar),
-                      child: Text(
-                        post.title,
-                        style: TextStylesLight().coloredBodyBold(Colors.black),
-                        textAlign: TextAlign.left,
-                      ),
+                    Text(
+                      post.title,
+                      style: TextStylesLight().coloredBodyBold(Colors.black),
+                      textAlign: TextAlign.left,
                     ),
                     const SizedBox(
                       height: 2,
@@ -73,21 +70,16 @@ class PostItem extends StatelessWidget {
                 : const SizedBox(
               height: 0,
             ),
-            Hero(
-                tag: HeroTag.forPost(post, PostFields.image),
-                child: buildContent(post)),
+            buildContent(post),
             const SizedBox(
               height: 15,
             ),
-            Hero(
-              tag: HeroTag.forPost(post, PostFields.description),
-              child: Text(
-                post.description,
-                style: TextStylesLight().small,
-                textAlign: TextAlign.start,
-                overflow: TextOverflow.visible,
-                maxLines: 6,
-              ),
+            Text(
+              post.description,
+              style: TextStylesLight().small,
+              textAlign: TextAlign.start,
+              overflow: TextOverflow.visible,
+              maxLines: 6,
             ),
             const SizedBox(
               height: 10,
