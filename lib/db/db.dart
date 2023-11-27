@@ -353,7 +353,6 @@ class Database {
 
         final resLocality = await queryLocality.get();
         data.addOtherPeople(currentUid, resLocality.docs);
-
       }
       if (lastForCity != null) {
         final Query<models.User> queryCity = Geo()
@@ -484,6 +483,9 @@ class Database {
   Future<Resource<List<QueryDocumentSnapshot<Service>>>> fetchServiceByLocation(
           String uid, GeoPoint userLocation) async =>
       await ServiceUtils(uid).fetchByLocation(uid, userLocation);
+
+  Future<Resource<Service>> fetchService(String uid, String serviceId) =>
+      ServiceUtils(uid).fetchService(serviceId);
 
   Future<Resource<List<QueryDocumentSnapshot<Service>>>>
       fetchMoreServicesByLocation(

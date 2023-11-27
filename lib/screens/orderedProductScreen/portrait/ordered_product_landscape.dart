@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 
-class PurchaseFullPortrait extends StatelessWidget {
+class OrderedProductLandscape extends StatelessWidget {
   final BoxConstraints cons;
-  const PurchaseFullPortrait({super.key, required this.cons});
 
+  const OrderedProductLandscape({super.key, required this.cons});
 
   @override
   Widget build(BuildContext context) {

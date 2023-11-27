@@ -5,6 +5,7 @@ import 'package:astroverse/controllers/service_controller.dart';
 import 'package:astroverse/models/service.dart';
 import 'package:astroverse/res/colors/project_colors.dart';
 import 'package:astroverse/res/img/images.dart';
+import 'package:astroverse/res/strings/backend_strings.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
@@ -17,41 +18,39 @@ class MartItemFullPortrait extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final Service? item = Get.arguments;
-    final sb = StringBuffer();
     final ServiceController service = Get.find();
     final AuthController auth = Get.find();
+    final sb = StringBuffer();
     sb.writeAll(item!.genre, ", ");
-    log(item.toString() ,name:"ITEM");
-
-
-
-
+    log(item.toString(), name: "ITEM");
 
     service.attachPaymentEventListeners(auth.user.value!, item);
+
+    service.fetchProviderDetails(item.authorId);
 
     return Scaffold(
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           item.imageUrl.isNotEmpty
-                ? Hero(
-                    tag: "service ${item.id}",
-                    child: Image(
-                      image: NetworkImage(item.imageUrl),
-                      height: cons.maxHeight * 0.45,
-                      fit: BoxFit.fitHeight,
-                      width: cons.maxWidth,
-                    ),
-                  )
-                : Hero(
-                    tag: "service ${item.id}",
-                    child: Image(
-                      image: ProjectImages.planet,
-                      height: cons.maxHeight * 0.45,
-                      fit: BoxFit.fitHeight,
-                      width: cons.maxWidth,
-                    ),
+              ? Hero(
+                  tag: "service ${item.id}",
+                  child: Image(
+                    image: NetworkImage(item.imageUrl),
+                    height: cons.maxHeight * 0.45,
+                    fit: BoxFit.fitHeight,
+                    width: cons.maxWidth,
                   ),
+                )
+              : Hero(
+                  tag: "service ${item.id}",
+                  child: Image(
+                    image: ProjectImages.planet,
+                    height: cons.maxHeight * 0.45,
+                    fit: BoxFit.fitHeight,
+                    width: cons.maxWidth,
+                  ),
+                ),
           const SizedBox(
             height: 10,
           ),
@@ -192,36 +191,43 @@ class MartItemFullPortrait extends StatelessWidget {
             ),
           ),
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 10),
-            child: Obx(() {
-              final user = auth.user.value;
-              return MaterialButton(
-                onPressed: () async {
-                  (user == null || service.paymentLoading.isTrue)
+              padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 10),
+              child: Obx(() {
+                final user = auth.user.value;
+                final providerState = service.serviceProvider.value;
+                log(providerState.toString(), name: "PROVIDER IN BUTTON");
+                return MaterialButton(
+                  onPressed: (user == null ||
+                          service.paymentLoading.isTrue ||
+                          providerState != BackEndStrings.providerFound)
                       ? null
-                      : service.makePayment(item, user.phNo, user.email);
-                },
-                color: const Color(0xff444040),
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 70, vertical: 15),
-                shape: const RoundedRectangleBorder(
-                    borderRadius: BorderRadius.all(Radius.circular(30))),
-                child: service.paymentLoading.isTrue
-                    ? const SizedBox(
-                        height: 20,
-                        width: 20,
-                        child: CircularProgressIndicator(
-                          color: Colors.white,
-                          strokeWidth: 2.0,
-                        ),
-                      )
-                    : Text("Buy for ₹ ${item.price.toInt()}",
-                        textAlign: TextAlign.center,
-                        style:
-                            const TextStyle(fontSize: 13, color: Colors.white)),
-              );
-            }),
-          )
+                      : () async {
+                          service.makePayment(item, user.phNo, user.email);
+                        },
+                  color: const Color(0xff444040),
+                  disabledColor: ProjectColors.disabled,
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 70, vertical: 15),
+                  shape: const RoundedRectangleBorder(
+                      borderRadius: BorderRadius.all(Radius.circular(30))),
+                  child: service.paymentLoading.isTrue
+                      ? const SizedBox(
+                          height: 20,
+                          width: 20,
+                          child: CircularProgressIndicator(
+                            color: Colors.white,
+                            strokeWidth: 2.0,
+                          ),
+                        )
+                      : Text(
+                          providerState == BackEndStrings.providerNotFound
+                              ? "Provider not found"
+                              : "Buy for ₹ ${item.price.toInt()}",
+                          textAlign: TextAlign.center,
+                          style: const TextStyle(
+                              fontSize: 13, color: Colors.white)),
+                );
+              }))
         ],
       ),
     );

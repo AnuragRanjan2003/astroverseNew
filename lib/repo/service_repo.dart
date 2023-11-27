@@ -6,6 +6,7 @@ import 'package:astroverse/models/purchase.dart';
 import 'package:astroverse/models/save_service.dart';
 import 'package:astroverse/models/service.dart';
 import 'package:astroverse/models/transaction.dart' as t;
+import 'package:astroverse/models/user.dart';
 import 'package:astroverse/utils/resource.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
@@ -49,6 +50,10 @@ class ServiceRepo {
 
   Future<Resource<Purchase>> postPurchase(Purchase p) async =>
       await _db.postPurchase(p);
+
+  Future<Resource<DocumentSnapshot<User>>> fetchProviderData(
+          String providerUid) async =>
+      await _db.getUserData(providerUid);
 
   Future<Resource<List<QueryDocumentSnapshot<Service>>>> fetchByLocation(
           String uid, GeoPoint userLocation) async =>

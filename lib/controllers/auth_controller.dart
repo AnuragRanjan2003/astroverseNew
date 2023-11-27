@@ -72,7 +72,6 @@ class AuthController extends GetxController {
     loading.value = true;
     _repo.loginUser(email, password).then((value) async {
       loading.value = false;
-      updateUI(value, _repo.checkIfEmailVerified());
       if (value.isSuccess) {
         value = value as Success<UserCredential>;
         _analytics.logLogin(loginMethod: "Email");
@@ -81,14 +80,25 @@ class AuthController extends GetxController {
           await _repo.updateExtraInfo(
               {"lastActive": FieldValue.serverTimestamp()},
               value.data.user!.uid);
-          await startListeningToUser(
-            value.data.user!.uid,
-          );
+          var res = await _repo.getUserData(value.data.user!.uid);
+          if (res.isSuccess) {
+            res = res as Success<DocumentSnapshot<models.User>>;
+            user.value = res.data.data();
+            updateUI(value, _repo.checkIfEmailVerified());
+            await startListeningToUser(
+              value.data.user!.uid,
+            );
+          }else{
+            // TODO(implement error dialog)
+
+          }
+
         }
         error.value = null;
       } else {
         value = value as Failure<UserCredential>;
         error.value = value.error;
+        updateUI(value, _repo.checkIfEmailVerified());
       }
     });
   }
@@ -248,15 +258,26 @@ class AuthController extends GetxController {
       UserCredential event) {
     _repo.saveUserData(user).then((value) async {
       loading.value = false;
-      updateUI(value);
       if (value is Success) {
         if (event.user != null) {
-          await startListeningToUser(event.user!.uid);
+          var res=  await _repo.getUserData(event.user!.uid);
+          if(res.isSuccess){
+            res= res as Success<DocumentSnapshot<models.User>>;
+            this.user.value = res.data.data()!;
+            await startListeningToUser(event.user!.uid);
+            updateUI(value);
+          }else{
+            // TODO( implement error dialog )
+
+          }
+
         }
+
         error.value = null;
       } else {
         value = value as Failure;
         error.value = value.error;
+        updateUI(value);
       }
     });
   }
@@ -320,10 +341,17 @@ class AuthController extends GetxController {
             );
             GoogleSignIn().signOut();
           } else {
-            await startListeningToUser(
-              (value as Success<UserCredential>).data.user!.uid,
-            );
-            Get.offAndToNamed(Routes.main);
+
+            var res = await _repo.getUserData((value as Success<UserCredential>).data.user!.uid);
+            if(res.isSuccess){
+              user.value = (res as Success<DocumentSnapshot<models.User>>).data.data();
+              await startListeningToUser(
+                (value).data.user!.uid,
+              );
+              Get.offAndToNamed(Routes.main);
+            }else{
+              // TODO(implement alert)
+            }
           }
         });
       } else {

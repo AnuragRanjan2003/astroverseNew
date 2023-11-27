@@ -43,6 +43,8 @@ class ServiceController extends GetxController {
   RxString searchText = "".obs;
   RxBool paymentLoading = false.obs;
   RxDouble imageSize = 0.45.obs;
+  Rxn<String> serviceProvider = Rxn();
+
   final searchController = TextEditingController(text: "");
 
   final razorPayUtils = RazorPayUtils();
@@ -81,12 +83,25 @@ class ServiceController extends GetxController {
       log("transaction recorder", name: "TRANSACTION");
       log("purchase recorder", name: "PURCHASE");
     } else {
-      res as Failure<void>;
-      res1 as Failure<Purchase>;
-      res2 as Failure<Json>;
-      log("error", name: "TRANSACTION");
-      log(res1.error, name: "PURCHASE");
-      log(res2.error, name: "UPDATE SERVICE");
+      try {
+        res as Failure<void>;
+        log("error", name: "TRANSACTION");
+      } on TypeError catch (e) {
+        log(e.toString(), name: "TRANSACTION");
+      }
+      try {
+        res1 as Failure<Purchase>;
+        log(res1.error, name: "PURCHASE");
+      } on TypeError catch (e) {
+        log(e.toString(), name: "TRANSACTION");
+      }
+
+      try {
+        res2 as Failure<Json>;
+        log(res2.error, name: "UPDATE SERVICE");
+      } on TypeError catch (e) {
+        log(e.toString(), name: "TRANSACTION");
+      }
     }
   }
 
@@ -146,6 +161,23 @@ class ServiceController extends GetxController {
     final img = await _imagePicker.pickImage(
         source: ImageSource.gallery, imageQuality: 25);
     image.value = img;
+  }
+
+  fetchProviderDetails(String providerUid) {
+    log("fetching provider" , name:"PROVIDER");
+    serviceProvider.value = null;
+    _repo.fetchProviderData(providerUid).then((value) {
+      if (value.isSuccess) {
+        value = value as Success<DocumentSnapshot<User>>;
+        log("${value.data.data()}" , name:"PROVIDER INFO");
+        if(value.data.data()!=null) {
+          serviceProvider.value = BackEndStrings.providerFound;
+        }else{
+          serviceProvider.value = BackEndStrings.providerNotFound;
+        }
+      }
+      log(serviceProvider.value.toString() , name:"PROVIDER");
+    });
   }
 
   postService(Service s, Function() updateUI) {
@@ -244,7 +276,7 @@ class ServiceController extends GetxController {
       return;
     }
     loadingMorePosts.value = true;
-    if (lastPostForLocality.value == null && lastPostForCity.value==null) {
+    if (lastPostForLocality.value == null && lastPostForCity.value == null) {
       fetchServiceByLocation(uid, (p0) {
         onFetch(p0);
       }, userLocation);
@@ -264,8 +296,9 @@ class ServiceController extends GetxController {
           for (var s in value.data) {
             if (s.exists) {
               list.add(s.data());
-              if(s.data().range==Ranges.locality)lastPostForLocality.value = s;
-              if(s.data().range==Ranges.city)lastPostForCity.value = s;
+              if (s.data().range == Ranges.locality)
+                lastPostForLocality.value = s;
+              if (s.data().range == Ranges.city) lastPostForCity.value = s;
             }
           }
           log("${lastPostForLocality.value!.data()}", name: "IS NULL");
@@ -286,7 +319,7 @@ class ServiceController extends GetxController {
   void fetchServiceByLocation(
       String uid, Function(List<Service>) onFetch, GeoPoint userLocation) {
     log("loading  posts", name: "POST LIST");
-    if (lastPostForLocality.value == null || lastPostForCity.value==null) {
+    if (lastPostForLocality.value == null || lastPostForCity.value == null) {
       log("null", name: "LP");
     } else {
       log(lastPostForLocality.value!.data().toString(), name: "LP");
@@ -304,7 +337,8 @@ class ServiceController extends GetxController {
             if (element.data().range == Ranges.locality) {
               lastPostForLocality.value = element;
             }
-            if (element.data().range == Ranges.city) lastPostForCity.value = element;
+            if (element.data().range == Ranges.city)
+              lastPostForCity.value = element;
           }
         }
         //log("${lastPost.value!.data()}", name: "IS NULL");
@@ -360,7 +394,7 @@ class ServiceController extends GetxController {
       GeoPoint userLocation) async {
     clearList();
     log("loading  posts", name: "POST LIST");
-    if (lastPostForLocality.value == null && lastPostForCity.value==null) {
+    if (lastPostForLocality.value == null && lastPostForCity.value == null) {
       log("null", name: "LP");
     } else {
       log(lastPostForLocality.value!.data().toString(), name: "LP");

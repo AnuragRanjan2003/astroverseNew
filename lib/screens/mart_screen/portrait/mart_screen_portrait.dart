@@ -47,16 +47,19 @@ class MartScreenPortrait extends StatelessWidget {
     return Scaffold(
       backgroundColor: ProjectColors.greyBackground,
       floatingActionButtonLocation: FloatingActionButtonLocation.endDocked,
-      floatingActionButton: (auth.user.value?.astro != true)
-          ? FloatingActionButton(
-              onPressed: _postItemScreen,
-              backgroundColor: Colors.lightBlue.shade300,
-              elevation: 0,
-              child: const Icon(
-                Icons.add,
-                color: Colors.white,
+      floatingActionButton: (auth.user.value?.astro == true)
+          ? Container(
+        margin: const EdgeInsets.only(bottom: 100),
+            child: FloatingActionButton(
+                onPressed: _postItemScreen,
+                backgroundColor: Colors.lightBlue.shade300,
+                elevation: 0,
+                child: const Icon(
+                  Icons.add,
+                  color: Colors.white,
+                ),
               ),
-            )
+          )
           : null,
       body: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 10),

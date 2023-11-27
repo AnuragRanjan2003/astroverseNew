@@ -174,6 +174,21 @@ class ServiceUtils extends Postable<Service, SaveService> {
   Stream<QuerySnapshot<SaveService>> likedStream(String uid) =>
       likeRef!.snapshots();
 
+  Future<Resource<Service>> fetchService(String serviceId) async {
+    try {
+      final res = await ref.doc(serviceId).get();
+      if (res.exists && res.data() != null) {
+        return Success<Service>(res.data()!);
+      } else {
+        return Failure<Service>("null returned");
+      }
+    } on FirebaseException catch (e) {
+      return Failure<Service>(e.message.toString());
+    } catch (e) {
+      return Failure<Service>(e.toString());
+    }
+  }
+
   @override
   Future<Resource<Service>> savePost(Service post) async {
     final point = GeoHasher().encode(post.lat, post.lng);

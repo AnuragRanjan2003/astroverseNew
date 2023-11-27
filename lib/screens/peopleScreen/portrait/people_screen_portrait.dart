@@ -11,6 +11,7 @@ import 'package:astroverse/models/user.dart';
 import 'package:astroverse/res/colors/project_colors.dart';
 import 'package:astroverse/res/img/images.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:cometchat_chat_uikit/cometchat_chat_uikit.dart' as comet;
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:location/location.dart';
@@ -27,8 +28,9 @@ class PeopleScreenPortrait extends StatelessWidget {
     final AstrologerController astro = Get.put(AstrologerController());
     final LocationController location = Get.find();
     if (auth.user.value != null) {
-
-      astro.fetchAstrologers(location.location.value!.geoPointFromLocationData()!, auth.user.value!.uid);
+      astro.fetchAstrologers(
+          location.location.value!.geoPointFromLocationData()!,
+          auth.user.value!.uid);
     }
 
     search.addListener(() {
@@ -40,7 +42,9 @@ class PeopleScreenPortrait extends StatelessWidget {
     });
 
     loadMore() {
-      astro.fetchMoreAstrologers(location.location.value!.geoPointFromLocationData()!, auth.user.value!.uid);
+      astro.fetchMoreAstrologers(
+          location.location.value!.geoPointFromLocationData()!,
+          auth.user.value!.uid);
     }
 
     return Scaffold(
@@ -64,9 +68,11 @@ class PeopleScreenPortrait extends StatelessWidget {
                         return const SizedBox(
                           height: 70,
                         );
-                      } else if(index==list.length+2){
-                        return const SizedBox(height: 100,);
-                      }else {
+                      } else if (index == list.length + 2) {
+                        return const SizedBox(
+                          height: 100,
+                        );
+                      } else {
                         return AstrologerItem(user: list[index - 1]);
                       }
                     },
@@ -80,6 +86,21 @@ class PeopleScreenPortrait extends StatelessWidget {
                 controller: search,
                 hint: 'Search for Astrologers',
                 width: cons.maxWidth * 0.9),
+            Positioned(
+              right: 20,
+              bottom: 100,
+              child: FloatingActionButton(
+                onPressed: () {
+                  final user = auth.user.value!;
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) =>
+                              const comet.CometChatConversationsWithMessages()));
+                },
+                child: const Icon(Icons.history_toggle_off_outlined),
+              ),
+            ),
           ],
         ),
       ),

@@ -1,6 +1,9 @@
 import 'package:astroverse/models/purchase.dart';
 import 'package:astroverse/res/colors/project_colors.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+
+import '../routes/routes.dart';
 
 class PurchaseItem extends StatelessWidget {
   final Purchase purchase;
@@ -12,10 +15,9 @@ class PurchaseItem extends StatelessWidget {
     return IntrinsicHeight(
       child: Container(
         decoration: const BoxDecoration(
-          borderRadius: BorderRadius.all(Radius.circular(20)),
-              color: Colors.white
-        ),
-        padding: const EdgeInsets.symmetric(horizontal: 10 , vertical: 15),
+            borderRadius: BorderRadius.all(Radius.circular(20)),
+            color: Colors.white),
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 15),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
@@ -43,7 +45,9 @@ class PurchaseItem extends StatelessWidget {
                   Text(
                     '₹${purchase.itemPrice}',
                     style: const TextStyle(
-                        color: ProjectColors.lightBlack, fontSize: 12 ,fontWeight: FontWeight.w500),
+                        color: ProjectColors.lightBlack,
+                        fontSize: 12,
+                        fontWeight: FontWeight.w500),
                   ),
                   _buildChip(
                       toTimeDelay(purchase.boughtOn),
@@ -60,15 +64,17 @@ class PurchaseItem extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                _buildChip(
-                    "unreceived",
-                    null,
-                    Colors.red.shade200,
-                    Colors.red),
+                _buildChip("unreceived", null, Colors.red.shade200, Colors.red),
                 MaterialButton(
-                  onPressed: () {},
+                  onPressed: () {
+                    Get.toNamed(
+                      Routes.orderedProductScreen,
+                      arguments: purchase,
+                    );
+                  },
                   color: ProjectColors.lightBlack,
-                  shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(20))),
+                  shape: const RoundedRectangleBorder(
+                      borderRadius: BorderRadius.all(Radius.circular(20))),
                   child: const Text(
                     "View",
                     style: TextStyle(fontSize: 12, color: Colors.white),
@@ -94,7 +100,7 @@ class PurchaseItem extends StatelessWidget {
         spacing: 2,
         crossAxisAlignment: WrapCrossAlignment.center,
         children: [
-          if(icon!=null)icon,
+          if (icon != null) icon,
           Text(
             text,
             style: TextStyle(

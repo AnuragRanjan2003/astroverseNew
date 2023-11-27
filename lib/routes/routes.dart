@@ -1,4 +1,5 @@
 import 'package:astroverse/screens/ask/ask_screen.dart';
+import 'package:astroverse/screens/askLocationScreen/ask_location_screen.dart';
 import 'package:astroverse/screens/astroLogIn/astro_login_screen.dart';
 import 'package:astroverse/screens/astroSelectPlan/astro_select_plan.dart';
 import 'package:astroverse/screens/astroSignUp/astro_signup_screen.dart';
@@ -8,13 +9,13 @@ import 'package:astroverse/screens/emailverfication/email_verification_screen.da
 import 'package:astroverse/screens/main/main_screen.dart';
 import 'package:astroverse/screens/mart_item_full/mart_item_full_screen.dart';
 import 'package:astroverse/screens/moreProfile/more_profile_screen.dart';
+import 'package:astroverse/screens/orderedProductScreen/ordered_product_screen.dart';
 import 'package:astroverse/screens/otpScreen/otp_screen.dart';
 import 'package:astroverse/screens/phoneAuth/phone_auth_screen.dart';
 import 'package:astroverse/screens/post_full_screen/post_full_screen.dart';
 import 'package:astroverse/screens/profile/profile_screen.dart';
 import 'package:astroverse/screens/public_profile/public_profile_screen.dart';
 import 'package:astroverse/screens/purchasesScreen/purchases_screen.dart';
-import 'package:astroverse/screens/askLocationScreen/ask_location_screen.dart';
 import 'package:astroverse/screens/userLogin/user_login_screen.dart';
 import 'package:astroverse/screens/userSignUp/user_sign_up_screen.dart';
 import 'package:get/get.dart';
@@ -40,6 +41,7 @@ class Routes {
   static const publicProfile = '/public_profile_screen';
   static const purchasesScreen = '/purchases_screen';
   static const purchaseFullScreen = '/purchase_full_screen';
+  static const orderedProductScreen = '/ordered_product_screen';
 }
 
 class AppRoutes {
@@ -123,6 +125,10 @@ class AppRoutes {
         GetPage(
           name: Routes.purchaseFullScreen,
           page: () => const PostFullScreen(),
+        ),
+        GetPage(
+          name: Routes.orderedProductScreen,
+          page: () => const OrderedProductScreen(),
         ),
       ];
 }
