@@ -120,8 +120,8 @@ class PurchaseUtils extends Postable<Purchase, Purchase> {
         "uses": FieldValue.increment(1),
         "lastDate": FieldValue.serverTimestamp()
       });
-      batch
-          .update(extraInfoDocument!, {"servicesSold": FieldValue.increment(1)});
+      batch.update(
+          extraInfoDocument!, {"servicesSold": FieldValue.increment(1)});
       await batch.commit();
       return Success<Purchase>(purchase);
     } on FirebaseException catch (e) {
@@ -144,5 +144,9 @@ class PurchaseUtils extends Postable<Purchase, Purchase> {
     } catch (e) {
       return Failure<Json>(e.toString());
     }
+  }
+
+  Stream<DocumentSnapshot<Purchase>> purchaseStream(String id) {
+    return ref.doc(id).snapshots();
   }
 }

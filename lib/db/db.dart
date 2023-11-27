@@ -454,11 +454,17 @@ class Database {
               _purchasesCollection(buyerId), null, null)
           .update(data, id);
 
+  Stream<DocumentSnapshot<Purchase>> purchaseStream(
+          String currentUid, String purchaseId) =>
+      PurchaseUtils(_purchasesCollection(currentUid),
+              _purchasesCollection(currentUid), null, null)
+          .purchaseStream(purchaseId);
+
   Future<Resource<List<QueryDocumentSnapshot<Purchase>>>> fetchPurchases(
-          String buyerUid) async =>
-      await PurchaseUtils(_purchasesCollection(buyerUid),
-              _purchasesCollection(buyerUid), null, null)
-          .fetchByGenreAndPage([], buyerUid);
+          String currentUid) async =>
+      await PurchaseUtils(_purchasesCollection(currentUid),
+              _purchasesCollection(currentUid), null, null)
+          .fetchByGenreAndPage([], currentUid);
 
   Future<Resource<List<QueryDocumentSnapshot<Purchase>>>> fetchMorePurchases(
           QueryDocumentSnapshot<Purchase> lastPost, String buyerUid) async =>

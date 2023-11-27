@@ -15,6 +15,7 @@ class Service extends Post {
   DateTime lastDate;
   DateTime date;
   String geoHash;
+  int deliveryMethod;
   final int range;
 
   Service({
@@ -27,6 +28,7 @@ class Service extends Post {
     required super.title,
     required this.geoHash,
     required this.range,
+    required this.deliveryMethod,
     required super.description,
     required super.genre,
     @JsonKey(fromJson: _dateFromTimeStamp, toJson: _dateAsIs)
@@ -38,6 +40,14 @@ class Service extends Post {
   }) : super(date: date);
 
   factory Service.fromJson(json) => _$ServiceFromJson(json);
+
+  static int _intFromNullable(dynamic value){
+    try{
+      return (value as num).toInt();
+    }catch(e){
+      return 0;
+    }
+  }
 
   @override
   Map<String, dynamic> toJson() => _$ServiceToJson(this);

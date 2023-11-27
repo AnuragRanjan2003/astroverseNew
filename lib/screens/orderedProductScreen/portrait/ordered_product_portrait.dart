@@ -19,8 +19,8 @@ class OrderedProductPortrait extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final Purchase? purchase = Get.arguments;
-    final OrderController order = Get.put(OrderController());
+    Purchase? purchase = Get.arguments;
+    final OrderController order = Get.find();
     final AuthController auth = Get.find();
 
     if (purchase == null) {
@@ -30,8 +30,14 @@ class OrderedProductPortrait extends StatelessWidget {
     }
     log(purchase.toString(), name: "PURCHASE");
 
+    order.purchase.value = purchase;
+
     if (auth.user.value != null) {
       order.fetchService(auth.user.value!.uid, purchase.itemId);
+      order.startPurchaseStream(auth.user.value!.uid, purchase.purchaseId,
+          (p0) {
+        purchase = p0;
+      });
     }
 
     return Scaffold(
@@ -92,14 +98,33 @@ class OrderedProductPortrait extends StatelessWidget {
                 children: [
                   Expanded(
                       flex: 1,
-                      child: buildChip(
-                          purchase.delivered ? 'delivered' : 'undelivered',
-                          const FaIcon(
-                            FontAwesomeIcons.truckFast,
-                            size: 20,
-                            color: Colors.red,
-                          ),
-                          Colors.red)),
+                      child: Obx(() {
+                        if (order.purchase.value == null)
+                          return Container(
+                            width: 150,
+                            height: 50,
+                            color: Colors.grey,
+                          );
+                        if (order.purchase.value!.delivered) {
+                          return buildChip(
+                              'delivered',
+                              const FaIcon(
+                                FontAwesomeIcons.truckFast,
+                                size: 20,
+                                color: Colors.green,
+                              ),
+                              Colors.green);
+                        } else {
+                          return buildChip(
+                              'pending',
+                              const FaIcon(
+                                FontAwesomeIcons.truckFast,
+                                size: 20,
+                                color: Colors.red,
+                              ),
+                              Colors.red);
+                        }
+                      })),
                   const Expanded(
                     flex: 1,
                     child: SizedBox(),
@@ -111,12 +136,13 @@ class OrderedProductPortrait extends StatelessWidget {
               padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 5),
               child: Obx(() {
                 final item = order.service.value;
-                if (item == null)
+                if (item == null) {
                   return Container(
                     color: Colors.grey,
                     width: 200,
                     height: 70,
                   );
+                }
                 return Row(
                   mainAxisAlignment: MainAxisAlignment.start,
                   children: [
@@ -157,12 +183,13 @@ class OrderedProductPortrait extends StatelessWidget {
                 final sb = StringBuffer();
                 final item = order.service.value;
                 log(item.toString(), name: "ITEM");
-                if (item == null)
+                if (item == null) {
                   return Container(
                     color: Colors.grey,
                     width: 200,
                     height: 70,
                   );
+                }
                 sb.writeAll(item.genre, ", ");
                 return Text(
                   sb.toString(),
@@ -176,12 +203,13 @@ class OrderedProductPortrait extends StatelessWidget {
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
               child: Obx(() {
                 final item = order.service.value;
-                if (item == null)
+                if (item == null) {
                   return Container(
                     color: Colors.grey,
                     width: 200,
                     height: 70,
                   );
+                }
                 return Text(
                   item.description,
                   style: const TextStyle(
@@ -204,13 +232,13 @@ class OrderedProductPortrait extends StatelessWidget {
                     children: [
                       Icon(
                         Icons.location_pin,
-                        color: ProjectColors.lightBlack,
+                        color: Colors.black,
                       ),
                       Text(
                         'Pickup Address',
                         style: TextStyle(
                             fontSize: 16,
-                            color: ProjectColors.lightBlack,
+                            color: Colors.black,
                             fontWeight: FontWeight.bold),
                       ),
                     ],
@@ -259,22 +287,24 @@ class OrderedProductPortrait extends StatelessWidget {
             ),
             Obx(() {
               final item = order.service.value;
-              if (item == null)
+              if (item == null) {
                 return Container(
                   color: Colors.grey,
                   width: 200,
                   height: 70,
                 );
+              }
               return buildRow('seller', item.authorName, Icons.person_2);
             }),
             Obx(() {
               final item = order.service.value;
-              if (item == null)
+              if (item == null) {
                 return Container(
                   color: Colors.grey,
                   width: 200,
                   height: 70,
                 );
+              }
               return buildRow(
                   'date',
                   DateFormat.yMMMd().format(item.date).toString(),
@@ -282,23 +312,25 @@ class OrderedProductPortrait extends StatelessWidget {
             }),
             Obx(() {
               final item = order.service.value;
-              if (item == null)
+              if (item == null) {
                 return Container(
                   color: Colors.grey,
                   width: 200,
                   height: 70,
                 );
+              }
               return buildRow(
                   'uses', item.uses.toString(), Icons.data_thresholding);
             }),
             Obx(() {
               final item = order.service.value;
-              if (item == null)
+              if (item == null) {
                 return Container(
                   color: Colors.grey,
                   width: 200,
                   height: 70,
                 );
+              }
               return buildRow('likes', item.upVotes.toString(), Icons.favorite);
             }),
             const SizedBox(
@@ -326,14 +358,42 @@ class OrderedProductPortrait extends StatelessWidget {
                 ],
               ),
             ),
-            buildRow(
-                'payment Id', purchase.paymentId.toString(), Icons.numbers),
-            buildRow('price', '₹ ${purchase.itemPrice}', Icons.money),
-            buildRow('total paid', '₹ ${purchase.totalPrice}', Icons.money),
-            buildRow(
-                'bought on',
-                DateFormat.yMMMd().format(purchase.boughtOn).toString(),
-                Icons.date_range),
+            order.purchase.value != null
+                ? buildRow('payment Id',
+                    order.purchase.value!.paymentId.toString(), Icons.numbers)
+                : Container(
+                    width: 100,
+                    height: 30,
+                    color: Colors.grey,
+                  ),
+            order.purchase.value != null
+                ? buildRow('price', '₹ ${order.purchase.value!.itemPrice}',
+                    Icons.money)
+                : Container(
+                    width: 100,
+                    height: 30,
+                    color: Colors.grey,
+                  ),
+            order.purchase.value != null
+                ? buildRow('total price',
+                    '₹ ${order.purchase.value!.totalPrice}', Icons.money)
+                : Container(
+                    width: 100,
+                    height: 30,
+                    color: Colors.grey,
+                  ),
+            order.purchase.value != null
+                ? buildRow(
+                    'bought on',
+                    DateFormat.yMMMd()
+                        .format(order.purchase.value!.boughtOn)
+                        .toString(),
+                    Icons.date_range)
+                : Container(
+                    width: 100,
+                    height: 30,
+                    color: Colors.grey,
+                  ),
             const SizedBox(
               height: 20,
             ),
@@ -359,15 +419,34 @@ class OrderedProductPortrait extends StatelessWidget {
                 ],
               ),
             ),
-            buildRow('status', purchase.delivered.toString(), Icons.numbers),
-            buildRow(
-                'delivered on',
-                purchase.deliveredOn != null
-                    ? DateFormat.yMMMd()
-                        .format(purchase.deliveredOn!)
-                        .toString()
-                    : "to be delivered",
-                Icons.date_range),
+            Obx(() {
+              if (order.purchase.value == null)
+                return Container(
+                  width: 90,
+                  height: 40,
+                  color: Colors.grey,
+                );
+              return buildRow(
+                  'status',
+                  order.purchase.value!.delivered ? "delivered" : "pending",
+                  Icons.numbers);
+            }),
+            Obx(() {
+              if (order.purchase.value == null)
+                return Container(
+                  width: 90,
+                  height: 40,
+                  color: Colors.grey,
+                );
+              return buildRow(
+                  'delivered on',
+                  order.purchase.value!.deliveredOn != null
+                      ? DateFormat.yMMMd()
+                          .format(order.purchase.value!.deliveredOn!)
+                          .toString()
+                      : "to be delivered",
+                  Icons.date_range);
+            }),
             const SizedBox(
               height: 20,
             ),
@@ -376,21 +455,29 @@ class OrderedProductPortrait extends StatelessWidget {
               child: Obx(() {
                 final user = auth.user.value!;
                 return MaterialButton(
-                  onPressed: () {
-                    Get.bottomSheet(
-                        OrderBottomSheet(
-                          purchase: purchase,
-                          item: order.service.value,
-                          currentUser: auth.user.value,
-                        ),
-                        isScrollControlled: true);
-                  },
+                  onPressed: order.purchase.value!.delivered
+                      ? null
+                      : () {
+                          if (order.purchase.value == null) return;
+                          Get.bottomSheet(
+                              OrderBottomSheet(
+                                purchase: purchase,
+                                item: order.service.value,
+                                currentUser: auth.user.value,
+                              ),
+                              isScrollControlled: true);
+                        },
+                  disabledColor: ProjectColors.disabled,
                   color: Colors.blue,
                   padding: const EdgeInsets.symmetric(vertical: 12),
                   shape: const RoundedRectangleBorder(
                       borderRadius: BorderRadius.all(Radius.circular(10))),
                   child: Text(
-                    (user.uid == purchase.sellerId) ? "Claim" : "Received",
+                    order.purchase.value != null
+                        ? ((user.uid == order.purchase.value!.sellerId)
+                            ? "Claim"
+                            : "Received")
+                        : "fetching",
                     style: const TextStyle(
                         fontSize: 15,
                         color: Colors.white,
@@ -432,7 +519,7 @@ class OrderedProductPortrait extends StatelessWidget {
         ));
   }
 
-  Widget buildRow(String label, String value, IconData icon) => Padding(
+  Widget buildRow(String label, String? value, IconData icon) => Padding(
         padding: const EdgeInsets.symmetric(horizontal: 35, vertical: 5),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -456,7 +543,7 @@ class OrderedProductPortrait extends StatelessWidget {
               ],
             ),
             Text(
-              value,
+              value.toString(),
               style: const TextStyle(
                   color: ProjectColors.lightBlack, fontSize: 12),
             ),

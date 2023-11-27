@@ -269,6 +269,7 @@ class CreateServicePortrait extends StatelessWidget {
                                         _list.keys.toList()[
                                             service.selectedItem.value]
                                       ],
+                                      deliveryMethod: 0,
                                       geoHash: "",
                                       range: Ranges.city,
                                       date: DateTime.now(),

@@ -1,3 +1,4 @@
+import 'package:astroverse/controllers/order_controller.dart';
 import 'package:astroverse/models/purchase.dart';
 import 'package:astroverse/models/service.dart';
 import 'package:astroverse/models/user.dart';
@@ -5,6 +6,7 @@ import 'package:astroverse/res/colors/project_colors.dart';
 import 'package:astroverse/res/img/images.dart';
 import 'package:astroverse/res/strings/other_strings.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 
 class OrderBottomSheet extends StatelessWidget {
   final Purchase? purchase;
@@ -21,12 +23,24 @@ class OrderBottomSheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final OrderController order = Get.find();
+    final TextEditingController code = TextEditingController();
     var isBuyer = false;
+
+    code.addListener(() {
+      order.enteredCode.value = code.value.text;
+    });
+
     if (purchase != null && currentUser != null) {
       isBuyer = purchase!.buyerId == currentUser!.uid;
     }
+    order.enteredCode.value = "";
 
-    doOnConfirm() {}
+    doOnConfirm() {
+      order.processConfirmation(code.value.text, purchase!.secretCode,
+          () => null, purchase!, currentUser!.uid);
+    }
+
     return Container(
       decoration: const BoxDecoration(
           color: Colors.white,
@@ -88,13 +102,17 @@ class OrderBottomSheet extends StatelessWidget {
               height: 20,
             ),
             isBuyer
-                ? buildRow("Key", purchase!.purchaseId.toString(), Icons.key)
-                : _buildTextField(
-                    TextEditingController(), "password", const TextStyle()),
+                ? buildRow("Key", purchase!.secretCode.toString(), Icons.key)
+                : _buildTextField(code, "password", const TextStyle()),
             const SizedBox(
               height: 10,
             ),
-            isBuyer ? const SizedBox.shrink() : confirmButton(doOnConfirm ,false),
+            isBuyer
+                ? const SizedBox.shrink()
+                : Obx(() {
+                    return confirmButton(doOnConfirm,
+                        order.enteredCode.value.length == 14, order.confirming.value);
+                  }),
             const SizedBox(
               height: 20,
             )
@@ -104,18 +122,25 @@ class OrderBottomSheet extends StatelessWidget {
     );
   }
 
-  MaterialButton confirmButton(void Function() doOnConfirm , bool isEnabled) {
+  MaterialButton confirmButton(
+      void Function() doOnConfirm, bool isEnabled, bool isLoading) {
     return MaterialButton(
-      onPressed: isEnabled?doOnConfirm:null,
+      onPressed: isEnabled && !isLoading ? doOnConfirm : null,
       disabledColor: ProjectColors.disabled,
       color: ProjectColors.lightBlack,
       padding: const EdgeInsets.symmetric(vertical: 14),
       shape: const RoundedRectangleBorder(
           borderRadius: BorderRadius.all(Radius.circular(15))),
-      child: const Text(
-        "Confirm",
-        style: TextStyle(color: Colors.white),
-      ),
+      child: !isLoading
+          ? const Text(
+              "Confirm",
+              style: TextStyle(color: Colors.white),
+            )
+          : const SizedBox(
+              height: 20,
+              width: 20,
+              child: CircularProgressIndicator(strokeWidth: 2 , color: Colors.white,),
+            ),
     );
   }
 
@@ -160,7 +185,6 @@ class OrderBottomSheet extends StatelessWidget {
         controller: controller,
         maxLength: 14,
         textAlign: TextAlign.start,
-        keyboardType: TextInputType.datetime,
         decoration: InputDecoration(
           prefixText: "order_",
           border: InputBorder.none,

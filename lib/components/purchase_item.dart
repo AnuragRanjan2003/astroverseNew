@@ -64,7 +64,14 @@ class PurchaseItem extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                _buildChip("unreceived", null, Colors.red.shade200, Colors.red),
+                purchase.delivered
+                    ? _buildChip("delivered", null, Colors.green, Colors.green)
+                    : _buildChip(
+                        "pending",
+                        null,
+                        Colors.red.shade200,
+                        Colors.red,
+                      ),
                 MaterialButton(
                   onPressed: () {
                     Get.toNamed(

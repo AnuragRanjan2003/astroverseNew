@@ -1,18 +1,69 @@
+import 'dart:async';
 import 'dart:developer';
 
+import 'package:astroverse/models/purchase.dart';
 import 'package:astroverse/models/service.dart';
 import 'package:astroverse/repo/orders_repo.dart';
 import 'package:astroverse/utils/resource.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:get/get.dart';
 
 class OrderController extends GetxController {
   final _repo = OrderRepo();
 
   Rxn<Service> service = Rxn();
+  RxString enteredCode = "".obs;
+  RxBool confirming = false.obs;
+  Rxn<Purchase> purchase = Rxn();
+
+  StreamSubscription<DocumentSnapshot<Purchase?>>? _purchaseSub;
 
   @override
   void onClose() {
     service.value = null;
+    _purchaseSub?.cancel();
+  }
+
+  processConfirmation(String enteredCode, String codeHash, Function() onFail,
+      Purchase purchase, String currentUserId) {
+    enteredCode = "order_$enteredCode";
+    enteredCode = enteredCode.trim();
+    codeHash = codeHash.trim();
+    log(enteredCode, name: "ORDER CODE");
+    if (enteredCode != codeHash) {
+      log("not match", name: "ORDER CODE");
+      log("$enteredCode || $codeHash ", name: "CODE MATCH");
+      this.enteredCode.value = "";
+      onFail();
+
+      return;
+    }
+
+    confirming.value = true;
+
+    _repo
+        .confirmDelivery(
+            purchase.purchaseId, purchase.buyerId, purchase.sellerId)
+        .then((value) {
+      confirming.value = false;
+      if (value.isSuccess) {
+        // fetchService(currentUserId, purchase.purchaseId);
+        Get.snackbar("confirmed", "delivery was confirmed successfully");
+      } else {
+        Get.snackbar("Error", "delivery could not be confirmed");
+      }
+    });
+  }
+
+  Future<void>? stopPurchaseStream() => _purchaseSub?.cancel();
+
+  startPurchaseStream(
+      String currentUid, String purchaseId, Function(Purchase? p) onChange) {
+    _purchaseSub =
+        _repo.purchaseStream(currentUid, purchaseId).listen((snapshot) {
+      purchase.value = snapshot.data();
+      onChange(snapshot.data());
+    });
   }
 
   fetchService(String uid, String serviceId) {
@@ -20,11 +71,11 @@ class OrderController extends GetxController {
       if (value.isSuccess) {
         value = value as Success<Service>;
         service.value = value.data;
-        log(value.data.toString() ,name : "SERVICE FETCH");
+        log(value.data.toString(), name: "SERVICE FETCH");
       } else {
         value = value as Failure<Service>;
         service.value = null;
-        log(value.error ,name : "SERVICE FETCH");
+        log(value.error, name: "SERVICE FETCH");
       }
     });
   }
