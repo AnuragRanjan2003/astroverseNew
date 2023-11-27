@@ -17,6 +17,8 @@ class Purchase {
   final String sellerName;
   final String itemImage;
   final String itemName;
+  @JsonKey(fromJson: _getNullableString)
+  final String secretCode;
   @JsonKey(fromJson: _dateFromTimeStamp, toJson: _dateAsIs)
   DateTime boughtOn;
   final bool delivered;
@@ -35,6 +37,7 @@ class Purchase {
       required this.itemName,
       required this.buyerId,
       required this.buyerName,
+      required this.secretCode,
       required this.sellerId,
       required this.sellerName,
       required this.boughtOn,
@@ -50,6 +53,14 @@ class Purchase {
   static DateTime? _nullableDateFromTimeStamp(Timestamp? timestamp) {
     if (timestamp == null) return null;
     return DateTime.parse(timestamp.toDate().toString());
+  }
+
+  static String _getNullableString(dynamic value) {
+    try {
+      return value as String;
+    } catch (e) {
+      return "";
+    }
   }
 
   Json toJson() => _$PurchaseToJson(this);
@@ -69,6 +80,7 @@ class Purchase {
       purchaseId: '1',
       paymentId: '1',
       review: 0,
+      secretCode: "000",
       itemImage:
           "https://firebasestorage.googleapis.com/v0/b/astroverse-5f2ae.appspot.com/o/serviceImage%2Fplanet.png?alt=media&token=7587f430-3ff2-41d4-8c47-6899db4b2db0",
       sellerId: '2dbSVMhJgjaUUqXxD6ryXjOBzOl2',

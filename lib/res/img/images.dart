@@ -12,4 +12,5 @@ class ProjectImages{
   static const emptyBox = AssetImage('lib/assets/images/empty_box.png');
   static const background = AssetImage('lib/assets/images/background.png');
   static const location = AssetImage('lib/assets/images/location_map.png');
+  static const truck = AssetImage('lib/assets/images/truck_min.png');
 }

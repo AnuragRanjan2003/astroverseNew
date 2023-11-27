@@ -1,5 +1,6 @@
 import 'dart:developer';
 
+import 'package:astroverse/components/order_bottom_sheet.dart';
 import 'package:astroverse/controllers/auth_controller.dart';
 import 'package:astroverse/controllers/order_controller.dart';
 import 'package:astroverse/models/purchase.dart';
@@ -109,7 +110,13 @@ class OrderedProductPortrait extends StatelessWidget {
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 5),
               child: Obx(() {
-                final item = order.service.value!;
+                final item = order.service.value;
+                if (item == null)
+                  return Container(
+                    color: Colors.grey,
+                    width: 200,
+                    height: 70,
+                  );
                 return Row(
                   mainAxisAlignment: MainAxisAlignment.start,
                   children: [
@@ -148,9 +155,15 @@ class OrderedProductPortrait extends StatelessWidget {
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 3),
               child: Obx(() {
                 final sb = StringBuffer();
-                final item = order.service.value!;
-                sb.writeAll(item.genre, ", ");
+                final item = order.service.value;
                 log(item.toString(), name: "ITEM");
+                if (item == null)
+                  return Container(
+                    color: Colors.grey,
+                    width: 200,
+                    height: 70,
+                  );
+                sb.writeAll(item.genre, ", ");
                 return Text(
                   sb.toString(),
                   style: const TextStyle(
@@ -162,7 +175,13 @@ class OrderedProductPortrait extends StatelessWidget {
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
               child: Obx(() {
-                final item = order.service.value!;
+                final item = order.service.value;
+                if (item == null)
+                  return Container(
+                    color: Colors.grey,
+                    width: 200,
+                    height: 70,
+                  );
                 return Text(
                   item.description,
                   style: const TextStyle(
@@ -175,7 +194,8 @@ class OrderedProductPortrait extends StatelessWidget {
               height: 15,
             ),
             Obx(() {
-              final item = order.service.value!;
+              final item = order.service.value;
+              if (item == null) return const SizedBox.shrink();
               return Visibility(
                 visible: item.place.isNotEmpty,
                 child: const Padding(
@@ -199,7 +219,8 @@ class OrderedProductPortrait extends StatelessWidget {
               );
             }),
             Obx(() {
-              final item = order.service.value!;
+              final item = order.service.value;
+              if (item == null) return const SizedBox.shrink();
               return Visibility(
                 visible: item.place.isNotEmpty,
                 child: Padding(
@@ -237,23 +258,47 @@ class OrderedProductPortrait extends StatelessWidget {
               ),
             ),
             Obx(() {
-              final item = order.service.value!;
-              return buildRow('provider', item.authorName, Icons.person_2);
+              final item = order.service.value;
+              if (item == null)
+                return Container(
+                  color: Colors.grey,
+                  width: 200,
+                  height: 70,
+                );
+              return buildRow('seller', item.authorName, Icons.person_2);
             }),
             Obx(() {
-              final item = order.service.value!;
+              final item = order.service.value;
+              if (item == null)
+                return Container(
+                  color: Colors.grey,
+                  width: 200,
+                  height: 70,
+                );
               return buildRow(
                   'date',
                   DateFormat.yMMMd().format(item.date).toString(),
                   Icons.date_range);
             }),
             Obx(() {
-              final item = order.service.value!;
+              final item = order.service.value;
+              if (item == null)
+                return Container(
+                  color: Colors.grey,
+                  width: 200,
+                  height: 70,
+                );
               return buildRow(
                   'uses', item.uses.toString(), Icons.data_thresholding);
             }),
             Obx(() {
-              final item = order.service.value!;
+              final item = order.service.value;
+              if (item == null)
+                return Container(
+                  color: Colors.grey,
+                  width: 200,
+                  height: 70,
+                );
               return buildRow('likes', item.upVotes.toString(), Icons.favorite);
             }),
             const SizedBox(
@@ -331,7 +376,15 @@ class OrderedProductPortrait extends StatelessWidget {
               child: Obx(() {
                 final user = auth.user.value!;
                 return MaterialButton(
-                  onPressed: () {},
+                  onPressed: () {
+                    Get.bottomSheet(
+                        OrderBottomSheet(
+                          purchase: purchase,
+                          item: order.service.value,
+                          currentUser: auth.user.value,
+                        ),
+                        isScrollControlled: true);
+                  },
                   color: Colors.blue,
                   padding: const EdgeInsets.symmetric(vertical: 12),
                   shape: const RoundedRectangleBorder(
@@ -346,7 +399,9 @@ class OrderedProductPortrait extends StatelessWidget {
                 );
               }),
             ),
-            const SizedBox(height: 20,)
+            const SizedBox(
+              height: 20,
+            )
           ],
         ),
       ),

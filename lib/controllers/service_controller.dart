@@ -61,8 +61,9 @@ class ServiceController extends GetxController {
     final res = await _repo.addTransaction(trans);
     final purchase = Purchase(
         itemId: item.id,
-        purchaseId: response.orderId.toString(),
+        purchaseId: response.paymentId.toString(),
         paymentId: response.paymentId.toString(),
+        secretCode: response.orderId.toString(),
         itemName: item.title,
         itemImage: item.imageUrl,
         itemPrice: item.price.toString(),

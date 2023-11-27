@@ -178,7 +178,7 @@ class MartItemFullPortrait extends StatelessWidget {
                       ],
                     ),
                   ),
-                  buildRow('provider', item.authorName, Icons.person_2),
+                  buildRow('seller', item.authorName, Icons.person_2),
                   buildRow(
                       'date',
                       DateFormat.yMMMd().format(item.date).toString(),
