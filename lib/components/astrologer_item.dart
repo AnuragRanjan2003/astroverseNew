@@ -61,10 +61,7 @@ class AstrologerItem extends StatelessWidget {
                       const SizedBox(
                         width: 20,
                       ),
-                      _dataWidget(
-                          Icons.data_exploration_outlined,
-                          NumberParser().toSocialMediaString(user.points),
-                          Colors.blueAccent),
+
                     ],
                   )
                 ],

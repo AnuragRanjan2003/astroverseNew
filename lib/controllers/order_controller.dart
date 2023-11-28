@@ -15,6 +15,7 @@ class OrderController extends GetxController {
   RxString enteredCode = "".obs;
   RxBool confirming = false.obs;
   Rxn<Purchase> purchase = Rxn();
+  RxBool checkBox = false.obs;
 
   StreamSubscription<DocumentSnapshot<Purchase?>>? _purchaseSub;
 

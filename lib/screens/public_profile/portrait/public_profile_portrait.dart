@@ -99,16 +99,6 @@ class PublicProfilePortrait extends StatelessWidget {
                   ),
                   Text(user.email),
                   const SizedBox(
-                    height: 15,
-                  ),
-                  Obx(() {
-                    if (public.info.value == null) {
-                      return _buildDataShimmerChips();
-                    }
-                    return _buildDataChips(
-                        public.info.value!, user.profileViews, user.points);
-                  }),
-                  const SizedBox(
                     height: 25,
                   ),
                   Obx(() {

@@ -375,7 +375,7 @@ class AuthController extends GetxController {
               _parseValueForModel(cred.photoURL),
               0,
               location: loc,
-              points: 0,
+              coins: 0,
               profileViews: 0,
               _parseValueForModel(cred.uid),
               astro,

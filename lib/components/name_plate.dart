@@ -160,15 +160,6 @@ class NamePlate extends StatelessWidget {
                           divider,
                           nameItem(
                               const Icon(
-                                Icons.attach_money,
-                                color: Colors.blue,
-                                size: _sizeIcon,
-                              ),
-                              'Points',
-                              NumberParser().toSocialMediaString(user.points)),
-                          divider,
-                          nameItem(
-                              const Icon(
                                 Icons.chat_bubble_outline,
                                 color: Colors.blue,
                                 size: _sizeIcon,

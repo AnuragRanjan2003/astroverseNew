@@ -14,14 +14,14 @@ class User {
   final bool astro;
   @JsonKey(fromJson: _fromJsonGeoPoint, toJson: _toJsonGeoPoint)
   GeoPoint? location;
-  int points;
+  int coins;
   int profileViews;
   String phNo;
   String upiID;
 
   User(this.name, this.email, this.image, this.plan, this.uid, this.astro,
       this.phNo, this.upiID,this.geoHash,
-      {this.location, this.points = 0, this.profileViews = 0});
+      {this.location, this.coins = 0, this.profileViews = 0});
 
   factory User.fromJson(json) => _$UserFromJson(json);
 

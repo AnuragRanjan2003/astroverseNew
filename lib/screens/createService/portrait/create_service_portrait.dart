@@ -20,6 +20,11 @@ class CreateServicePortrait extends StatelessWidget {
     'job prediction': 2,
     'marriage prediction': 3
   };
+  static const _listMode = {
+    'in-person': 0,
+    'chat': 1,
+    'call': 2,
+  };
 
   const CreateServicePortrait({super.key, required this.cons});
 
@@ -38,17 +43,17 @@ class CreateServicePortrait extends StatelessWidget {
       service.price.value =
           price.value.text.isNotEmpty ? double.parse(price.value.text) : 0.00;
       service.formValid.value = validate(
-          title, body, price, service.image.value, service.selectedItem.value);
+          title, body, price, service.image.value, service.selectedItem.value , service.selectedMode.value);
     });
 
     place.addListener(() {
       service.formValid.value = validate(
-          title, body, price, service.image.value, service.selectedItem.value);
+          title, body, price, service.image.value, service.selectedItem.value , service.selectedMode.value);
     });
 
     title.addListener(() {
       service.formValid.value = validate(
-          title, body, price, service.image.value, service.selectedItem.value);
+          title, body, price, service.image.value, service.selectedItem.value , service.selectedMode.value);
     });
     return WillPopScope(
       onWillPop: () async {
@@ -128,7 +133,7 @@ class CreateServicePortrait extends StatelessWidget {
                           maxLines: 1,
                         ),
                         const SizedBox(
-                          height: 20,
+                          height: 30,
                         ),
                         const Text(
                           "What kind of product is it?",
@@ -160,6 +165,45 @@ class CreateServicePortrait extends StatelessWidget {
                               log(service.selectedItem.value.toString(),
                                   name: 'DROPDOWN');
                             }),
+                        const SizedBox(
+                          height: 30,
+                        ),
+                        const Text(
+                          "Preferred mode of delivery",
+                          style: TextStyle(
+                              color: ProjectColors.lightBlack,
+                              fontWeight: FontWeight.bold),
+                        ),
+                        const SizedBox(
+                          height: 10,
+                        ),
+                        Obx(() {
+                          return DropdownMenu(
+                              width: 190,
+                              errorText: (service.selectedItem.value == 1 &&
+                                      service.selectedMode.value != 0)
+                                  ? "required in-person"
+                                  : null,
+                              initialSelection: _listMode.keys.first,
+                              inputDecorationTheme: const InputDecorationTheme(
+                                  border: OutlineInputBorder(
+                                      borderRadius: BorderRadius.all(
+                                          Radius.circular(30)))),
+                              dropdownMenuEntries: List.generate(
+                                  _listMode.length,
+                                  (i) => DropdownMenuEntry(
+                                      value: _listMode.keys.toList()[i],
+                                      label: _listMode.keys.toList()[i])),
+                              onSelected: (e) {
+                                if (e == null) {
+                                  service.selectedMode.value = 0;
+                                } else {
+                                  service.selectedMode.value = _listMode[e]!;
+                                }
+                                log(service.selectedMode.value.toString(),
+                                    name: 'MODE');
+                              });
+                        }),
                         const SizedBox(
                           height: 20,
                         ),
@@ -249,14 +293,23 @@ class CreateServicePortrait extends StatelessWidget {
                               ? () {
                                   var location = loc.location.value!;
                                   var user = auth.user.value!;
-                                  log(' post is valid : ${validate(title, body, price, service.image.value, service.selectedItem.value)}',
+                                  log(
+                                      ' post is valid : ${validate(
+                                        title,
+                                        body,
+                                        price,
+                                        service.image.value,
+                                        service.selectedItem.value,
+                                        service.selectedMode.value,
+                                      )}',
                                       name: "SERVICE");
                                   if (!validate(
                                       title,
                                       body,
                                       price,
                                       service.image.value,
-                                      service.selectedItem.value)) return;
+                                      service.selectedItem.value,
+                                      service.selectedMode.value)) return;
                                   final res = Service(
                                       price: double.parse(price.value.text),
                                       uses: 0,
@@ -269,7 +322,7 @@ class CreateServicePortrait extends StatelessWidget {
                                         _list.keys.toList()[
                                             service.selectedItem.value]
                                       ],
-                                      deliveryMethod: 0,
+                                      deliveryMethod: service.selectedMode.value,
                                       geoHash: "",
                                       range: Ranges.city,
                                       date: DateTime.now(),
@@ -316,11 +369,12 @@ class CreateServicePortrait extends StatelessWidget {
 }
 
 bool validate(TextEditingController title, TextEditingController body,
-    TextEditingController price, XFile? image, int i) {
+    TextEditingController price, XFile? image, int i, int a) {
   final t = title.value.text;
   final b = body.value.text;
 
   if (t.isEmpty || b.isEmpty) return false;
   if (i == 1 && image == null) return false;
+  if(i==1 && a!=0) return false;
   return true;
 }

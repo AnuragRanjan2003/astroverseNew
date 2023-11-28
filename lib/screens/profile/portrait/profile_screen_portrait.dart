@@ -1,3 +1,4 @@
+import 'package:astroverse/components/buy_coins.dart';
 import 'package:astroverse/components/name_plate.dart';
 import 'package:astroverse/controllers/auth_controller.dart';
 import 'package:astroverse/models/user.dart';
@@ -48,22 +49,27 @@ class ProfileScreenPortrait extends StatelessWidget {
           ),
           Align(
             alignment: Alignment.topRight,
-            child: Container(
-              margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 5),
-              decoration: BoxDecoration(
-                  borderRadius: const BorderRadius.all(Radius.circular(20)),
-                  border: Border.all(width: 1.2, color: Colors.black)),
-              child: const Wrap(
-                spacing: 8,
-                crossAxisAlignment: WrapCrossAlignment.center,
-                children: [
-                  Icon(
-                    Icons.currency_bitcoin,
-                    size: 17,
-                  ),
-                  Text("100")
-                ],
+            child: GestureDetector(
+              onTap: (){
+                Scaffold.of(context).showBottomSheet((context) => const BuyCoinsSheet(),constraints: BoxConstraints(maxHeight: Get.height*0.7) ,enableDrag: false);
+              },
+              child: Container(
+                margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 5),
+                decoration: BoxDecoration(
+                    borderRadius: const BorderRadius.all(Radius.circular(20)),
+                    border: Border.all(width: 1.2, color: Colors.black)),
+                child: const Wrap(
+                  spacing: 8,
+                  crossAxisAlignment: WrapCrossAlignment.center,
+                  children: [
+                    Icon(
+                      Icons.currency_bitcoin,
+                      size: 17,
+                    ),
+                    Text("100")
+                  ],
+                ),
               ),
             ),
           ),

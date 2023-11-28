@@ -43,6 +43,7 @@ class ServiceController extends GetxController {
   RxString searchText = "".obs;
   RxBool paymentLoading = false.obs;
   RxDouble imageSize = 0.45.obs;
+  RxInt selectedMode = 0.obs;
   Rxn<String> serviceProvider = Rxn();
 
   final searchController = TextEditingController(text: "");

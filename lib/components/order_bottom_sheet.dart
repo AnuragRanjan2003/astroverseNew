@@ -8,7 +8,7 @@ import 'package:astroverse/res/strings/other_strings.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-class OrderBottomSheet extends StatelessWidget {
+class OrderBottomSheet extends StatefulWidget {
   final Purchase? purchase;
   final Service? item;
   final User? currentUser;
@@ -21,6 +21,16 @@ class OrderBottomSheet extends StatelessWidget {
 
   static const _borderRadius = Radius.circular(0);
 
+
+
+  @override
+  State<OrderBottomSheet> createState() => _OrderBottomSheetState();
+}
+
+class _OrderBottomSheetState extends State<OrderBottomSheet> {
+
+
+
   @override
   Widget build(BuildContext context) {
     final OrderController order = Get.find();
@@ -31,21 +41,21 @@ class OrderBottomSheet extends StatelessWidget {
       order.enteredCode.value = code.value.text;
     });
 
-    if (purchase != null && currentUser != null) {
-      isBuyer = purchase!.buyerId == currentUser!.uid;
+    if (widget.purchase != null && widget.currentUser != null) {
+      isBuyer = widget.purchase!.buyerId == widget.currentUser!.uid;
     }
     order.enteredCode.value = "";
 
     doOnConfirm() {
-      order.processConfirmation(code.value.text, purchase!.secretCode,
-          () => null, purchase!, currentUser!.uid);
+      order.processConfirmation(code.value.text, widget.purchase!.secretCode,
+          () => null, widget.purchase!, widget.currentUser!.uid);
     }
 
     return Container(
       decoration: const BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.only(
-              topRight: _borderRadius, topLeft: _borderRadius)),
+              topRight: OrderBottomSheet._borderRadius, topLeft: OrderBottomSheet._borderRadius)),
       padding: const EdgeInsets.only(left: 20, right: 20, top: 10),
       width: double.infinity,
       child: SingleChildScrollView(
@@ -102,7 +112,27 @@ class OrderBottomSheet extends StatelessWidget {
               height: 20,
             ),
             isBuyer
-                ? buildRow("Key", purchase!.secretCode.toString(), Icons.key)
+                ? const SizedBox.shrink()
+                : Wrap(
+                    children: [
+                      Obx( () {
+                          return CheckboxMenuButton(
+                              value: order.checkBox.value,
+                              onChanged: (e) {
+                                order.checkBox.value = e??false;
+                              },
+                              child: const Text(
+                                "I hereby confirm to have delivered\nthe required product/service.",
+                                style: TextStyle(
+                                    fontSize: 13, color: ProjectColors.lightBlack),
+                              ));
+                        }
+                      )
+                    ],
+                  ),
+            isBuyer?const SizedBox.shrink():const SizedBox(height: 20,),
+            isBuyer
+                ? buildRow("Key", widget.purchase!.secretCode.toString(), Icons.key)
                 : _buildTextField(code, "password", const TextStyle()),
             const SizedBox(
               height: 10,
@@ -110,8 +140,10 @@ class OrderBottomSheet extends StatelessWidget {
             isBuyer
                 ? const SizedBox.shrink()
                 : Obx(() {
-                    return confirmButton(doOnConfirm,
-                        order.enteredCode.value.length == 14, order.confirming.value);
+                    return confirmButton(
+                        doOnConfirm,
+                        order.enteredCode.value.length == 14 && order.checkBox.value,
+                        order.confirming.value);
                   }),
             const SizedBox(
               height: 20,
@@ -139,7 +171,10 @@ class OrderBottomSheet extends StatelessWidget {
           : const SizedBox(
               height: 20,
               width: 20,
-              child: CircularProgressIndicator(strokeWidth: 2 , color: Colors.white,),
+              child: CircularProgressIndicator(
+                strokeWidth: 2,
+                color: Colors.white,
+              ),
             ),
     );
   }
@@ -196,5 +231,11 @@ class OrderBottomSheet extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  @override
+  void dispose() {
+    final OrderController order = Get.find();
+    order.checkBox.value = false;
   }
 }
