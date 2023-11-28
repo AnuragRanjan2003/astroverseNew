@@ -5,7 +5,7 @@ part 'comment.g.dart';
 
 @JsonSerializable(anyMap: true)
 class Comment {
-  final String userName;
+  String userName;
   final String userId;
   final String body;
   @JsonKey(fromJson: _dateFromTimeStamp, toJson: _dateAsIs)

@@ -11,6 +11,7 @@ import 'package:astroverse/models/transaction.dart' as t;
 import 'package:astroverse/models/user.dart' as models;
 import 'package:astroverse/res/strings/backend_strings.dart';
 import 'package:astroverse/utils/comment_utils.dart';
+import 'package:astroverse/utils/crypt.dart';
 import 'package:astroverse/utils/geo.dart';
 import 'package:astroverse/utils/purchase_utils.dart';
 import 'package:astroverse/utils/resource.dart';
@@ -23,6 +24,7 @@ typedef Json = Map<String, dynamic>;
 
 class Database {
   static const int _limit = 20;
+  final _crypt = Crypt();
   final _fireStore = FirebaseFirestore.instance;
   final _userCollection = FirebaseFirestore.instance
       .collection(BackEndStrings.userCollection)
@@ -109,17 +111,20 @@ class Database {
             toFirestore: (value, options) => value.toJson(),
           );
 
-  Future<Resource<void>> saveUserData(models.User user) async =>
-      await SafeCall().fireStoreCall<void>(
-          () async => await _userCollection.doc(user.uid).set(user));
+  Future<Resource<void>> saveUserData(models.User user) async {
+    user.name = _crypt.encryptToBase64String(user.name);
+    user.email = _crypt.encryptToBase64String(user.email);
+    return SafeCall().fireStoreCall<void>(
+        () async => await _userCollection.doc(user.uid).set(user));
+  }
 
   Stream<DocumentSnapshot<models.User>> getUserStream(String id) =>
       _userCollection.doc(id).snapshots();
 
-  Future<Resource<DocumentSnapshot<models.User>>> getUserData(
-          String uid) async =>
-      await SafeCall().fireStoreCall<DocumentSnapshot<models.User>>(
-          () async => await _userCollection.doc(uid).get());
+  Future<Resource<DocumentSnapshot<models.User>>> getUserData(String uid) {
+    return SafeCall().fireStoreCall<DocumentSnapshot<models.User>>(
+        () async => await _userCollection.doc(uid).get());
+  }
 
   Future<bool> checkForUserData(String uid) async {
     final res = await _userCollection.where('uid', isEqualTo: uid).get();
@@ -129,6 +134,7 @@ class Database {
 
   Future<Resource<Post>> savePost(Post post) async {
     try {
+      post.authorName = _crypt.encryptToBase64String(post.authorName);
       final batch = _fireStore.batch();
       batch.set(_postCollection.doc(post.id), post);
       batch.set(_userPostCollection(post.authorId).doc(post.id), post);

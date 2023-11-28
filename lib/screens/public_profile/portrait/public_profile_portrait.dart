@@ -8,6 +8,7 @@ import 'package:astroverse/models/user.dart';
 import 'package:astroverse/res/img/images.dart';
 import 'package:astroverse/res/textStyles/text_styles.dart';
 import 'package:astroverse/screens/messaging.dart';
+import 'package:astroverse/utils/crypt.dart';
 import 'package:astroverse/utils/hero_tag.dart';
 import 'package:astroverse/utils/num_parser.dart';
 import 'package:astroverse/utils/zego_cloud_services.dart';
@@ -25,8 +26,10 @@ class PublicProfilePortrait extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final User user = Get.arguments;
+    final crypto = Crypt();
+    User user = Get.arguments;
     log("$user", name: "ASTRO USER");
+    final decryptedUserName = crypto.decryptFromBase64String(user.name);
     final PublicProfileController public = Get.find();
     final zegoService = ZegoCloudServices();
     final ht = cons.maxHeight;
@@ -43,7 +46,7 @@ class PublicProfilePortrait extends StatelessWidget {
           child: Row(
             children: [
               Expanded(
-                  flex: 7, child: zegoService.callButton(user.uid, user.name)),
+                  flex: 7, child: zegoService.callButton(user.uid, decryptedUserName)),
               const Spacer(
                 flex: 1,
               ),
@@ -54,7 +57,7 @@ class PublicProfilePortrait extends StatelessWidget {
                   child: InkWell(
                     onTap: () {
                       comet.User receiver = comet.User(
-                          uid: user.uid, name: user.name, avatar: user.image);
+                          uid: user.uid, name: decryptedUserName, avatar: user.image);
                       Navigator.of(context).push(
                         MaterialPageRoute(
                           builder: (context) => Messaging(receiver: receiver),
@@ -91,7 +94,7 @@ class PublicProfilePortrait extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   Text(
-                    user.name,
+                    decryptedUserName,
                     style: TextStylesLight().bodyBold,
                   ),
                   const SizedBox(

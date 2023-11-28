@@ -1,6 +1,7 @@
 import 'package:astroverse/models/extra_info.dart';
 import 'package:astroverse/res/colors/project_colors.dart';
 import 'package:astroverse/res/dims/global.dart';
+import 'package:astroverse/utils/crypt.dart';
 import 'package:astroverse/utils/num_parser.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -29,6 +30,8 @@ class NamePlate extends StatelessWidget {
       color: ProjectColors.greyBackground,
     );
 
+    final crypto = Crypt();
+
     return IntrinsicHeight(
       child: Container(
         padding: const EdgeInsets.symmetric(
@@ -56,7 +59,7 @@ class NamePlate extends StatelessWidget {
                   height: 15,
                 ),
                 Text(
-                  user.name,
+                  crypto.decryptFromBase64String(crypto.decryptFromBase64String(user.name)),
                   style: const TextStyle(
                       fontSize: 20, fontWeight: FontWeight.w500),
                 ),
@@ -97,7 +100,7 @@ class NamePlate extends StatelessWidget {
                                 size: _sizeIcon,
                               ),
                               'Email',
-                              user.email),
+                              crypto.decryptFromBase64String(crypto.decryptFromBase64String(user.email))),
                           divider,
                           nameItem(
                               const Icon(
@@ -106,7 +109,7 @@ class NamePlate extends StatelessWidget {
                                 size: _sizeIcon,
                               ),
                               'Phone',
-                              user.phNo),
+                              crypto.decryptFromBase64String(user.phNo)),
                           divider,
                           nameItem(
                               const Icon(

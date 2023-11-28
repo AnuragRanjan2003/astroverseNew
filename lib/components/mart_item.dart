@@ -3,6 +3,7 @@ import 'package:astroverse/res/colors/project_colors.dart';
 import 'package:astroverse/res/img/images.dart';
 import 'package:astroverse/res/textStyles/text_styles.dart';
 import 'package:astroverse/routes/routes.dart';
+import 'package:astroverse/utils/crypt.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -14,6 +15,7 @@ class MartItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final crypto = Crypt();
     return Card(
       surfaceTintColor: Colors.white,
       elevation: 8,
@@ -55,7 +57,7 @@ class MartItem extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
                   Text(
-                    '@${item.authorName}',
+                    '@${crypto.decryptFromBase64String(item.authorName)}',
                     style: const TextStyle(fontSize: 11),
                   ),
                   Text(

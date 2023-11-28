@@ -7,6 +7,7 @@ import 'package:astroverse/models/comment.dart';
 import 'package:astroverse/models/post_save.dart';
 import 'package:astroverse/res/dims/global.dart';
 import 'package:astroverse/res/textStyles/text_styles.dart';
+import 'package:astroverse/utils/crypt.dart';
 import 'package:astroverse/utils/hero_tag.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -22,21 +23,14 @@ class PostFullPortrait extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final crypto = Crypt();
     final MainController main = Get.find();
     final AuthController auth = Get.find();
     final FullPostPageController controller = Get.put(FullPostPageController());
     final Post post = Get.arguments;
     log(post.authorId, name: "UID");
     controller.addPostView(post.id);
-    final dummy = Comment(
-      'xyz',
-      '12345',
-      'nice',
-      '123456',
-      '320ff7bd-5664-4be6-b06b-347d82261a51',
-      false,
-      DateTime.now(),
-    );
+
     controller.getAuthor(post.authorId);
     //controller.postComment(dummy, post.id);
     controller.fetchComments(post.id);
@@ -71,7 +65,7 @@ class PostFullPortrait extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  '@${post.authorName}',
+                  '@${crypto.decryptFromBase64String(post.authorName)}',
                   style: TextStylesLight().coloredSmallThick(Colors.black),
                 ),
                 const SizedBox(

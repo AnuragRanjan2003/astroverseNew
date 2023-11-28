@@ -1,4 +1,5 @@
 import 'package:astroverse/models/purchase.dart';
+import 'package:astroverse/utils/crypt.dart';
 import 'package:astroverse/utils/postable.dart';
 import 'package:astroverse/utils/resource.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -10,6 +11,8 @@ class PurchaseUtils extends Postable<Purchase, Purchase> {
   final CollectionReference? servicesCollection;
   final DocumentReference? extraInfoDocument;
   static const int _limit = 20;
+
+  final _crypto = Crypt();
 
   PurchaseUtils(super.ref, super.likeRef, this.servicesCollection,
       this.extraInfoDocument);
@@ -114,6 +117,9 @@ class PurchaseUtils extends Postable<Purchase, Purchase> {
   Future<Resource<Purchase>> savePost(Purchase purchase) async {
     try {
       final batch = _db.batch();
+      purchase.buyerName = _crypto.encryptToBase64String(purchase.buyerName);
+      purchase.sellerName = _crypto.encryptToBase64String(purchase.sellerName);
+      purchase.secretCode = _crypto.encryptToBase64String(purchase.secretCode);
       batch.set(ref.doc(purchase.purchaseId), purchase);
       batch.set(likeRef!.doc(purchase.purchaseId), purchase);
       batch.update(servicesCollection!.doc(purchase.itemId), {

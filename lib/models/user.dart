@@ -1,3 +1,4 @@
+import 'package:astroverse/utils/crypt.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:json_annotation/json_annotation.dart';
 
@@ -5,8 +6,8 @@ part 'user.g.dart';
 
 @JsonSerializable(anyMap: true)
 class User {
-  final String name;
-  final String email;
+  String name;
+  String email;
   String image;
   String uid;
   int plan;
@@ -29,6 +30,10 @@ class User {
 
   static GeoPoint? _fromJsonGeoPoint(GeoPoint? geoPoint) {
     return geoPoint;
+  }
+
+  static _decrypt(String encoded){
+    return Crypt().decryptFromBase64String(encoded);
   }
 
   static GeoPoint? _toJsonGeoPoint(GeoPoint? geoPoint) {

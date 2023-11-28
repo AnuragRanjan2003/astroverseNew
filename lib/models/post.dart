@@ -16,7 +16,7 @@ class Post {
   final double lng;
   final int comments;
   final int views;
-  final String authorName;
+  String authorName;
   final String authorId;
 
   Post({

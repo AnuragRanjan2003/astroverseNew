@@ -1,5 +1,6 @@
 import 'package:astroverse/models/save_service.dart';
 import 'package:astroverse/models/service.dart';
+import 'package:astroverse/utils/crypt.dart';
 import 'package:astroverse/utils/geo.dart';
 import 'package:astroverse/utils/postable.dart';
 import 'package:astroverse/utils/resource.dart';
@@ -33,6 +34,8 @@ class ServiceUtils extends Postable<Service, SaveService> {
 
   ServiceUtils(this.uid)
       : super(_serviceCollection, _usedServiceCollection(uid));
+
+  final _crypto = Crypt();
 
   @override
   Future<Resource<int>> dislike(String id) async {
@@ -193,6 +196,7 @@ class ServiceUtils extends Postable<Service, SaveService> {
   Future<Resource<Service>> savePost(Service post) async {
     final point = GeoHasher().encode(post.lat, post.lng);
     post.geoHash = point;
+    post.authorName = _crypto.encryptToBase64String(post.authorName);
     try {
       await ref.doc(post.id).set(post);
       return Success(post);

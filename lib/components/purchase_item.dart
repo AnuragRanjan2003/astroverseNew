@@ -1,5 +1,6 @@
 import 'package:astroverse/models/purchase.dart';
 import 'package:astroverse/res/colors/project_colors.dart';
+import 'package:astroverse/utils/crypt.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -12,6 +13,7 @@ class PurchaseItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final crypto = Crypt();
     return IntrinsicHeight(
       child: Container(
         decoration: const BoxDecoration(

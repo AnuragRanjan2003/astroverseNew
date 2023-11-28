@@ -1,6 +1,7 @@
 import 'package:astroverse/models/comment.dart';
 import 'package:astroverse/models/save_comment.dart';
 import 'package:astroverse/res/strings/backend_strings.dart';
+import 'package:astroverse/utils/crypt.dart';
 import 'package:astroverse/utils/postable.dart';
 import 'package:astroverse/utils/resource.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -18,6 +19,7 @@ CollectionReference<Comment> getCommentCollection(String postId) =>
 
 class CommentUtils extends Postable<Comment, SaveComment> {
   final String postId;
+  final _crypto = Crypt();
 
   CommentUtils(this.postId) : super(getCommentCollection(postId), null);
 
@@ -77,6 +79,7 @@ class CommentUtils extends Postable<Comment, SaveComment> {
   @override
   Future<Resource<Comment>> savePost(Comment comment) async {
     try {
+      comment.userName = _crypto.encryptToBase64String(comment.userName);
       await ref.doc(comment.id).set(comment);
       await ref.doc(comment.id).update({"date": FieldValue.serverTimestamp()});
       return Success(comment);

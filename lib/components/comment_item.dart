@@ -1,4 +1,5 @@
 import 'package:astroverse/models/comment.dart';
+import 'package:astroverse/utils/crypt.dart';
 import 'package:flutter/material.dart';
 
 class CommentItem extends StatelessWidget {
@@ -8,6 +9,7 @@ class CommentItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final crypto  = Crypt();
     return IntrinsicHeight(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -16,7 +18,7 @@ class CommentItem extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                "@${item.userName}",
+                "@${crypto.decryptFromBase64String(item.userName)}",
                 textAlign: TextAlign.start,
                 style: const TextStyle(
                     color: Colors.black, fontWeight: FontWeight.bold),

@@ -118,8 +118,9 @@ class AstroSignUpPortrait extends StatelessWidget {
                           onPressed: () {
                             final loc = location.location.value;
                             GeoPoint? geo;
-                            if (loc != null)
+                            if (loc != null) {
                               geo = GeoPoint(loc.latitude!, loc.longitude!);
+                            }
                             auth.signUpWithGoogle((p0) {
                               auth.saveGoogleData(
                                   p0,

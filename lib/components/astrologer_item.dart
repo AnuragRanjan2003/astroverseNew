@@ -1,6 +1,7 @@
 import 'package:astroverse/models/user.dart';
 import 'package:astroverse/res/colors/project_colors.dart';
 import 'package:astroverse/routes/routes.dart';
+import 'package:astroverse/utils/crypt.dart';
 import 'package:astroverse/utils/hero_tag.dart';
 import 'package:astroverse/utils/num_parser.dart';
 import 'package:flutter/material.dart';
@@ -13,6 +14,7 @@ class AstrologerItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final crypto = Crypt();
     return GestureDetector(
       onTap: () {
         Get.toNamed(Routes.publicProfile, arguments: user);
@@ -43,7 +45,7 @@ class AstrologerItem extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    user.name,
+                    crypto.decryptFromBase64String(user.name),
                     style: const TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.bold,

@@ -12,13 +12,13 @@ class Purchase {
   final String itemPrice;
   final String totalPrice;
   final String buyerId;
-  final String buyerName;
+  String buyerName;
   final String sellerId;
-  final String sellerName;
+  String sellerName;
   final String itemImage;
   final String itemName;
   @JsonKey(fromJson: _getNullableString)
-  final String secretCode;
+  String secretCode;
   @JsonKey(fromJson: _dateFromTimeStamp, toJson: _dateAsIs)
   DateTime boughtOn;
   final bool delivered;
