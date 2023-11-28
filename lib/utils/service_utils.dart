@@ -196,7 +196,6 @@ class ServiceUtils extends Postable<Service, SaveService> {
   Future<Resource<Service>> savePost(Service post) async {
     final point = GeoHasher().encode(post.lat, post.lng);
     post.geoHash = point;
-    post.authorName = _crypto.encryptToBase64String(post.authorName);
     try {
       await ref.doc(post.id).set(post);
       return Success(post);

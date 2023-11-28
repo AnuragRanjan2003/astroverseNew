@@ -7,6 +7,7 @@ import 'package:astroverse/models/user.dart' as models;
 import 'package:astroverse/repo/auth_repo.dart';
 import 'package:astroverse/res/strings/backend_strings.dart';
 import 'package:astroverse/routes/routes.dart';
+import 'package:astroverse/utils/crypt.dart';
 import 'package:astroverse/utils/geo.dart';
 import 'package:astroverse/utils/resource.dart';
 import 'package:astroverse/utils/zego_cloud_services.dart';
@@ -28,6 +29,8 @@ class AuthController extends GetxController {
       FirebaseAnalyticsObserver(analytics: FirebaseAnalytics.instance);
 
   final _analytics = FirebaseAnalytics.instance;
+
+  final _crypto = Crypt();
 
   Rxn<models.User> user = Rxn<models.User>();
   Rx<bool> loading = false.obs;
@@ -138,6 +141,10 @@ class AuthController extends GetxController {
       debugPrint(event.toString());
       if (event.isSuccess) {
         event = event as Success<UserCredential>;
+
+        user.name = _crypto.encryptToBase64String(user.name);
+        user.email = _crypto.encryptToBase64String(user.email);
+
         user.uid = event.data.user!.uid;
         if (image.value != null) {
           _repo
@@ -203,6 +210,8 @@ class AuthController extends GetxController {
     _repo.createUser(user, password).then((event) {
       debugPrint(event.toString());
       if (event.isSuccess) {
+        user.name = _crypto.encryptToBase64String(user.name);
+        user.email = _crypto.encryptToBase64String(user.email);
         event = event as Success<UserCredential>;
         user.uid = event.data.user!.uid;
         if (image.value != null) {
@@ -370,8 +379,8 @@ class AuthController extends GetxController {
             final cred = (value as Success<UserCredential>).data.user!;
             _analytics.logSignUp(signUpMethod: "Google");
             final user = models.User(
-              _parseValueForModel(cred.displayName),
-              _parseValueForModel(cred.email),
+              _crypto.encryptToBase64String(_parseValueForModel(cred.displayName)),
+              _crypto.encryptToBase64String(_parseValueForModel(cred.email)),
               _parseValueForModel(cred.photoURL),
               0,
               location: loc,

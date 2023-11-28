@@ -1,6 +1,5 @@
 import 'package:astroverse/components/glass_morph_container.dart';
 import 'package:astroverse/components/new_posts_page.dart';
-import 'package:astroverse/controllers/main_controller.dart';
 import 'package:astroverse/res/colors/project_colors.dart';
 import 'package:astroverse/routes/routes.dart';
 import 'package:flutter/material.dart';
@@ -12,8 +11,7 @@ import '../../../controllers/auth_controller.dart';
 class DiscoverScreenPortrait extends StatelessWidget {
   final BoxConstraints cons;
 
-  const DiscoverScreenPortrait(
-      {super.key, required this.cons});
+  const DiscoverScreenPortrait({super.key, required this.cons});
 
   @override
   Widget build(BuildContext context) {
@@ -26,30 +24,23 @@ class DiscoverScreenPortrait extends StatelessWidget {
       child: Scaffold(
         backgroundColor: ProjectColors.greyBackground,
         floatingActionButtonLocation: FloatingActionButtonLocation.endTop,
-        floatingActionButton: Obx(() {
-          if (auth.user.value?.astro == true) {
-            return Container(
-              margin: const EdgeInsets.only(top: 10),
-              child: FloatingActionButton(
-                onPressed: () {
-                  Get.toNamed(Routes.createPostScreen);
-                },
-                backgroundColor: Colors.lightBlue,
-                elevation: 0,
-                shape: const RoundedRectangleBorder(
-                    borderRadius: BorderRadius.all(Radius.circular(20))),
-                child: const FaIcon(
-                  FontAwesomeIcons.penNib,
-                  color: Colors.white,
-                  size: 17,
-                ),
-              ),
-            );
-          }
-          return const SizedBox(
-            height: 0,
-          );
-        }),
+        floatingActionButton: Container(
+          margin: const EdgeInsets.only(top: 10),
+          child: FloatingActionButton(
+            onPressed: () {
+              Get.toNamed(Routes.createPostScreen);
+            },
+            backgroundColor: Colors.lightBlue,
+            elevation: 0,
+            shape: const RoundedRectangleBorder(
+                borderRadius: BorderRadius.all(Radius.circular(20))),
+            child: const FaIcon(
+              FontAwesomeIcons.penNib,
+              color: Colors.white,
+              size: 17,
+            ),
+          ),
+        ),
         body: SizedBox(
             width: wd,
             child: Stack(
@@ -76,10 +67,9 @@ class DiscoverScreenPortrait extends StatelessWidget {
       borderRadius: 20,
       blur: 3,
       opacity: 0.5,
-      margin: EdgeInsets.only(
-        left: 10, right: cons.maxWidth * 0.30, top: 10),
+      margin: EdgeInsets.only(left: 10, right: cons.maxWidth * 0.30, top: 10),
       child: Container(
-        padding: const EdgeInsets.only(left: 10, top: 5, bottom: 5,right: 10),
+        padding: const EdgeInsets.only(left: 10, top: 5, bottom: 5, right: 10),
         decoration: const BoxDecoration(
             borderRadius: BorderRadius.all(Radius.circular(20)),
             color: Colors.transparent),
@@ -90,11 +80,11 @@ class DiscoverScreenPortrait extends StatelessWidget {
             ),
           ),
           child: const TabBar(
-            indicatorPadding: EdgeInsets.symmetric(horizontal: 0,vertical: 2),
+              indicatorPadding:
+                  EdgeInsets.symmetric(horizontal: 0, vertical: 2),
               indicator: BoxDecoration(
-                borderRadius: BorderRadius.all(Radius.circular(15)),
-                color: Colors.blue
-              ),
+                  borderRadius: BorderRadius.all(Radius.circular(15)),
+                  color: Colors.blue),
               indicatorColor: Colors.transparent,
               indicatorSize: TabBarIndicatorSize.tab,
               labelColor: Colors.white,

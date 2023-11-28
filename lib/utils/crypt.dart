@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:encrypt/encrypt.dart';
 
 class Crypt {
@@ -6,6 +8,7 @@ class Crypt {
 
     String _decrypt(Encrypted encryptedData) {
         final key = Key.fromUtf8(_keyString);
+        log("decrypting : $encryptedData" , name:"CRYPT");
         final encrypter = Encrypter(AES(key, mode: AESMode.cbc));
         final initVector = IV.fromUtf8(_ivString);
         return encrypter.decrypt(encryptedData, iv: initVector);
@@ -13,6 +16,7 @@ class Crypt {
 
     Encrypted _encrypt(String plainText) {
         final key = Key.fromUtf8(_keyString);
+        log("encrypting : $plainText" , name:"CRYPT");
         final encrypter = Encrypter(AES(key, mode: AESMode.cbc));
         final initVector = IV.fromUtf8(_ivString);
         Encrypted encryptedData = encrypter.encrypt(plainText, iv: initVector);

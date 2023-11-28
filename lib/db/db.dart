@@ -112,8 +112,6 @@ class Database {
           );
 
   Future<Resource<void>> saveUserData(models.User user) async {
-    user.name = _crypt.encryptToBase64String(user.name);
-    user.email = _crypt.encryptToBase64String(user.email);
     return SafeCall().fireStoreCall<void>(
         () async => await _userCollection.doc(user.uid).set(user));
   }
@@ -134,7 +132,6 @@ class Database {
 
   Future<Resource<Post>> savePost(Post post) async {
     try {
-      post.authorName = _crypt.encryptToBase64String(post.authorName);
       final batch = _fireStore.batch();
       batch.set(_postCollection.doc(post.id), post);
       batch.set(_userPostCollection(post.authorId).doc(post.id), post);

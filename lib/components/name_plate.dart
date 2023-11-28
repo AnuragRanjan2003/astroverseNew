@@ -59,7 +59,7 @@ class NamePlate extends StatelessWidget {
                   height: 15,
                 ),
                 Text(
-                  crypto.decryptFromBase64String(crypto.decryptFromBase64String(user.name)),
+                  crypto.decryptFromBase64String(user.name),
                   style: const TextStyle(
                       fontSize: 20, fontWeight: FontWeight.w500),
                 ),
@@ -100,7 +100,7 @@ class NamePlate extends StatelessWidget {
                                 size: _sizeIcon,
                               ),
                               'Email',
-                              crypto.decryptFromBase64String(crypto.decryptFromBase64String(user.email))),
+                              crypto.decryptFromBase64String(user.email)),
                           divider,
                           nameItem(
                               const Icon(

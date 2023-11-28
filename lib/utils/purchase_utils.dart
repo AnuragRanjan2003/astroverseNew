@@ -117,8 +117,6 @@ class PurchaseUtils extends Postable<Purchase, Purchase> {
   Future<Resource<Purchase>> savePost(Purchase purchase) async {
     try {
       final batch = _db.batch();
-      purchase.buyerName = _crypto.encryptToBase64String(purchase.buyerName);
-      purchase.sellerName = _crypto.encryptToBase64String(purchase.sellerName);
       purchase.secretCode = _crypto.encryptToBase64String(purchase.secretCode);
       batch.set(ref.doc(purchase.purchaseId), purchase);
       batch.set(likeRef!.doc(purchase.purchaseId), purchase);

@@ -79,7 +79,6 @@ class CommentUtils extends Postable<Comment, SaveComment> {
   @override
   Future<Resource<Comment>> savePost(Comment comment) async {
     try {
-      comment.userName = _crypto.encryptToBase64String(comment.userName);
       await ref.doc(comment.id).set(comment);
       await ref.doc(comment.id).update({"date": FieldValue.serverTimestamp()});
       return Success(comment);
