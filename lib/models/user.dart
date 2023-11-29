@@ -18,10 +18,9 @@ class User {
   int coins;
   int profileViews;
   String phNo;
-  String upiID;
 
   User(this.name, this.email, this.image, this.plan, this.uid, this.astro,
-      this.phNo, this.upiID,this.geoHash,
+      this.phNo,this.geoHash,
       {this.location, this.coins = 0, this.profileViews = 0});
 
   factory User.fromJson(json) => _$UserFromJson(json);
@@ -42,6 +41,6 @@ class User {
 
   @override
   String toString() {
-    return "User(name :$name , email :$email , image : $image ,uid : $uid ,plan: $plan ,astro: $astro ,phno: $phNo , upi : $upiID)";
+    return "User(name :$name , email :$email , image : $image ,uid : $uid ,plan: $plan ,astro: $astro ,phno: $phNo )";
   }
 }

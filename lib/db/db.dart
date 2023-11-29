@@ -9,6 +9,7 @@ import 'package:astroverse/models/save_service.dart';
 import 'package:astroverse/models/service.dart';
 import 'package:astroverse/models/transaction.dart' as t;
 import 'package:astroverse/models/user.dart' as models;
+import 'package:astroverse/models/user_bank_details.dart';
 import 'package:astroverse/res/strings/backend_strings.dart';
 import 'package:astroverse/utils/comment_utils.dart';
 import 'package:astroverse/utils/crypt.dart';
@@ -57,6 +58,18 @@ class Database {
         fromFirestore: (snapshot, options) => Post.fromJson(snapshot.data()!),
         toFirestore: (value, options) => value.toJson(),
       );
+
+  DocumentReference<UserBankDetails> _userAccountDocument(String uid) =>
+      FirebaseFirestore.instance
+          .collection(BackEndStrings.userCollection)
+          .doc(uid)
+          .collection(BackEndStrings.metaDataCollection)
+          .doc(BackEndStrings.userBankAccountDocument)
+          .withConverter<UserBankDetails>(
+            fromFirestore: (snapshot, options) =>
+                UserBankDetails.fromJson(snapshot.data()),
+            toFirestore: (bankDetails, options) => bankDetails.toJson(),
+          );
 
   final _transactionCollection = FirebaseFirestore.instance
       .collection(BackEndStrings.transactionCollection)
@@ -115,6 +128,32 @@ class Database {
     return SafeCall().fireStoreCall<void>(
         () async => await _userCollection.doc(user.uid).set(user));
   }
+
+  Future<Resource<UserBankDetails>> saveBankDetails(
+      UserBankDetails data, String uid) async {
+    try {
+      await _userAccountDocument(uid).set(data, SetOptions(merge: true));
+      return Success<UserBankDetails>(data);
+    } on FirebaseException catch (e) {
+      return Failure<UserBankDetails>(e.message.toString());
+    } catch (e) {
+      return Failure<UserBankDetails>(e.toString());
+    }
+  }
+
+  Future<Resource<Json>> updateBankDetails(Json data, String uid) async {
+    try {
+      await _userAccountDocument(uid).update(data);
+      return Success<Json>(data);
+    } on FirebaseException catch (e) {
+      return Failure<Json>(e.message.toString());
+    } catch (e) {
+      return Failure<Json>(e.toString());
+    }
+  }
+
+  Stream<DocumentSnapshot<UserBankDetails>> getBankDetailsStream(String uid) =>
+      _userAccountDocument(uid).snapshots();
 
   Stream<DocumentSnapshot<models.User>> getUserStream(String id) =>
       _userCollection.doc(id).snapshots();

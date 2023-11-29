@@ -1,4 +1,6 @@
+import 'package:astroverse/components/update_bank_bottomsheet.dart';
 import 'package:astroverse/models/extra_info.dart';
+import 'package:astroverse/models/user_bank_details.dart';
 import 'package:astroverse/res/colors/project_colors.dart';
 import 'package:astroverse/res/dims/global.dart';
 import 'package:astroverse/utils/crypt.dart';
@@ -12,16 +14,19 @@ import '../models/user.dart';
 class NamePlate extends StatelessWidget {
   final User user;
   final ExtraInfo info;
+  final UserBankDetails? bankDetails;
   final void Function() onLogOut;
   final void Function() onEdit;
   static const _sizeIcon = 22.0;
 
-  const NamePlate(
-      {super.key,
-      required this.user,
-      required this.onLogOut,
-      required this.onEdit,
-      required this.info});
+  const NamePlate({
+    super.key,
+    required this.user,
+    required this.onLogOut,
+    required this.onEdit,
+    required this.info,
+    this.bankDetails,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -200,6 +205,94 @@ class NamePlate extends StatelessWidget {
                               'last',
                               DateFormat('dd MMM yyyy')
                                   .format(info.lastActive)),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        const Text(
+                          "Account",
+                          textAlign: TextAlign.start,
+                          style: TextStyle(
+                              fontSize: 15, fontWeight: FontWeight.w600),
+                        ),
+                        IconButton(
+                            onPressed: () {
+                              Scaffold.of(context).showBottomSheet(
+                                  (context) => UpdateBankBottomSheet(
+                                      bankDetails: bankDetails ??
+                                          UserBankDetails(
+                                              accountNumber: "",
+                                              ifscCode: "",
+                                              branch: "",
+                                              upiId: "")),
+                                  constraints: BoxConstraints(
+                                      maxHeight: Get.height * 0.7));
+                            },
+                            icon: const Icon(
+                              Icons.mode_edit_outline,
+                              color: Colors.blue,
+                            ))
+                      ],
+                    ),
+                    Container(
+                      margin: const EdgeInsets.symmetric(vertical: 10),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 0, vertical: 5),
+                      decoration: const BoxDecoration(
+                          borderRadius: BorderRadius.all(Radius.circular(20)),
+                          color: Colors.white),
+                      child: Column(
+                        children: [
+                          nameItem(
+                              const Icon(
+                                Icons.account_balance_wallet,
+                                color: Colors.blue,
+                                size: _sizeIcon,
+                              ),
+                              'UPI',
+                              bankDetails == null
+                                  ? "unavailable"
+                                  : bankDetails!.upiId),
+                          divider,
+                          nameItem(
+                              const Icon(
+                                Icons.numbers_sharp,
+                                color: Colors.blue,
+                                size: _sizeIcon,
+                              ),
+                              'Account No.',
+                              bankDetails == null
+                                  ? "unavailable"
+                                  : bankDetails!.accountNumber),
+                          divider,
+                          nameItem(
+                              const Icon(
+                                Icons.numbers,
+                                color: Colors.blue,
+                                size: _sizeIcon,
+                              ),
+                              'IFSC Code',
+                              bankDetails == null
+                                  ? "unavailable"
+                                  : bankDetails!.ifscCode),
+                          divider,
+                          nameItem(
+                              const Icon(
+                                Icons.alt_route,
+                                size: _sizeIcon,
+                                color: Colors.blue,
+                              ),
+                              'branch',
+                              bankDetails == null
+                                  ? "unavailable"
+                                  : bankDetails!.branch),
                         ],
                       ),
                     ),

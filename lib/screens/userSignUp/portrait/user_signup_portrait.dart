@@ -102,7 +102,6 @@ class UserSignUpPortrait extends StatelessWidget {
                               "",
                               false,
                               "",
-                              "",
                               ""
                             );
                             Get.toNamed(Routes.upiScreen,

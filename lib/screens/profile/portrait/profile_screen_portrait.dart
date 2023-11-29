@@ -21,59 +21,73 @@ class ProfileScreenPortrait extends StatelessWidget {
 
     auth.getExtraInfo(auth.user.value!.uid);
 
-    return Scaffold(
-      backgroundColor: ProjectColors.greyBackground,
-      body: Stack(
-        children: [
-          SingleChildScrollView(
-            child: Obx(() {
-              if (auth.user.value != null && auth.info.value != null) {
-                return NamePlate(
-                  user: auth.user.value!,
-                  info: auth.info.value!,
-                  onEdit: () {},
-                  onLogOut: () {
-                    auth.logOut();
-                  },
-                );
-              } else {
-                return loadingShimmer(Center(
-                  child: Container(
-                    color: Colors.white,
-                    width: wd,
-                    height: ht * 0.95,
-                  ),
-                ));
-              }
-            }),
-          ),
-          Align(
-            alignment: Alignment.topRight,
-            child: GestureDetector(
-              onTap: (){
-                Scaffold.of(context).showBottomSheet((context) => const BuyCoinsSheet(),constraints: BoxConstraints(maxHeight: Get.height*0.7) ,enableDrag: false);
-              },
-              child: Container(
-                margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 5),
-                decoration: BoxDecoration(
-                    borderRadius: const BorderRadius.all(Radius.circular(20)),
-                    border: Border.all(width: 1.2, color: Colors.black)),
-                child: const Wrap(
-                  spacing: 8,
-                  crossAxisAlignment: WrapCrossAlignment.center,
-                  children: [
-                    Icon(
-                      Icons.currency_bitcoin,
-                      size: 17,
+    auth.startBankDetailsStream(auth.user.value!.uid);
+
+    return WillPopScope(
+      onWillPop: () async {
+        auth.endBankDetailsStream();
+        return true;
+      },
+      child: Scaffold(
+        backgroundColor: ProjectColors.greyBackground,
+        body: Stack(
+          children: [
+            SingleChildScrollView(
+              child: Obx(() {
+                if (auth.user.value != null && auth.info.value != null) {
+                  return NamePlate(
+                    user: auth.user.value!,
+                    info: auth.info.value!,
+                    bankDetails: auth.bankDetails.value,
+                    onEdit: () {},
+                    onLogOut: () {
+                      auth.logOut();
+                    },
+                  );
+                } else {
+                  return loadingShimmer(Center(
+                    child: Container(
+                      color: Colors.white,
+                      width: wd,
+                      height: ht * 0.95,
                     ),
-                    Text("100")
-                  ],
+                  ));
+                }
+              }),
+            ),
+            Align(
+              alignment: Alignment.topRight,
+              child: GestureDetector(
+                onTap: () {
+                  Scaffold.of(context).showBottomSheet(
+                      (context) => const BuyCoinsSheet(),
+                      constraints: BoxConstraints(maxHeight: Get.height * 0.8),
+                      enableDrag: false);
+                },
+                child: Container(
+                  margin:
+                      const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 20, vertical: 5),
+                  decoration: BoxDecoration(
+                      borderRadius: const BorderRadius.all(Radius.circular(20)),
+                      border: Border.all(width: 1.2, color: Colors.black)),
+                  child: const Wrap(
+                    spacing: 8,
+                    crossAxisAlignment: WrapCrossAlignment.center,
+                    children: [
+                      Icon(
+                        Icons.currency_bitcoin,
+                        size: 17,
+                      ),
+                      Text("100")
+                    ],
+                  ),
                 ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

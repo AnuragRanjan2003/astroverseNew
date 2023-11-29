@@ -2,8 +2,10 @@ import 'dart:async';
 import 'dart:developer';
 import 'dart:io';
 
+import 'package:astroverse/controllers/service_controller.dart';
 import 'package:astroverse/models/extra_info.dart';
 import 'package:astroverse/models/user.dart' as models;
+import 'package:astroverse/models/user_bank_details.dart';
 import 'package:astroverse/repo/auth_repo.dart';
 import 'package:astroverse/res/strings/backend_strings.dart';
 import 'package:astroverse/routes/routes.dart';
@@ -37,6 +39,7 @@ class AuthController extends GetxController {
   Rx<bool> userLoading = false.obs;
   Rxn<String> error = Rxn<String>();
   StreamSubscription<DocumentSnapshot<models.User>>? _sub;
+  StreamSubscription<DocumentSnapshot<UserBankDetails>>? _bankSub;
   Rx<String> pass = "".obs;
   final _repo = AuthRepo();
   Rxn<XFile> image = Rxn();
@@ -48,6 +51,12 @@ class AuthController extends GetxController {
   Rx<int> astroPlanSelected = Rx(0);
   Rx<int> page = 0.obs;
   Rxn<ExtraInfo> info = Rxn();
+  RxBool disableAccountUpdate = true.obs;
+  RxnString upiError = RxnString();
+  RxnString accError = RxnString();
+  RxnString ifscError = RxnString();
+  RxnString branchError = RxnString();
+  Rxn<UserBankDetails> bankDetails = Rxn();
   final MainController _main = Get.put(MainController());
 
   @override
@@ -68,6 +77,13 @@ class AuthController extends GetxController {
     }
 
     super.onInit();
+  }
+
+  void clearError() {
+    upiError.value = null;
+    accError.value = null;
+    ifscError.value = null;
+    branchError.value = null;
   }
 
   loginUser(String email, String password,
@@ -91,11 +107,9 @@ class AuthController extends GetxController {
             await startListeningToUser(
               value.data.user!.uid,
             );
-          }else{
+          } else {
             // TODO(implement error dialog)
-
           }
-
         }
         error.value = null;
       } else {
@@ -196,6 +210,7 @@ class AuthController extends GetxController {
   @override
   void onClose() {
     _sub?.cancel();
+    _bankSub?.cancel();
     _timer?.cancel();
     _resendTimerInstance?.cancel();
     super.onClose();
@@ -269,17 +284,15 @@ class AuthController extends GetxController {
       loading.value = false;
       if (value is Success) {
         if (event.user != null) {
-          var res=  await _repo.getUserData(event.user!.uid);
-          if(res.isSuccess){
-            res= res as Success<DocumentSnapshot<models.User>>;
+          var res = await _repo.getUserData(event.user!.uid);
+          if (res.isSuccess) {
+            res = res as Success<DocumentSnapshot<models.User>>;
             this.user.value = res.data.data()!;
             await startListeningToUser(event.user!.uid);
             updateUI(value);
-          }else{
+          } else {
             // TODO( implement error dialog )
-
           }
-
         }
 
         error.value = null;
@@ -337,6 +350,16 @@ class AuthController extends GetxController {
     });
   }
 
+  startBankDetailsStream(String uid) {
+    _bankSub = _repo.userBankDetailsStream(uid).listen((event) {
+      bankDetails.value = event.data();
+    });
+  }
+
+  endBankDetailsStream() async {
+    await _bankSub?.cancel();
+  }
+
   signInWithGoogle(void Function(Resource<UserCredential>) updateUI) {
     _repo.signInWithGoogle().then((value) {
       if (value.isSuccess) {
@@ -350,15 +373,16 @@ class AuthController extends GetxController {
             );
             GoogleSignIn().signOut();
           } else {
-
-            var res = await _repo.getUserData((value as Success<UserCredential>).data.user!.uid);
-            if(res.isSuccess){
-              user.value = (res as Success<DocumentSnapshot<models.User>>).data.data();
+            var res = await _repo
+                .getUserData((value as Success<UserCredential>).data.user!.uid);
+            if (res.isSuccess) {
+              user.value =
+                  (res as Success<DocumentSnapshot<models.User>>).data.data();
               await startListeningToUser(
                 (value).data.user!.uid,
               );
               Get.offAndToNamed(Routes.main);
-            }else{
+            } else {
               // TODO(implement alert)
             }
           }
@@ -379,7 +403,8 @@ class AuthController extends GetxController {
             final cred = (value as Success<UserCredential>).data.user!;
             _analytics.logSignUp(signUpMethod: "Google");
             final user = models.User(
-              _crypto.encryptToBase64String(_parseValueForModel(cred.displayName)),
+              _crypto
+                  .encryptToBase64String(_parseValueForModel(cred.displayName)),
               _crypto.encryptToBase64String(_parseValueForModel(cred.email)),
               _parseValueForModel(cred.photoURL),
               0,
@@ -389,7 +414,6 @@ class AuthController extends GetxController {
               _parseValueForModel(cred.uid),
               astro,
               _parseValueForModel(cred.phoneNumber),
-              "",
               Geo().getHash(loc!),
             );
             final info = ExtraInfo(
@@ -458,6 +482,39 @@ class AuthController extends GetxController {
       } else {
         value = value as Failure;
         error.value = value.error;
+      }
+    });
+  }
+
+  addUserBankDetails(
+      UserBankDetails data,
+      String uid,
+      Function(Success<UserBankDetails>) onSuccess,
+      Function(String) onFailure) {
+    _repo.saveUserBankDetails(data, uid).then((value) {
+      if (value.isSuccess) {
+        value = value as Success<UserBankDetails>;
+        log("bank details updated : ${data.toString()}", name: "BANK DETAILS");
+        onSuccess(value);
+      } else {
+        value = value as Failure<UserBankDetails>;
+        log("bank details not updated : ${value.error}", name: "BANK DETAILS");
+        onFailure(value.error);
+      }
+    });
+  }
+
+  updateUserBankDetails(Json data, String uid,
+      Function(Success<Json>) onSuccess, Function(String) onFailure) {
+    _repo.updateUserBankDetails(data, uid).then((value) {
+      if (value.isSuccess) {
+        value = value as Success<Json>;
+        log("bank details updated : ${data.toString()}", name: "BANK DETAILS");
+        onSuccess(value);
+      } else {
+        value = value as Failure<Json>;
+        log("bank details not updated : ${value.error}", name: "BANK DETAILS");
+        onFailure(value.error);
       }
     });
   }

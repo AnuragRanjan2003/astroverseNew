@@ -59,11 +59,11 @@ class MainScreenPortrait extends StatelessWidget {
           debugPrint("Initialization failed with exception: ${e.message}");
         });
 
-    c.CometChatUIKit.login(auth.user.value!.uid, onSuccess: (e) {
-      log("login completed successfully  ${e.toString()}", name: "CHAT");
-    }, onError: (e) {
-      log("login failed with exception: ${e.message}", name: "CHAT");
-    });
+    // c.CometChatUIKit.login(auth.user.value!.uid, onSuccess: (e) {
+    //   log("login completed successfully  ${e.toString()}", name: "CHAT");
+    // }, onError: (e) {
+    //   log("login failed with exception: ${e.message}", name: "CHAT");
+    // });
 
     /*c.CometChatUIKit.createUser(
         c.User(name: authUser.name, uid: authUser.uid, avatar: authUser.image),
