@@ -41,6 +41,6 @@ class User {
 
   @override
   String toString() {
-    return "User(name :$name , email :$email , image : $image ,uid : $uid ,plan: $plan ,astro: $astro ,phno: $phNo )";
+    return "User(name :$name , email :$email , image : $image ,uid : $uid ,plan: $plan ,astro: $astro ,phno: $phNo ,coins: $coins )";
   }
 }

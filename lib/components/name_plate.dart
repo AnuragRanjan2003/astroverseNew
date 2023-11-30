@@ -216,18 +216,37 @@ class NamePlate extends StatelessWidget {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        const Text(
-                          "Account",
-                          textAlign: TextAlign.start,
-                          style: TextStyle(
-                              fontSize: 15, fontWeight: FontWeight.w600),
+                        Wrap(
+                          spacing: 5.0,
+                          children: [
+                            Visibility(
+                              visible: warningVisible(),
+                              child: const Tooltip(
+                                triggerMode: TooltipTriggerMode.tap,
+                                showDuration: Duration(seconds: 6),
+                                message:
+                                    "one of UPI or Bank account details are required for astrologers to receive payments.",
+                                child: Icon(
+                                  Icons.warning,
+                                  color: Colors.deepOrange,
+                                ),
+                              ),
+                            ),
+                            const Text(
+                              "Account",
+                              textAlign: TextAlign.start,
+                              style: TextStyle(
+                                  fontSize: 15, fontWeight: FontWeight.w600),
+                            ),
+                          ],
                         ),
                         IconButton(
                             onPressed: () {
                               Scaffold.of(context).showBottomSheet(
                                   (context) => UpdateBankBottomSheet(
-                                      bankDetails: bankDetails ??
-                                          UserBankDetails(
+                                      bankDetails: bankDetails != null
+                                          ? bankDetails!.decrypted()
+                                          : UserBankDetails(
                                               accountNumber: "",
                                               ifscCode: "",
                                               branch: "",
@@ -259,7 +278,8 @@ class NamePlate extends StatelessWidget {
                               'UPI',
                               bankDetails == null
                                   ? "unavailable"
-                                  : bankDetails!.upiId),
+                                  : crypto.decryptFromBase64String(
+                                      bankDetails!.upiId)),
                           divider,
                           nameItem(
                               const Icon(
@@ -270,7 +290,8 @@ class NamePlate extends StatelessWidget {
                               'Account No.',
                               bankDetails == null
                                   ? "unavailable"
-                                  : bankDetails!.accountNumber),
+                                  : crypto.decryptFromBase64String(
+                                      bankDetails!.accountNumber)),
                           divider,
                           nameItem(
                               const Icon(
@@ -281,7 +302,8 @@ class NamePlate extends StatelessWidget {
                               'IFSC Code',
                               bankDetails == null
                                   ? "unavailable"
-                                  : bankDetails!.ifscCode),
+                                  : crypto.decryptFromBase64String(
+                                      bankDetails!.ifscCode)),
                           divider,
                           nameItem(
                               const Icon(
@@ -292,7 +314,8 @@ class NamePlate extends StatelessWidget {
                               'branch',
                               bankDetails == null
                                   ? "unavailable"
-                                  : bankDetails!.branch),
+                                  : crypto.decryptFromBase64String(
+                                      bankDetails!.branch)),
                         ],
                       ),
                     ),
@@ -357,6 +380,12 @@ class NamePlate extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  bool warningVisible() {
+    if (!user.astro) return false;
+    if (bankDetails == null) return true;
+    return !bankDetails!.areValid();
   }
 
   Widget nameItem(

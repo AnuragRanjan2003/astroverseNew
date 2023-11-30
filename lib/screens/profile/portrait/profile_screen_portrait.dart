@@ -3,6 +3,8 @@ import 'package:astroverse/components/name_plate.dart';
 import 'package:astroverse/controllers/auth_controller.dart';
 import 'package:astroverse/models/user.dart';
 import 'package:astroverse/res/colors/project_colors.dart';
+import 'package:astroverse/res/img/images.dart';
+import 'package:astroverse/utils/num_parser.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:shimmer/shimmer.dart';
@@ -70,17 +72,27 @@ class ProfileScreenPortrait extends StatelessWidget {
                   padding:
                       const EdgeInsets.symmetric(horizontal: 20, vertical: 5),
                   decoration: BoxDecoration(
-                      borderRadius: const BorderRadius.all(Radius.circular(20)),
-                      border: Border.all(width: 1.2, color: Colors.black)),
-                  child: const Wrap(
+                      color: Colors.white,
+                      borderRadius: const BorderRadius.all(Radius.circular(10)),
+                      border: Border.all(width: 1.2, color: ProjectColors.disabled)),
+                  child: Wrap(
                     spacing: 8,
                     crossAxisAlignment: WrapCrossAlignment.center,
                     children: [
-                      Icon(
-                        Icons.currency_bitcoin,
-                        size: 17,
+                      const CircleAvatar(
+                        radius: 14,
+                        backgroundColor: Colors.transparent,
+                        child: Image(
+                          image: ProjectImages.singleCoin,
+                          fit: BoxFit.fill,
+                        ),
                       ),
-                      Text("100")
+                      Obx(() {
+                        return Text(
+                          auth.user.value == null ? "XX" : NumberParser().toSocialMediaString(auth.user.value!.coins),
+                          style: const TextStyle(fontWeight: FontWeight.w600 , color: ProjectColors.disabled),
+                        );
+                      })
                     ],
                   ),
                 ),

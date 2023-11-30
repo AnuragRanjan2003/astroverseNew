@@ -150,6 +150,7 @@ class _UpdateBankBottomSheetState extends State<UpdateBankBottomSheet> {
 
   bool _disableButton(String upi, String acc, String ifsc, String branch) {
     auth.clearError();
+    if (_bankDetails.isUnchanged(acc, ifsc, branch, upi)) return true;
     if (auth.user.value == null) return true;
     if (upi.isEmpty || acc.isEmpty || ifsc.isEmpty || branch.isEmpty) {
       return true;

@@ -8,7 +8,7 @@ class Crypt {
 
     String _decrypt(Encrypted encryptedData) {
         final key = Key.fromUtf8(_keyString);
-        log("decrypting : $encryptedData" , name:"CRYPT");
+        log("decrypting : ${encryptedData.base64}" , name:"CRYPT");
         final encrypter = Encrypter(AES(key, mode: AESMode.cbc));
         final initVector = IV.fromUtf8(_ivString);
         return encrypter.decrypt(encryptedData, iv: initVector);
