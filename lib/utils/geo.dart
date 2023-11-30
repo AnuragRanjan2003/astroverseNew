@@ -41,15 +41,18 @@ class Ranges {
   static const localityRadius = 5000.00; // in meters
   static const city = 1;
   static const cityRadius = 20000.00;
-  static const all = 2;
-
+  static const state = 2;
+  static const stateRadius = 200000.00;
+  static const all = 3;
 }
 
-class VisibilityPlans{
+class VisibilityPlans {
   static const locality = 0;
   static const localityRadius = 5000.00; // in meters
   static const city = 1;
   static const cityRadius = 20000.00;
+  static const state = 2;
+  static const stateRadius = 200000.00;
   static const all = 2;
 }
 

@@ -45,6 +45,7 @@ class ServiceController extends GetxController {
   RxDouble imageSize = 0.45.obs;
   RxInt selectedMode = 0.obs;
   Rxn<String> serviceProvider = Rxn();
+  RxDouble selectedRange = 0.0.obs;
 
   final searchController = TextEditingController(text: "");
 
@@ -159,38 +160,38 @@ class ServiceController extends GetxController {
     }
   }
 
-  selectImage() async {
+  selectImage(void Function(XFile? file) onSelect) async {
     final img = await _imagePicker.pickImage(
         source: ImageSource.gallery, imageQuality: 25);
     image.value = img;
   }
 
   fetchProviderDetails(String providerUid) {
-    log("fetching provider" , name:"PROVIDER");
+    log("fetching provider", name: "PROVIDER");
     serviceProvider.value = null;
     _repo.fetchProviderData(providerUid).then((value) {
       if (value.isSuccess) {
         value = value as Success<DocumentSnapshot<User>>;
-        log("${value.data.data()}" , name:"PROVIDER INFO");
-        if(value.data.data()!=null) {
+        log("${value.data.data()}", name: "PROVIDER INFO");
+        if (value.data.data() != null) {
           serviceProvider.value = BackEndStrings.providerFound;
-        }else{
+        } else {
           serviceProvider.value = BackEndStrings.providerNotFound;
         }
       }
-      log(serviceProvider.value.toString() , name:"PROVIDER");
+      log(serviceProvider.value.toString(), name: "PROVIDER");
     });
   }
 
-  postService(Service s, Function() updateUI) {
+  postService(Service s, int coinCost, Function(Resource<Service>) updateUI) {
     final id = const Uuid().v4();
     s.id = id;
     loading.value = 1;
     if (image.value == null) {
       s.imageUrl = BackEndStrings.defaultServiceImage;
-      _repo.saveService(s, id).then((value) {
+      _repo.saveService(s, id, coinCost).then((value) {
         loading.value = 0;
-        updateUI();
+        updateUI(value);
         if (value.isSuccess) {
           log('service posted', name: tag);
         } else {
@@ -205,16 +206,14 @@ class ServiceController extends GetxController {
       log(image.value!.path, name: 'FILE');
       if (value.isSuccess) {
         s.imageUrl = (value as Success<String>).data;
-        _repo.saveService(s, id).then((value) {
+        _repo.saveService(s, id, coinCost).then((value) {
+          updateUI(value);
           loading.value = 0;
-          updateUI();
           if (value.isSuccess) {
             log('service posted', name: tag);
-            updateUI();
           } else {
             value = value as Failure<Service>;
             log('failed ${value.error}', name: tag);
-            updateUI();
           }
         });
       } else {
@@ -427,5 +426,14 @@ class ServiceController extends GetxController {
 
   static double _computeFinalPrice(double price) {
     return price;
+  }
+
+  void resetServiceCreationValues() {
+    price.value = 0.00;
+    formValid.value = false;
+    image.value = null;
+    selectedItem.value = 0;
+    selectedRange.value = 0.0;
+    selectedMode.value = 0;
   }
 }

@@ -206,6 +206,27 @@ class ServiceUtils extends Postable<Service, SaveService> {
     }
   }
 
+  Future<Resource<Service>> savePostWithCoinCost(
+      Service post, int coinCost) async {
+    final point = GeoHasher().encode(post.lat, post.lng);
+    post.geoHash = point;
+    try {
+      final DocumentReference<Map<String, dynamic>> userDocument =
+          FirebaseFirestore.instance
+              .collection(BackEndStrings.userCollection)
+              .doc(post.authorId);
+      final batch = FirebaseFirestore.instance.batch();
+      batch.set(ref.doc(post.id), post);
+      batch.update(userDocument, {"coins": FieldValue.increment(-coinCost)});
+      await batch.commit();
+      return Success(post);
+    } on FirebaseException catch (e) {
+      return Failure<Service>(e.message.toString());
+    } catch (e) {
+      return Failure<Service>(e.toString());
+    }
+  }
+
   @override
   Future<Resource<Json>> update(Json data, String id) async {
     try {

@@ -63,6 +63,7 @@ dependencies:
   dart_geohash: ^2.0.2
   cometchat_chat_uikit: any
   carousel_slider: ^4.2.1
+  toggle_switch: ^2.1.0
 
 dev_dependencies:
   flutter_test:

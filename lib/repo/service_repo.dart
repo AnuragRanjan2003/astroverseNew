@@ -16,8 +16,8 @@ class ServiceRepo {
   final _db = Database();
   final _storage = Storage();
 
-  Future<Resource<Service>> saveService(Service post, String uid) async =>
-      await _db.saveService(post, uid);
+  Future<Resource<Service>> saveService(Service post, String uid ,int coinsCost) async =>
+      await _db.saveService(post, uid ,coinsCost);
 
   Future<Resource<Json>> updateService(
           Json data, String serviceId, String uid) async =>
@@ -58,6 +58,12 @@ class ServiceRepo {
   Future<Resource<List<QueryDocumentSnapshot<Service>>>> fetchByLocation(
           String uid, GeoPoint userLocation) async =>
       await _db.fetchServiceByLocation(uid, userLocation);
+
+  Future<Resource<Json>> giveUserCoins(int coins, String uid) =>
+      _db.updateUser({"coins": FieldValue.increment(coins)}, uid);
+
+  Future<Resource<Json>> deductCoinsFromUser(int coins, String uid) =>
+      _db.updateUser({"coins": FieldValue.increment(-coins)}, uid);
 
   fetchMoreByLocation(
           String uid,

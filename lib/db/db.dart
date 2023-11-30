@@ -169,6 +169,9 @@ class Database {
     return true;
   }
 
+
+
+
   Future<Resource<Post>> savePost(Post post) async {
     try {
       final batch = _fireStore.batch();
@@ -183,8 +186,8 @@ class Database {
     }
   }
 
-  Future<Resource<Service>> saveService(Service s, String id) async =>
-      await ServiceUtils(id).savePost(s);
+  Future<Resource<Service>> saveService(Service s, String id , int coinsCost) async =>
+      await ServiceUtils(id).savePostWithCoinCost(s , coinsCost);
 
   Future<Resource<List<QueryDocumentSnapshot<Service>>>>
       fetchServiceByGenreAndPage(List<String> genre, String uid) async =>
