@@ -186,9 +186,9 @@ class CreateServicePortrait extends StatelessWidget {
                                     label: _list.keys.toList()[i])),
                             onSelected: (e) {
                               if (e == null) {
-                                service.selectedItem.value = 0;
                               } else {
                                 service.selectedItem.value = _list[e]!;
+                                if(_list[e]==1) service.selectedRange.value = 0;
                               }
                               log(service.selectedItem.value.toString(),
                                   name: 'DROPDOWN');
@@ -423,8 +423,7 @@ class CreateServicePortrait extends StatelessWidget {
                                   BorderRadius.all(Radius.circular(20))),
                           padding: const EdgeInsets.symmetric(
                               horizontal: 60, vertical: 12),
-                          onPressed: service.formValid.isTrue &&
-                                  service.loading.value != 0
+                          onPressed: service.formValid.isTrue
                               ? () {
                                   var location = loc.location.value!;
                                   var user = auth.user.value!;
@@ -495,6 +494,7 @@ class CreateServicePortrait extends StatelessWidget {
                           child: service.loading.value == 1
                               ? const SizedBox(
                                   height: 20,
+                                  width: 20,
                                   child: CircularProgressIndicator(
                                     color: Colors.white,
                                     strokeWidth: 1.5,
@@ -541,6 +541,7 @@ bool validate(
   int productType,
   int mode,
 ) {
+
   final t = title.value.text;
   final b = body.value.text;
   final add = address.value.text;

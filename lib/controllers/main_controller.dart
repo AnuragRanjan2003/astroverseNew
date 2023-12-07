@@ -23,6 +23,9 @@ class MainController extends GetxController {
   Rxn<User> user = Rxn();
   StreamSubscription<DocumentSnapshot<String>>? likes;
 
+  RxList<Post> myPosts = <Post>[].obs;
+  RxBool myPostLoading = false.obs;
+
   void setUser(User? user) {
     this.user.value = user;
     if (this.user.value != null) startReadingUpVotedPosts(this.user.value!.uid);
@@ -131,6 +134,24 @@ class MainController extends GetxController {
         log("down voted");
         log('upvoted to : ${postList[e].upVotes}', name: "UPVOTES");
         onComplete();
+      }
+    });
+  }
+
+  fetchUserPosts(String uid) {
+    myPostLoading.value = true;
+    _postRepo.fetchUserPost(uid).then((value) {
+      myPostLoading.value = false;
+      if (value.isSuccess) {
+        value as Success<List<QueryDocumentSnapshot<Post>>>;
+        final list = <Post>[];
+        for (var it in value.data) {
+          list.add(it.data());
+        }
+
+        myPosts.value = list;
+      } else {
+        myPosts.value = [];
       }
     });
   }

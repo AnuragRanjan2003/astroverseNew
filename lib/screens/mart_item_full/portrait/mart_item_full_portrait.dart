@@ -6,6 +6,7 @@ import 'package:astroverse/models/service.dart';
 import 'package:astroverse/res/colors/project_colors.dart';
 import 'package:astroverse/res/img/images.dart';
 import 'package:astroverse/res/strings/backend_strings.dart';
+import 'package:astroverse/utils/crypt.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
@@ -21,6 +22,8 @@ class MartItemFullPortrait extends StatelessWidget {
     final ServiceController service = Get.find();
     final AuthController auth = Get.find();
     final sb = StringBuffer();
+
+    final crypto = Crypt();
     sb.writeAll(item!.genre, ", ");
     log(item.toString(), name: "ITEM");
 
@@ -178,7 +181,7 @@ class MartItemFullPortrait extends StatelessWidget {
                       ],
                     ),
                   ),
-                  buildRow('seller', item.authorName, Icons.person_2),
+                  buildRow('seller', crypto.decryptFromBase64String(item.authorName), Icons.person_2),
                   buildRow(
                       'date',
                       DateFormat.yMMMd().format(item.date).toString(),
@@ -202,7 +205,7 @@ class MartItemFullPortrait extends StatelessWidget {
                           providerState != BackEndStrings.providerFound)
                       ? null
                       : () async {
-                          service.makePayment(item, user.phNo, user.email);
+                          service.makePayment(item, crypto.decryptFromBase64String(user.phNo), crypto.decryptFromBase64String(user.email));
                         },
                   color: const Color(0xff444040),
                   disabledColor: ProjectColors.disabled,

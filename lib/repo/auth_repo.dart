@@ -69,13 +69,18 @@ class AuthRepo {
           Map<String, dynamic> data, String uid) async =>
       await _db.updateUser(data, uid);
 
-  Future<Resource<UserBankDetails>> saveUserBankDetails(UserBankDetails data, String uid) =>
+  Future<Resource<Json>> addCoinsInDatabase(int coinsToGive, String uid) =>
+      _db.updateUser({"coins": FieldValue.increment(coinsToGive)}, uid);
+
+  Future<Resource<UserBankDetails>> saveUserBankDetails(
+          UserBankDetails data, String uid) =>
       _db.saveBankDetails(data, uid);
 
   Future<Resource<Json>> updateUserBankDetails(Json data, String uid) =>
       _db.updateBankDetails(data, uid);
 
-  Stream<DocumentSnapshot<UserBankDetails>> userBankDetailsStream(String uid) => _db.getBankDetailsStream(uid);
+  Stream<DocumentSnapshot<UserBankDetails>> userBankDetailsStream(String uid) =>
+      _db.getBankDetailsStream(uid);
 
   Future<void> logOut() async => await _auth.logOut();
 }

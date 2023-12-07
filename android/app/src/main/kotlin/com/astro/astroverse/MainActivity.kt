@@ -1,4 +1,4 @@
-package com.example.astroverse
+package com.astro.astroverse
 
 import io.flutter.embedding.android.FlutterFragmentActivity
 

@@ -84,43 +84,47 @@ class CommentsBottomSheet extends StatelessWidget {
                         ],
                       )));
           }),
-          SizedBox(
-            height: 60,
-            child: Row(
-              children: [
-                CircleAvatar(
-                  foregroundImage: NetworkImage(user.image),
-                  radius: 20,
+          Visibility(
+            visible: post.authorId!=user.uid,
+              child: SizedBox(
+                height: 60,
+                child: Row(
+                  children: [
+                    CircleAvatar(
+                      foregroundImage: NetworkImage(user.image),
+                      radius: 20,
+                    ),
+                    const SizedBox(
+                      width: 8,
+                    ),
+                    Expanded(
+                        child: TextField(
+                      controller: commentController,
+                      decoration: const InputDecoration(
+                          fillColor: Color(0x64dad9d9),
+                          filled: true,
+                          border: OutlineInputBorder()),
+                    )),
+                    IconButton(
+                      onPressed: () {
+                        _postComment(post.id, post.authorId,
+                            commentController.value.text, user, postPageController);
+                        commentController.clear();
+                      },
+                      icon: const Icon(Icons.send),
+                    )
+                  ],
                 ),
-                const SizedBox(
-                  width: 8,
-                ),
-                Expanded(
-                    child: TextField(
-                  controller: commentController,
-                  decoration: const InputDecoration(
-                      fillColor: Color(0x64dad9d9),
-                      filled: true,
-                      border: OutlineInputBorder()),
-                )),
-                IconButton(
-                  onPressed: () {
-                    _postComment(post.id, commentController.value.text, user,
-                        postPageController);
-                    commentController.clear();
-                  },
-                  icon: const Icon(Icons.send),
-                )
-              ],
-            ),
+              ),
+
           )
         ],
       ),
     );
   }
 
-  _postComment(
-      String postId, String text, User user, FullPostPageController c) {
+  _postComment(String postId, String postAuthorId, String text, User user,
+      FullPostPageController c) {
     log("commenting", name: "COMMENT");
     final comment = Comment(
       user.name,
@@ -131,7 +135,7 @@ class CommentsBottomSheet extends StatelessWidget {
       user.astro,
       DateTime.now(),
     );
-    c.postComment(comment, postId);
+    c.postComment(comment, postId, postAuthorId);
     c.commentList.add(comment);
   }
 }

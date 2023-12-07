@@ -1,4 +1,5 @@
 import 'package:astroverse/components/glass_morph_container.dart';
+import 'package:astroverse/components/my_post_page.dart';
 import 'package:astroverse/components/new_posts_page.dart';
 import 'package:astroverse/res/colors/project_colors.dart';
 import 'package:astroverse/routes/routes.dart';
@@ -52,7 +53,7 @@ class DiscoverScreenPortrait extends StatelessWidget {
                     ),
                   ),
                   const Center(
-                    child: Text("following"),
+                    child: MyPostPage(),
                   ),
                 ]),
                 buildTabBar(theme),
@@ -93,7 +94,7 @@ class DiscoverScreenPortrait extends StatelessWidget {
                   text: 'new',
                 ),
                 Tab(
-                  text: 'following',
+                  text: 'my',
                 ),
               ]),
         ),

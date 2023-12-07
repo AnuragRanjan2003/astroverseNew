@@ -5,6 +5,7 @@ import 'package:astroverse/models/user.dart';
 import 'package:astroverse/res/colors/project_colors.dart';
 import 'package:astroverse/res/img/images.dart';
 import 'package:astroverse/res/strings/other_strings.dart';
+import 'package:astroverse/utils/crypt.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -132,7 +133,7 @@ class _OrderBottomSheetState extends State<OrderBottomSheet> {
                   ),
             isBuyer?const SizedBox.shrink():const SizedBox(height: 20,),
             isBuyer
-                ? buildRow("Key", widget.purchase!.secretCode.toString(), Icons.key)
+                ? buildRow("Key", Crypt().decryptFromBase64String(widget.purchase!.secretCode), Icons.key)
                 : _buildTextField(code, "password", const TextStyle()),
             const SizedBox(
               height: 10,
@@ -237,5 +238,6 @@ class _OrderBottomSheetState extends State<OrderBottomSheet> {
   void dispose() {
     final OrderController order = Get.find();
     order.checkBox.value = false;
+    super.dispose();
   }
 }

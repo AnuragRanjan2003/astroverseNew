@@ -356,6 +356,12 @@ class AuthController extends GetxController {
     });
   }
 
+  giveCoinsToUser(int coinsToGive, String uid , void Function(Resource<Json>) updateUi){
+    _repo.addCoinsInDatabase(coinsToGive, uid).then((value) {
+     updateUi(value);
+    });
+  }
+
   endBankDetailsStream() async {
     await _bankSub?.cancel();
   }

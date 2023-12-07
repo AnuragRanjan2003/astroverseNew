@@ -38,6 +38,8 @@ class AstrologerController extends GetxController {
     });
   }
 
+
+
   void fetchMoreAstrologers(GeoPoint geoPoint, String uid) {
     if (lastForLocality.value == null && lastForCity.value == null) {
       fetchAstrologers(geoPoint, uid);

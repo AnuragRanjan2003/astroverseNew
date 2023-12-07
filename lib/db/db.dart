@@ -169,9 +169,6 @@ class Database {
     return true;
   }
 
-
-
-
   Future<Resource<Post>> savePost(Post post) async {
     try {
       final batch = _fireStore.batch();
@@ -186,8 +183,9 @@ class Database {
     }
   }
 
-  Future<Resource<Service>> saveService(Service s, String id , int coinsCost) async =>
-      await ServiceUtils(id).savePostWithCoinCost(s , coinsCost);
+  Future<Resource<Service>> saveService(
+          Service s, String id, int coinsCost) async =>
+      await ServiceUtils(id).savePostWithCoinCost(s, coinsCost);
 
   Future<Resource<List<QueryDocumentSnapshot<Service>>>>
       fetchServiceByGenreAndPage(List<String> genre, String uid) async =>
@@ -216,6 +214,22 @@ class Database {
           .get();
       final data = res.docs;
       return Success(data);
+    } on FirebaseException catch (e) {
+      return Failure<List<QueryDocumentSnapshot<Post>>>(e.message.toString());
+    } catch (e) {
+      return Failure<List<QueryDocumentSnapshot<Post>>>(e.toString());
+    }
+  }
+
+  Future<Resource<List<QueryDocumentSnapshot<Post>>>> fetchUserPosts(
+      String userId) async {
+    try {
+      Query<Post> q = _userPostCollection(userId)
+          .limit(_limit)
+          .orderBy("date", descending: true);
+
+      final data = await q.get();
+      return Success(data.docs);
     } on FirebaseException catch (e) {
       return Failure<List<QueryDocumentSnapshot<Post>>>(e.message.toString());
     } catch (e) {
@@ -280,6 +294,8 @@ class Database {
     }
   }
 
+
+
   Stream<QuerySnapshot<PostSave>> upVotedPostsStream(String uid) {
     return FirebaseFirestore.instance
         .collection(BackEndStrings.userCollection)
@@ -298,22 +314,24 @@ class Database {
 
   Future<Resource<List<QueryDocumentSnapshot<Comment>>>> fetchComments(
           String postId) async =>
-      await CommentUtils(postId).fetchByGenreAndPage([], "");
+      await CommentUtils(postId, "").fetchByGenreAndPage([], "");
 
   Future<Resource<List<QueryDocumentSnapshot<Comment>>>> fetchMoreComments(
           String postId, QueryDocumentSnapshot<Comment> lastPost) async =>
-      await CommentUtils(postId).fetchMore(lastPost, [], "");
+      await CommentUtils(postId, "").fetchMore(lastPost, [], "");
 
-  Future<Resource<Comment>> postComment(String postId, Comment post) async {
-    await _postCollection
-        .doc(postId)
-        .update({"comments": FieldValue.increment(1)});
-    return await CommentUtils(postId).savePost(post);
+  Future<Resource<Comment>> postComment(
+      String postId, String postAuthorId, Comment post) async {
+    return await CommentUtils(postId, postAuthorId).savePost(post);
   }
 
-  Future<void> addPostView(String id) async {
+  Future<void> addPostView(String id, String authorId) async {
     try {
-      await _postCollection.doc(id).update({'views': FieldValue.increment(1)});
+      final batch = FirebaseFirestore.instance.batch();
+      batch.update(_postCollection.doc(id), {'views': FieldValue.increment(1)});
+      batch.update(_userPostCollection(authorId).doc(id),
+          {'views': FieldValue.increment(1)});
+      await batch.commit();
     } catch (e) {
       log(e.toString(), name: "VIEWS");
     }
@@ -364,12 +382,21 @@ class Database {
           .where('plan', isEqualTo: VisibilityPlans.city)
           .limit(_limit);
 
+      final Query<models.User> queryState = Geo()
+          .createGeoQuery(
+              _userCollection, VisibilityPlans.stateRadius, userLocation)
+          .where('astro', isEqualTo: true)
+          .where('plan', isEqualTo: VisibilityPlans.state)
+          .limit(_limit);
+
       final resLocality = await queryLocality.get();
       final resCity = await queryCity.get();
+      final resState = await queryState.get();
 
       final List<QueryDocumentSnapshot<models.User>> data = [];
       data.addOtherPeople(currentUid, resLocality.docs);
       data.addOtherPeople(currentUid, resCity.docs);
+      data.addOtherPeople(currentUid, resState.docs);
       return Success(data);
     } on FirebaseException catch (e) {
       return Failure<List<QueryDocumentSnapshot<models.User>>>(

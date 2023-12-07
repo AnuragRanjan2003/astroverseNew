@@ -86,11 +86,29 @@ class ServiceUtils extends Postable<Service, SaveService> {
           .orderBy("geoHash")
           .orderBy("date", descending: true)
           .limit(_limit);
+
+      Query<Service> queryState = Geo()
+          .createGeoQuery(ref, Ranges.stateRadius, userLocation)
+          .where("range", isEqualTo: Ranges.state)
+          .orderBy("geoHash")
+          .orderBy("date", descending: true)
+          .limit(_limit);
+
+      Query<Service> queryAll = ref
+          .where("range", isEqualTo: Ranges.all)
+          .orderBy("geoHash")
+          .orderBy("date", descending: true)
+          .limit(_limit);
+
       final List<QueryDocumentSnapshot<Service>> data = [];
       final res1 = await queryLocality.get();
       final res2 = await queryCity.get();
+      final res3 = await queryState.get();
+      final res4 = await queryAll.get();
       data.addIfNotUser(uid, res1.docs);
       data.addIfNotUser(uid, res2.docs);
+      data.addIfNotUser(uid, res3.docs);
+      data.addIfNotUser(uid, res4.docs);
       return Success(data);
     } on FirebaseException catch (e) {
       return Failure<List<QueryDocumentSnapshot<Service>>>(

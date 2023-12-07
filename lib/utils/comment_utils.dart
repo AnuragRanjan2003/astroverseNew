@@ -1,4 +1,5 @@
 import 'package:astroverse/models/comment.dart';
+import 'package:astroverse/models/post.dart';
 import 'package:astroverse/models/save_comment.dart';
 import 'package:astroverse/res/strings/backend_strings.dart';
 import 'package:astroverse/utils/crypt.dart';
@@ -16,12 +17,28 @@ CollectionReference<Comment> getCommentCollection(String postId) =>
               Comment.fromJson(snapshot.data()!),
           toFirestore: (value, options) => value.toJson(),
         );
+final _postCollection = FirebaseFirestore.instance
+    .collection(BackEndStrings.postCollection)
+    .withConverter<Post>(
+      fromFirestore: (snapshot, options) => Post.fromJson(snapshot.data()!),
+      toFirestore: (value, options) => value.toJson(),
+    );
+CollectionReference<Post> _userPostCollection(String uid) => FirebaseFirestore
+    .instance
+    .collection(BackEndStrings.userCollection)
+    .doc(uid)
+    .collection(BackEndStrings.postCollection)
+    .withConverter<Post>(
+  fromFirestore: (snapshot, options) => Post.fromJson(snapshot.data()!),
+  toFirestore: (value, options) => value.toJson(),
+);
 
 class CommentUtils extends Postable<Comment, SaveComment> {
   final String postId;
+  final String postAuthorId;
   final _crypto = Crypt();
 
-  CommentUtils(this.postId) : super(getCommentCollection(postId), null);
+  CommentUtils(this.postId, this.postAuthorId) : super(getCommentCollection(postId), null);
 
   static const _limit = 3;
 
@@ -79,8 +96,13 @@ class CommentUtils extends Postable<Comment, SaveComment> {
   @override
   Future<Resource<Comment>> savePost(Comment comment) async {
     try {
-      await ref.doc(comment.id).set(comment);
-      await ref.doc(comment.id).update({"date": FieldValue.serverTimestamp()});
+      final batch = FirebaseFirestore.instance.batch();
+      batch.set(ref.doc(comment.id), comment);
+      batch.update(
+          _postCollection.doc(postId), {"comments": FieldValue.increment(1)});
+      batch.update(_userPostCollection(postAuthorId).doc(postId), {"comments": FieldValue.increment(1)});
+
+      await batch.commit();
       return Success(comment);
     } on FirebaseException catch (e) {
       return Failure<Comment>(e.message.toString());

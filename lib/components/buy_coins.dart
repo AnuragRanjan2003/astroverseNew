@@ -1,6 +1,8 @@
+import 'package:astroverse/controllers/auth_controller.dart';
 import 'package:astroverse/db/coins_data_db.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 
 class BuyCoinsSheet extends StatefulWidget {
   const BuyCoinsSheet({super.key});
@@ -10,6 +12,8 @@ class BuyCoinsSheet extends StatefulWidget {
 }
 
 class _BuyCoinsSheetState extends State<BuyCoinsSheet> {
+  final AuthController auth = Get.find();
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -57,7 +61,8 @@ class _BuyCoinsSheetState extends State<BuyCoinsSheet> {
             children: [
               const Text(
                 "includes : ",
-                style: TextStyle(fontWeight: FontWeight.normal ,fontStyle: FontStyle.italic),
+                style: TextStyle(
+                    fontWeight: FontWeight.normal, fontStyle: FontStyle.italic),
               ),
               Text(
                 '${coin.number} x astrocoins',
@@ -69,7 +74,17 @@ class _BuyCoinsSheetState extends State<BuyCoinsSheet> {
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 10),
           child: MaterialButton(
-            onPressed: () {},
+            onPressed: () {
+              auth.giveCoinsToUser(coin.number, auth.user.value!.uid, (p0) {
+                if (p0.isSuccess) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text("coins purchases")));
+                } else {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text("failed to buy coins")));
+                }
+              });
+            },
             color: Colors.lightGreen,
             padding: const EdgeInsets.symmetric(vertical: 12),
             child: Text(

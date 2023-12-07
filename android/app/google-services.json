@@ -7,6 +7,42 @@
   "client": [
     {
       "client_info": {
+        "mobilesdk_app_id": "1:76643529369:android:476832b0bf40824ac23e08",
+        "android_client_info": {
+          "package_name": "com.astro.astroverse"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "76643529369-fmdci9t0vmhcf3234l4fml4glf3nlphl.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAza2x8DDFbHJ7qRjpnPddZi9SpKq5aP4E"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "76643529369-6fdd2g4hpnesna0laa4uhnvs8g7t1cm9.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "76643529369-tach42r0oun3bkf4c9psbq5nqnha5hei.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.astroverse"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
         "mobilesdk_app_id": "1:76643529369:android:3595acd92164d482c23e08",
         "android_client_info": {
           "package_name": "com.example.astroverse"

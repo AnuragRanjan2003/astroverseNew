@@ -3,7 +3,6 @@ import 'dart:developer';
 import 'package:astroverse/components/comments_bottom_sheet.dart';
 import 'package:astroverse/controllers/full_post_page_controller.dart';
 import 'package:astroverse/controllers/main_controller.dart';
-import 'package:astroverse/models/comment.dart';
 import 'package:astroverse/models/post_save.dart';
 import 'package:astroverse/res/dims/global.dart';
 import 'package:astroverse/res/textStyles/text_styles.dart';
@@ -29,7 +28,7 @@ class PostFullPortrait extends StatelessWidget {
     final FullPostPageController controller = Get.put(FullPostPageController());
     final Post post = Get.arguments;
     log(post.authorId, name: "UID");
-    controller.addPostView(post.id);
+    controller.addPostView(post.id, post.authorId);
 
     controller.getAuthor(post.authorId);
     //controller.postComment(dummy, post.id);
@@ -137,7 +136,7 @@ class PostFullPortrait extends StatelessWidget {
                     children: [
                       Obx(
                         () => IconButton(
-                          onPressed: () {
+                          onPressed: post.authorId!=auth.user.value!.uid?() {
                             if (!isUpVoted(main.upVotedPosts, post.id)) {
                               main.postList.firstWhere(
                                   (element) => element.id == post.id);
@@ -155,7 +154,7 @@ class PostFullPortrait extends StatelessWidget {
                                 () {},
                               );
                             }
-                          },
+                          }:null,
                           icon: isUpVoted(main.upVotedPosts, post.id)
                               ? const FaIcon(
                                   FontAwesomeIcons.solidHeart,
@@ -168,13 +167,8 @@ class PostFullPortrait extends StatelessWidget {
                                 ),
                         ),
                       ),
-                      Obx(() {
-                        final i = main.postList
-                            .indexWhere((element) => element.id == post.id);
-                        log('$i', name: 'UI UPVOTE');
-                        return Text(main.postList[i].upVotes.toString(),
-                            style: TextStylesLight().small);
-                      })
+                      Text(post.upVotes.toString(),
+                          style: TextStylesLight().small),
                     ],
                   ),
                   Column(

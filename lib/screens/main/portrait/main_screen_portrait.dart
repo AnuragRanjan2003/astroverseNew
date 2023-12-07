@@ -59,19 +59,19 @@ class MainScreenPortrait extends StatelessWidget {
           debugPrint("Initialization failed with exception: ${e.message}");
         });
 
-    // c.CometChatUIKit.login(auth.user.value!.uid, onSuccess: (e) {
-    //   log("login completed successfully  ${e.toString()}", name: "CHAT");
-    // }, onError: (e) {
-    //   log("login failed with exception: ${e.message}", name: "CHAT");
-    // });
-
-    /*c.CometChatUIKit.createUser(
-        c.User(name: authUser.name, uid: authUser.uid, avatar: authUser.image),
-        onSuccess: (e) {
-      log("sign up completed successfully  ${e.toString()}", name: "CHAT");
+    c.CometChatUIKit.login(auth.user.value!.uid, onSuccess: (e) {
+      log("login completed successfully  ${e.toString()}", name: "CHAT");
     }, onError: (e) {
-      log("sign up failed with exception: ${e.message}", name: "CHAT");
-    });*/
+      log("login failed with exception: ${e.message} ; code : ${e.code}", name: "CHAT");
+    });
+
+    // c.CometChatUIKit.createUser(
+    //     c.User(name: authUser.name, uid: authUser.uid, avatar: authUser.image),
+    //     onSuccess: (e) {
+    //   log("sign up completed successfully  ${e.toString()}", name: "CHAT");
+    // }, onError: (e) {
+    //   log("sign up failed with exception: ${e.message}", name: "CHAT");
+    // });
 
     final tabs = [
       const GButton(

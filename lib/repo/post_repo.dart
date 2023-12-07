@@ -38,9 +38,13 @@ class PostRepo {
   Stream<QuerySnapshot<PostSave>> upVotedPostStream(String uid) =>
       _db.upVotedPostsStream(uid);
 
-  Future<void> addPostView(String id) async => await _db.addPostView(id);
+  Future<void> addPostView(String id , String authorId) async => await _db.addPostView(id ,authorId);
 
   Future<Resource<SetInfo>> updateExtraInfo(
           Map<String, dynamic> data, String uid) async =>
       await _db.updateExtraInfo(uid, data);
+
+  Future<Resource<List<QueryDocumentSnapshot<Post>>>> fetchUserPost(
+          String userId) =>
+      _db.fetchUserPosts(userId);
 }

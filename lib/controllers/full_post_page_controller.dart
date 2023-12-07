@@ -21,7 +21,6 @@ class FullPostPageController extends GetxController {
   Rxn<QueryDocumentSnapshot<Comment>> lastComment = Rxn();
   RxBool moreCommentsToLoad = false.obs;
 
-
   void getAuthor(String uid) {
     if (author.value != null) return;
     _repo.getUserData(uid).then((value) {
@@ -59,9 +58,9 @@ class FullPostPageController extends GetxController {
     }
   }
 
-void addPostView(String id){
-    _postRepo.addPostView(id);
-}
+  void addPostView(String id, String authorId) {
+    _postRepo.addPostView(id, authorId);
+  }
 
   void fetchComments(String postId) {
     _commentRepo.fetchComments(postId).then((value) {
@@ -72,7 +71,7 @@ void addPostView(String id){
         for (var element in value.data) {
           list.add(element.data());
         }
-        lastComment.value = value.data.last;
+        list.isNotEmpty ? lastComment.value = value.data.last : null;
         moreCommentsToLoad.value = list.isNotEmpty;
 
         commentList.value = list;
@@ -83,10 +82,10 @@ void addPostView(String id){
     });
   }
 
-  void postComment(Comment comment, postId) {
+  void postComment(Comment comment, postId ,String postAuthorId,) {
     final id = const Uuid().v4();
     comment.id = id;
-    _commentRepo.postComment(postId, comment).then((value) {
+    _commentRepo.postComment(postId, postAuthorId,comment).then((value) {
       if (value.isSuccess) {
         value = value as Success<Comment>;
         log('comment posted', name: "COMMENT");

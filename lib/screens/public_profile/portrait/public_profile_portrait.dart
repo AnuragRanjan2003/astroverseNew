@@ -36,6 +36,7 @@ class PublicProfilePortrait extends StatelessWidget {
 
     public.getExtraInfo(user.uid);
     public.updateProfileViews(user.uid);
+    public.fetchUserPosts(user.uid);
 
     return DefaultTabController(
       length: 2,
@@ -46,7 +47,8 @@ class PublicProfilePortrait extends StatelessWidget {
           child: Row(
             children: [
               Expanded(
-                  flex: 7, child: zegoService.callButton(user.uid, decryptedUserName)),
+                  flex: 7,
+                  child: zegoService.callButton(user.uid, decryptedUserName)),
               const Spacer(
                 flex: 1,
               ),
@@ -57,7 +59,9 @@ class PublicProfilePortrait extends StatelessWidget {
                   child: InkWell(
                     onTap: () {
                       comet.User receiver = comet.User(
-                          uid: user.uid, name: decryptedUserName, avatar: user.image);
+                          uid: user.uid,
+                          name: decryptedUserName,
+                          avatar: user.image);
                       Navigator.of(context).push(
                         MaterialPageRoute(
                           builder: (context) => Messaging(receiver: receiver),
@@ -100,7 +104,7 @@ class PublicProfilePortrait extends StatelessWidget {
                   const SizedBox(
                     height: 15,
                   ),
-                  Text(user.email),
+                  Text(crypto.decryptFromBase64String(user.email)),
                   const SizedBox(
                     height: 25,
                   ),
@@ -118,11 +122,21 @@ class PublicProfilePortrait extends StatelessWidget {
                 Tab(text: 'items'),
               ],
             ),
-            const Expanded(
+            Expanded(
                 child: TabBarView(
               children: [
-                Center(child: PersonPosts()),
-                Center(child: PersonItems()),
+                Center(child: Obx(() {
+                  if (public.postsLoading.isTrue) {
+                    return const SizedBox(
+                      height: 30,
+                      width: 20,
+                      child: CircularProgressIndicator(),
+                    );
+                  } else {
+                    return PersonPosts(list: public.posts);
+                  }
+                })),
+                const Center(child: PersonItems()),
               ],
             ))
           ],

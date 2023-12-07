@@ -5,6 +5,7 @@ import 'package:astroverse/controllers/auth_controller.dart';
 import 'package:astroverse/controllers/order_controller.dart';
 import 'package:astroverse/models/purchase.dart';
 import 'package:astroverse/res/img/images.dart';
+import 'package:astroverse/utils/crypt.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get/get.dart';
@@ -99,12 +100,13 @@ class OrderedProductPortrait extends StatelessWidget {
                   Expanded(
                       flex: 1,
                       child: Obx(() {
-                        if (order.purchase.value == null)
+                        if (order.purchase.value == null) {
                           return Container(
                             width: 150,
                             height: 50,
                             color: Colors.grey,
                           );
+                        }
                         if (order.purchase.value!.delivered) {
                           return buildChip(
                               'delivered',
@@ -294,7 +296,7 @@ class OrderedProductPortrait extends StatelessWidget {
                   height: 70,
                 );
               }
-              return buildRow('seller', item.authorName, Icons.person_2);
+              return buildRow('seller', Crypt().decryptFromBase64String(item.authorName), Icons.person_2);
             }),
             Obx(() {
               final item = order.service.value;

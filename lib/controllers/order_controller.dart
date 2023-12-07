@@ -4,6 +4,7 @@ import 'dart:developer';
 import 'package:astroverse/models/purchase.dart';
 import 'package:astroverse/models/service.dart';
 import 'package:astroverse/repo/orders_repo.dart';
+import 'package:astroverse/utils/crypt.dart';
 import 'package:astroverse/utils/resource.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:get/get.dart';
@@ -31,7 +32,8 @@ class OrderController extends GetxController {
     enteredCode = enteredCode.trim();
     codeHash = codeHash.trim();
     log(enteredCode, name: "ORDER CODE");
-    if (enteredCode != codeHash) {
+    final enteredCodeHash = Crypt().encryptToBase64String(enteredCode);
+    if (enteredCodeHash != codeHash) {
       log("not match", name: "ORDER CODE");
       log("$enteredCode || $codeHash ", name: "CODE MATCH");
       this.enteredCode.value = "";
@@ -48,7 +50,6 @@ class OrderController extends GetxController {
         .then((value) {
       confirming.value = false;
       if (value.isSuccess) {
-        // fetchService(currentUserId, purchase.purchaseId);
         Get.snackbar("confirmed", "delivery was confirmed successfully");
       } else {
         Get.snackbar("Error", "delivery could not be confirmed");

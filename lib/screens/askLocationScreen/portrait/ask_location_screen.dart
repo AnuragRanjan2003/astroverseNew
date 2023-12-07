@@ -7,6 +7,7 @@ import 'package:astroverse/res/textStyles/text_styles.dart';
 import 'package:astroverse/screens/astroSignUp/portrait/astro_signup_portrait.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:geocode/geocode.dart';
 import 'package:get/get.dart';
 import 'package:location/location.dart';
 
@@ -83,7 +84,7 @@ class AskLocationPortrait extends StatelessWidget {
                             const Text(
                               OtherStrings.locationText,
                               style:
-                              TextStyle(fontSize: 13, color: Colors.black),
+                                  TextStyle(fontSize: 13, color: Colors.black),
                             ),
                             const SizedBox(
                               height: 20,
@@ -98,18 +99,23 @@ class AskLocationPortrait extends StatelessWidget {
                                   color: Colors.white),
                               padding: const EdgeInsets.symmetric(
                                   horizontal: 20, vertical: 13),
-                              child: const Wrap(
+                              child: Wrap(
                                 spacing: 12,
                                 crossAxisAlignment: WrapCrossAlignment.center,
                                 alignment: WrapAlignment.center,
                                 children: [
-                                  Icon(
+                                  const Icon(
                                     Icons.my_location_outlined,
                                     color: Colors.blue,
                                   ),
-                                  Text(
-                                    "location address",
-                                    style: TextStyle(fontSize: 14),
+                                  FutureBuilder(
+                                    future: getAddress(
+                                        location.location.value!.latitude,
+                                        location.location.value!.longitude),
+                                    builder: (context, snapshot) => Text(
+                                      snapshot.data.toString(),
+                                      style: const TextStyle(fontSize: 12),
+                                    ),
                                   ),
                                 ],
                               ),
@@ -125,7 +131,7 @@ class AskLocationPortrait extends StatelessWidget {
 
                                 Get.toNamed(Routes.phoneAuth,
                                     arguments:
-                                    Parcel(data: user, google: google));
+                                        Parcel(data: user, google: google));
                               },
                               shape: ButtonDecors.filled,
                               color: Colors.blue,
@@ -163,4 +169,12 @@ extension on LocationData {
     if (latitude == null || longitude == null) return null;
     return GeoPoint(latitude!, longitude!);
   }
+}
+
+Future<String> getAddress(double? lat, double? lng) async {
+  if (lat == null || lng == null) return "";
+  final geoCode = GeoCode();
+  Address address =
+      await geoCode.reverseGeocoding(latitude: lat, longitude: lng);
+  return "${address.streetAddress} , ${address.postal}";
 }
