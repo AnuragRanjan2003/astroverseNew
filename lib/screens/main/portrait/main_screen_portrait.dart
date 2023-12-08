@@ -6,7 +6,6 @@ import 'package:astroverse/res/colors/project_colors.dart';
 import 'package:astroverse/res/textStyles/text_styles.dart';
 import 'package:astroverse/routes/routes.dart';
 import 'package:astroverse/screens/mart_screen/mart_screen.dart';
-import 'package:astroverse/screens/messaging.dart';
 import 'package:astroverse/screens/peopleScreen/portrait/people_screen_portrait.dart';
 import 'package:astroverse/screens/profile/profile_screen.dart';
 import 'package:astroverse/screens/purchasesScreen/purchases_screen.dart';
@@ -62,16 +61,27 @@ class MainScreenPortrait extends StatelessWidget {
     c.CometChatUIKit.login(auth.user.value!.uid, onSuccess: (e) {
       log("login completed successfully  ${e.toString()}", name: "CHAT");
     }, onError: (e) {
-      log("login failed with exception: ${e.message} ; code : ${e.code}", name: "CHAT");
-    });
+      if (e.code == "ERR_UID_NOT_FOUND") {
+        log("user not found , creating user!", name: "CHAT");
+        var user = auth.user.value!;
+        final authUser =
+            c.User(name: user.name, uid: user.uid, avatar: user.image);
+        c.CometChatUIKit.createUser(
+            c.User(
+                name: authUser.name,
+                uid: authUser.uid,
+                avatar: authUser.avatar), onSuccess: (e) {
+          log("created user successfully  ${e.toString()}", name: "CHAT");
 
-    // c.CometChatUIKit.createUser(
-    //     c.User(name: authUser.name, uid: authUser.uid, avatar: authUser.image),
-    //     onSuccess: (e) {
-    //   log("sign up completed successfully  ${e.toString()}", name: "CHAT");
-    // }, onError: (e) {
-    //   log("sign up failed with exception: ${e.message}", name: "CHAT");
-    // });
+          c.CometChatUIKit.login(authUser.uid);
+        }, onError: (e) {
+          log("sign up failed with exception: ${e.message}", name: "CHAT");
+        });
+      } else {
+        log("login failed with exception: ${e.message} ; code : ${e.code}",
+            name: "CHAT");
+      }
+    });
 
     final tabs = [
       const GButton(

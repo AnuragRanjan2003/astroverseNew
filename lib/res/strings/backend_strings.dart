@@ -11,6 +11,7 @@ class BackEndStrings {
   static const metaDataCollection = "metaData";
   static const purchasesCollection = "purchases";
   static const userBankAccountDocument = "bankAccount";
+  static const replyCollection = "replies";
 
   static const profileImage = "profileImage";
   static const serviceImage = "serviceImage";

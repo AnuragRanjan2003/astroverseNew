@@ -15,6 +15,7 @@ import 'package:astroverse/utils/comment_utils.dart';
 import 'package:astroverse/utils/crypt.dart';
 import 'package:astroverse/utils/geo.dart';
 import 'package:astroverse/utils/purchase_utils.dart';
+import 'package:astroverse/utils/reply_utils.dart';
 import 'package:astroverse/utils/resource.dart';
 import 'package:astroverse/utils/safe_call.dart';
 import 'package:astroverse/utils/service_utils.dart';
@@ -257,6 +258,14 @@ class Database {
     }
   }
 
+  Future<Resource<List<Comment>>> fetchReplies(
+          String postId, String commentId) =>
+      ReplyUtil().fetchReplies(postId, commentId);
+
+  Future<Resource<Comment>> postReply(
+          String postId, String commentId, Comment c) =>
+      ReplyUtil().postReply(c, postId, commentId);
+
   Future<Resource<int>> increaseVote(
       String id, String uid, String authorId) async {
     try {
@@ -293,8 +302,6 @@ class Database {
       return Failure<int>(e.toString());
     }
   }
-
-
 
   Stream<QuerySnapshot<PostSave>> upVotedPostsStream(String uid) {
     return FirebaseFirestore.instance

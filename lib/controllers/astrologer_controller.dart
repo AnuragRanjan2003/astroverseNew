@@ -2,6 +2,7 @@ import 'dart:developer';
 
 import 'package:astroverse/models/user.dart';
 import 'package:astroverse/repo/astrologer_repo.dart';
+import 'package:astroverse/utils/crypt.dart';
 import 'package:astroverse/utils/geo.dart';
 import 'package:astroverse/utils/resource.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -21,7 +22,7 @@ class AstrologerController extends GetxController {
     _repo.fetchAstrologersByLocation(uid, geoPoint).then((value) {
       if (value.isSuccess) {
         value as Success<List<QueryDocumentSnapshot<User>>>;
-        final list = <User>[];
+        var list = <User>[];
         moreUsers.value = value.data.isNotEmpty;
         for (QueryDocumentSnapshot<User> it in value.data) {
           list.add(it.data());
@@ -32,6 +33,7 @@ class AstrologerController extends GetxController {
             lastForCity.value = value.data.last;
           }
         }
+
         this.list.value = list;
         log("$list" , name: "ASTRO");
       } else {}
@@ -61,6 +63,7 @@ class AstrologerController extends GetxController {
           if (it.data().plan == VisibilityPlans.city) lastForCity.value = it;
         }
         moreUsers.value = list.isNotEmpty;
+
         this.list.addAll(list);
       } else {}
     });

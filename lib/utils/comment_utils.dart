@@ -36,7 +36,6 @@ CollectionReference<Post> _userPostCollection(String uid) => FirebaseFirestore
 class CommentUtils extends Postable<Comment, SaveComment> {
   final String postId;
   final String postAuthorId;
-  final _crypto = Crypt();
 
   CommentUtils(this.postId, this.postAuthorId) : super(getCommentCollection(postId), null);
 

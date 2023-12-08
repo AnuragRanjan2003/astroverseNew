@@ -21,6 +21,10 @@ class FullPostPageController extends GetxController {
   Rxn<QueryDocumentSnapshot<Comment>> lastComment = Rxn();
   RxBool moreCommentsToLoad = false.obs;
 
+  RxString commentId = "".obs;
+  RxList<Comment> replies = RxList();
+  RxBool repliesLoading = false.obs;
+
   void getAuthor(String uid) {
     if (author.value != null) return;
     _repo.getUserData(uid).then((value) {
@@ -95,4 +99,29 @@ class FullPostPageController extends GetxController {
       }
     });
   }
+
+  void getReplies(String postId , String commentId){
+    repliesLoading.value = true;
+    _commentRepo.fetchReplies(postId, commentId).then((value) {
+      repliesLoading.value = false;
+      if(value.isSuccess){
+        value as Success<List<Comment>>;
+        replies.value = value.data;
+      }else{
+        value as Failure<List<Comment>>;
+        log(value.error , name: "REPLIES");
+      }
+    });
+  }
+
+  void postReply(String postId ,String commentId , Comment c){
+    _commentRepo.postReply(c, postId, commentId).then((value){
+      if(value.isSuccess){
+        log("replied success" , name: "REPLIES");
+      }else{
+        log("replied failed" , name: "REPLIES");
+      }
+    });
+  }
+
 }

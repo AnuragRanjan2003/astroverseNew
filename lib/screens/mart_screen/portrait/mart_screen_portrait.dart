@@ -200,37 +200,6 @@ class MartScreenPortrait extends StatelessWidget {
     );
   }
 
-  Container _buildSearchBox(TextEditingController controller, Widget bottom) {
-    return Container(
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-        margin: const EdgeInsets.symmetric(horizontal: 0, vertical: 10),
-        decoration: BoxDecoration(
-            color: Colors.white,
-            border: Border.all(width: 0.5, color: ProjectColors.disabled),
-            borderRadius: const BorderRadius.all(Radius.circular(20))),
-        child: Column(
-          children: [
-            TextField(
-              controller: controller,
-              decoration: const InputDecoration(
-                  prefixIcon: Icon(
-                    Icons.search,
-                    color: Colors.blue,
-                  ),
-                  border: InputBorder.none,
-                  hintText: 'Search in store',
-                  hintStyle:
-                      TextStyle(fontSize: 14, color: ProjectColors.disabled)),
-              style: const TextStyle(fontSize: 14),
-            ),
-            const SizedBox(
-              height: 5,
-            ),
-            bottom
-          ],
-        ));
-  }
-
   void _postItemScreen() => Get.toNamed(Routes.createServiceScreen);
 }
 

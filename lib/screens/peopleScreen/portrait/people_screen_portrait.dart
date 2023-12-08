@@ -10,6 +10,7 @@ import 'package:astroverse/controllers/location_controller.dart';
 import 'package:astroverse/models/user.dart';
 import 'package:astroverse/res/colors/project_colors.dart';
 import 'package:astroverse/res/img/images.dart';
+import 'package:astroverse/utils/crypt.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:cometchat_chat_uikit/cometchat_chat_uikit.dart' as comet;
 import 'package:flutter/material.dart';
@@ -111,8 +112,9 @@ class PeopleScreenPortrait extends StatelessWidget {
 List<User> _filteredList(List<User> list, String s) {
   if (s.isEmpty) return list;
   var l = <User>[];
+  final crypto =Crypt();
   for (var it in list) {
-    if (it.name.contains(s)) l.add(it);
+    if (crypto.decryptFromBase64String(it.name).contains(s)) l.add(it);
   }
   return l;
 }
