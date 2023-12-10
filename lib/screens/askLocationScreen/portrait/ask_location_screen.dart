@@ -125,7 +125,15 @@ class AskLocationPortrait extends StatelessWidget {
                             ),
                             MaterialButton(
                               onPressed: () {
-                                log(upi.value.text, name: "UPI");
+                                //log(upi.value.text, name: "UPI");
+                                if (location.location.value == null) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                      const SnackBar(
+                                          content: Text(
+                                              "unable to access the location. Check permissions and gps"
+                                              "")));
+                                  return;
+                                }
                                 user!.location = location.location.value!
                                     .geoPointFromLocationData();
 

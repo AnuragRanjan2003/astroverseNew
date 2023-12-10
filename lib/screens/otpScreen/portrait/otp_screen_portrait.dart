@@ -105,6 +105,7 @@ class OtpScreenPortrait extends StatelessWidget {
                                                     .otpEntered.value
                                                     .toString());
                                         controller.checkOtp(cred, () {
+                                          controller.verifyOtpLoading.value = false;
                                           user!.phNo = Crypt().encryptToBase64String(number);
                                           final loc = location.location.value;
                                           GeoPoint? geo;
