@@ -1,6 +1,8 @@
 import 'package:astroverse/components/buy_coins.dart';
 import 'package:astroverse/components/name_plate.dart';
+import 'package:astroverse/components/upgrade_range_bottomsheet.dart';
 import 'package:astroverse/controllers/auth_controller.dart';
+import 'package:astroverse/controllers/location_controller.dart';
 import 'package:astroverse/models/user.dart';
 import 'package:astroverse/res/colors/project_colors.dart';
 import 'package:astroverse/res/img/images.dart';
@@ -20,6 +22,7 @@ class ProfileScreenPortrait extends StatelessWidget {
     final wd = cons.maxWidth;
     final ht = cons.maxHeight;
     final AuthController auth = Get.find();
+
 
     auth.getExtraInfo(auth.user.value!.uid);
 

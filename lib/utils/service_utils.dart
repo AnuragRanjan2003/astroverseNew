@@ -212,7 +212,7 @@ class ServiceUtils extends Postable<Service, SaveService> {
 
   @override
   Future<Resource<Service>> savePost(Service post) async {
-    final point = GeoHasher().encode(post.lat, post.lng);
+    final point = GeoHasher().encode(post.lng, post.lat);
     post.geoHash = point;
     try {
       await ref.doc(post.id).set(post);
@@ -226,7 +226,7 @@ class ServiceUtils extends Postable<Service, SaveService> {
 
   Future<Resource<Service>> savePostWithCoinCost(
       Service post, int coinCost) async {
-    final point = GeoHasher().encode(post.lat, post.lng);
+    final point = GeoHasher().encode(post.lng, post.lat);
     post.geoHash = point;
     try {
       final DocumentReference<Map<String, dynamic>> userDocument =

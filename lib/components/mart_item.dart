@@ -64,14 +64,20 @@ class MartItem extends StatelessWidget {
                     item.title,
                     overflow: TextOverflow.ellipsis,
                     textAlign: TextAlign.left,
-                    style: const TextStyle(fontSize: 12),
-                  ),
-                  Text(
-                    item.genre[0],
                     style: const TextStyle(
                         fontSize: 10,
                         color: Color(0xff444040),
                         fontWeight: FontWeight.bold),
+                  ),
+                  Text(
+                    methodToString(item.deliveryMethod),
+                    style: const TextStyle(
+                      fontSize: 10,),
+                  ),
+                  Text(
+                    item.genre[0],
+                    style: const TextStyle(
+                        fontSize: 10,),
                   ),
                   Text(
                     '₹${item.price.toInt()}',
@@ -96,5 +102,14 @@ class MartItem extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  String methodToString(int e) {
+    if(e==0) return "in-person";
+    if(e==1) {
+      return "chat";
+    } else {
+      return "call";
+    }
   }
 }

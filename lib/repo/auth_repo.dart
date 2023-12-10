@@ -82,5 +82,8 @@ class AuthRepo {
   Stream<DocumentSnapshot<UserBankDetails>> userBankDetailsStream(String uid) =>
       _db.getBankDetailsStream(uid);
 
+  Future<Resource<Json>> updateRangeForUser(String uid, int range, int cost) =>
+      _db.upgradeRangeForUser(uid, cost, range);
+
   Future<void> logOut() async => await _auth.logOut();
 }

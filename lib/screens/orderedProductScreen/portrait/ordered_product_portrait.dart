@@ -5,7 +5,10 @@ import 'package:astroverse/controllers/auth_controller.dart';
 import 'package:astroverse/controllers/order_controller.dart';
 import 'package:astroverse/models/purchase.dart';
 import 'package:astroverse/res/img/images.dart';
+import 'package:astroverse/screens/messaging.dart';
 import 'package:astroverse/utils/crypt.dart';
+import 'package:astroverse/utils/zego_cloud_services.dart';
+import 'package:cometchat_chat_uikit/cometchat_chat_uikit.dart' as comet;
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get/get.dart';
@@ -23,6 +26,8 @@ class OrderedProductPortrait extends StatelessWidget {
     Purchase? purchase = Get.arguments;
     final OrderController order = Get.find();
     final AuthController auth = Get.find();
+    final crypto = Crypt();
+    final zegoService = ZegoCloudServices();
 
     if (purchase == null) {
       return const Center(
@@ -42,6 +47,10 @@ class OrderedProductPortrait extends StatelessWidget {
     }
 
     return Scaffold(
+      floatingActionButtonLocation: FloatingActionButtonLocation.endDocked,
+      floatingActionButton: purchase != null
+          ? actionButton(purchase!, crypto, zegoService, context)
+          : const SizedBox.shrink(),
       body: SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -296,7 +305,10 @@ class OrderedProductPortrait extends StatelessWidget {
                   height: 70,
                 );
               }
-              return buildRow('seller', Crypt().decryptFromBase64String(item.authorName), Icons.person_2);
+              return buildRow(
+                  'seller',
+                  Crypt().decryptFromBase64String(item.authorName),
+                  Icons.person_2);
             }),
             Obx(() {
               final item = order.service.value;
@@ -422,24 +434,26 @@ class OrderedProductPortrait extends StatelessWidget {
               ),
             ),
             Obx(() {
-              if (order.purchase.value == null)
+              if (order.purchase.value == null) {
                 return Container(
                   width: 90,
                   height: 40,
                   color: Colors.grey,
                 );
+              }
               return buildRow(
                   'status',
                   order.purchase.value!.delivered ? "delivered" : "pending",
                   Icons.numbers);
             }),
             Obx(() {
-              if (order.purchase.value == null)
+              if (order.purchase.value == null) {
                 return Container(
                   width: 90,
                   height: 40,
                   color: Colors.grey,
                 );
+              }
               return buildRow(
                   'delivered on',
                   order.purchase.value!.deliveredOn != null
@@ -552,4 +566,42 @@ class OrderedProductPortrait extends StatelessWidget {
           ],
         ),
       );
+
+  Widget actionButton(Purchase purchase, Crypt crypto,
+      ZegoCloudServices zegoService, BuildContext context) {
+    if (purchase.deliveryMethod == 1) {
+      return Container(
+          child: zegoService.callButton(purchase.sellerId,
+              crypto.decryptFromBase64String(purchase.sellerName)));
+    }
+    if (purchase.deliveryMethod == 2) {
+      comet.User receiver = comet.User(
+          uid: purchase.sellerId,
+          name: crypto.decryptFromBase64String(purchase.sellerName));
+      return InkWell(
+        onTap: () {
+          Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (context) => Messaging(receiver: receiver),
+            ),
+          );
+        },
+        child: Container(
+          width: 80, // Set the width of the button
+          height: 80, // Set the height of the button
+          decoration: const BoxDecoration(
+            shape: BoxShape.circle, // Makes the container circular
+            color: Colors.lightBlue, // Set the background color of the button
+          ),
+          child: const Center(
+              child: Icon(
+            Icons.messenger_outlined,
+            color: Colors.white,
+          )),
+        ),
+      );
+    }
+
+    return const SizedBox.shrink();
+  }
 }

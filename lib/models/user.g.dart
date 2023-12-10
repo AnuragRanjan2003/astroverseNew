@@ -32,4 +32,5 @@ Map<String, dynamic> _$UserToJson(User instance) => <String, dynamic>{
       'points': instance.coins,
       'profileViews': instance.profileViews,
       'phNo': instance.phNo,
+      'coins':instance.coins,
     };

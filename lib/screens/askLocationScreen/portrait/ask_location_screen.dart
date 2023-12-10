@@ -6,6 +6,7 @@ import 'package:astroverse/res/strings/other_strings.dart';
 import 'package:astroverse/res/textStyles/text_styles.dart';
 import 'package:astroverse/screens/astroSignUp/portrait/astro_signup_portrait.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:dart_geohash/dart_geohash.dart';
 import 'package:flutter/material.dart';
 import 'package:geocode/geocode.dart';
 import 'package:get/get.dart';
@@ -136,6 +137,7 @@ class AskLocationPortrait extends StatelessWidget {
                                 }
                                 user!.location = location.location.value!
                                     .geoPointFromLocationData();
+                                user.geoHash = GeoHasher().encode(location.location.value!.longitude!, location.location.value!.latitude!);
 
                                 Get.toNamed(Routes.phoneAuth,
                                     arguments:

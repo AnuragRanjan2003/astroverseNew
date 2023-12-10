@@ -74,6 +74,7 @@ class ServiceController extends GetxController {
         buyerName: user.name,
         sellerId: item.authorId,
         sellerName: item.authorName,
+        deliveryMethod: item.deliveryMethod,
         boughtOn: DateTime.now(),
         delivered: false,
         review: null,

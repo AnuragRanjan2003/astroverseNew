@@ -18,7 +18,7 @@ import '../../../controllers/auth_controller.dart';
 
 class MartScreenPortrait extends StatelessWidget {
   final BoxConstraints cons;
-  static const chipNames = ['item', 'job prediction', 'palm reading'];
+  static const chipNames = ['item', 'job prediction', 'palm reading' , 'marriage prediction'];
 
   const MartScreenPortrait({super.key, required this.cons});
 
@@ -43,6 +43,8 @@ class MartScreenPortrait extends StatelessWidget {
 
     loadMore() => service.fetchMoreServicesByLocation(auth.user.value!.uid,
         location.location.value!.geoPointFromLocationData()!, (p0) => null);
+
+
 
     return Scaffold(
       backgroundColor: ProjectColors.greyBackground,
@@ -157,6 +159,14 @@ class MartScreenPortrait extends StatelessWidget {
                                           ? service.selectedItem.value = 3
                                           : service.selectedItem.value = 0;
                                     }, service.selectedItem.value == 3)),
+                                const SizedBox(
+                                  width: 5,
+                                ),
+                                Obx(() => buildFilterChip(chipNames[3], (e) {
+                                  e
+                                      ? service.selectedItem.value = 4
+                                      : service.selectedItem.value = 0;
+                                }, service.selectedItem.value == 4)),
                               ],
                             ),
                           ),

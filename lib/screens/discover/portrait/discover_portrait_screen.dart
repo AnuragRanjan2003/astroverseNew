@@ -1,8 +1,10 @@
 import 'package:astroverse/components/glass_morph_container.dart';
 import 'package:astroverse/components/my_post_page.dart';
 import 'package:astroverse/components/new_posts_page.dart';
+import 'package:astroverse/controllers/location_controller.dart';
 import 'package:astroverse/res/colors/project_colors.dart';
 import 'package:astroverse/routes/routes.dart';
+import 'package:dart_geohash/dart_geohash.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get/get.dart';
@@ -17,9 +19,18 @@ class DiscoverScreenPortrait extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final AuthController auth = Get.find();
+    final LocationController loc = Get.find();
     var theme = Theme.of(context);
     final ht = cons.maxHeight;
     final wd = cons.maxWidth;
+
+    if (auth.user.value != null && auth.user.value!.geoHash.isEmpty) {
+      auth.updateUser({
+        "geoHash": GeoHasher().encode(
+            loc.location.value!.longitude!, loc.location.value!.latitude!)
+      }, auth.user.value!.uid);
+    }
+
     return DefaultTabController(
       length: 2,
       child: Scaffold(

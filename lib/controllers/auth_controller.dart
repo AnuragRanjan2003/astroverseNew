@@ -15,6 +15,7 @@ import 'package:astroverse/utils/resource.dart';
 import 'package:astroverse/utils/zego_cloud_services.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:cometchat_chat_uikit/cometchat_chat_uikit.dart';
+import 'package:dart_geohash/dart_geohash.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
@@ -28,7 +29,7 @@ import 'main_controller.dart';
 class AuthController extends GetxController {
   final _zegoService = ZegoCloudServices();
   final FirebaseAnalyticsObserver observer =
-      FirebaseAnalyticsObserver(analytics: FirebaseAnalytics.instance);
+  FirebaseAnalyticsObserver(analytics: FirebaseAnalytics.instance);
 
   final _analytics = FirebaseAnalytics.instance;
 
@@ -58,6 +59,8 @@ class AuthController extends GetxController {
   RxnString branchError = RxnString();
   Rxn<UserBankDetails> bankDetails = Rxn();
   final MainController _main = Get.put(MainController());
+  RxInt selectedUpgradePlan = 0.obs;
+  RxBool upgradingPlan = false.obs;
 
   @override
   void onInit() async {
@@ -145,8 +148,8 @@ class AuthController extends GetxController {
     });
   }
 
-  createUserWithEmail(
-      models.User user, String password, void Function(Resource) updateUI) {
+  createUserWithEmail(models.User user, String password,
+      void Function(Resource) updateUI) {
     user.plan = 0;
     String path = BackEndStrings.defaultImage;
     if (image.value != null) path = image.value!.path;
@@ -216,8 +219,8 @@ class AuthController extends GetxController {
     super.onClose();
   }
 
-  createUserWithEmailForAstro(
-      models.User user, String password, void Function(Resource) updateUI) {
+  createUserWithEmailForAstro(models.User user, String password,
+      void Function(Resource) updateUI) {
     user.plan = 0;
     String path = BackEndStrings.defaultImage;
     if (image.value != null) path = image.value!.path;
@@ -276,6 +279,10 @@ class AuthController extends GetxController {
         updateUI(event);
       }
     });
+  }
+
+  updateUser(Json data, String uid) {
+    _repo.updateUserInfo(data, uid).then((value) {});
   }
 
   void saveData(models.User user, void Function(Resource<void>) updateUI,
@@ -356,9 +363,10 @@ class AuthController extends GetxController {
     });
   }
 
-  giveCoinsToUser(int coinsToGive, String uid , void Function(Resource<Json>) updateUi){
+  giveCoinsToUser(int coinsToGive, String uid,
+      void Function(Resource<Json>) updateUi) {
     _repo.addCoinsInDatabase(coinsToGive, uid).then((value) {
-     updateUi(value);
+      updateUi(value);
     });
   }
 
@@ -399,8 +407,17 @@ class AuthController extends GetxController {
     });
   }
 
-  signUpWithGoogle(
-      void Function(models.User) onComplete, bool astro, GeoPoint? loc) {
+  void updateRangeForUser(String uid, int range, int cost,
+      Function(Resource<Json>) updateUI) {
+    upgradingPlan.value = true;
+    _repo.updateRangeForUser(uid, range, cost).then((value) {
+      upgradingPlan.value = false;
+      updateUI(value);
+    });
+  }
+
+  signUpWithGoogle(void Function(models.User) onComplete, bool astro,
+      GeoPoint? loc) {
     _repo.signInWithGoogle().then((value) {
       if (value.isSuccess) {
         value = value as Success<UserCredential>;
@@ -409,18 +426,20 @@ class AuthController extends GetxController {
             final cred = (value as Success<UserCredential>).data.user!;
             _analytics.logSignUp(signUpMethod: "Google");
             final user = models.User(
-              _crypto
-                  .encryptToBase64String(_parseValueForModel(cred.displayName)),
-              _crypto.encryptToBase64String(_parseValueForModel(cred.email)),
-              _parseValueForModel(cred.photoURL),
-              0,
-              location: loc,
-              coins: 0,
-              profileViews: 0,
-              _parseValueForModel(cred.uid),
-              astro,
-              _parseValueForModel(cred.phoneNumber),
-              Geo().getHash(loc!),
+                _crypto
+                    .encryptToBase64String(
+                    _parseValueForModel(cred.displayName)),
+                _crypto.encryptToBase64String(_parseValueForModel(cred.email)),
+                _parseValueForModel(cred.photoURL),
+                0,
+                location: loc,
+                coins: 0,
+                profileViews: 0,
+                _parseValueForModel(cred.uid),
+                astro,
+                _parseValueForModel(cred.phoneNumber),
+                loc == null ? "" : GeoHasher().encode(
+                    loc.longitude, loc.latitude)
             );
             final info = ExtraInfo(
                 joiningDate: DateTime.now(),
@@ -444,11 +463,10 @@ class AuthController extends GetxController {
     });
   }
 
-  void saveGoogleData(
-      models.User user,
+  void saveGoogleData(models.User user,
       void Function(
-        Resource<void> value,
-      ) updateUI,
+          Resource<void> value,
+          ) updateUI,
       bool astro,
       Function() goTO) {
     loading.value = true;
@@ -492,8 +510,7 @@ class AuthController extends GetxController {
     });
   }
 
-  addUserBankDetails(
-      UserBankDetails data,
+  addUserBankDetails(UserBankDetails data,
       String uid,
       Function(Success<UserBankDetails>) onSuccess,
       Function(String) onFailure) {

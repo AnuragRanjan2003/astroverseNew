@@ -64,6 +64,6 @@ class Service extends Post {
 
   static String _genGeoHashNullSafe(double lat, double long , dynamic hash) {
     if(hash!=null) return hash as String;
-    return GeoHasher().encode(lat, long);
+    return GeoHasher().encode(long, lat);
   }
 }

@@ -99,8 +99,18 @@ class AstroSignUpPortrait extends StatelessWidget {
                             if (email.value.text.isEmpty ||
                                 password.value.text.isEmpty ||
                                 name.value.text.isEmpty) return;
-                            final user = User(name.value.text, email.value.text,
-                                "", 0, "", true, "", "");
+                            final user = User(
+                              name.value.text,
+                              email.value.text,
+                              "",
+                              0,
+                              "",
+                              true,
+                              "",
+                              "",
+                              coins: 0,
+                              profileViews: 0,
+                            );
                             debugPrint(" sent : ${user.toString()}");
                             auth.pass.value = password.value.text;
                             Get.toNamed(Routes.upiScreen,
