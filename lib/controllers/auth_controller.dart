@@ -61,7 +61,8 @@ class AuthController extends GetxController {
   final MainController _main = Get.put(MainController());
   RxInt selectedUpgradePlan = 0.obs;
   RxBool upgradingPlan = false.obs;
-
+  RxInt selectedUpgradeFeatures = 0.obs;
+  RxBool upgradingFeatures = false.obs;
   @override
   void onInit() async {
     final fUser = FirebaseAuth.instance.currentUser;

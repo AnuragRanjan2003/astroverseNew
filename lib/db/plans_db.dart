@@ -3,8 +3,8 @@ import 'package:astroverse/utils/geo.dart';
 
 class Plans {
   static const plans = [
-    Plan("Basic", 0, "good plan.\nnice plan.\nmust take.",0),
-    Plan("Premium", 100, "good plan.\nnice plan.",1),
+    Plan("Basic", 50, "good plan.nice plan.\nmust take.", 0),
+    Plan("Premium", 100, "good plan.nice plan.", 1),
   ];
 
   static const astroPlans = [

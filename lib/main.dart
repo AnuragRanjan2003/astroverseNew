@@ -19,12 +19,7 @@ void main() async {
       options: DefaultFirebaseOptions.currentPlatform);
   await dotenv.load(fileName: '.env');
 
-  // await FirebaseAppCheck.instance
-  //     .activate(
-  //   webProvider: ReCaptchaV3Provider('recaptcha-v3-site-key'),
-  //   androidProvider: AndroidProvider.playIntegrity,
-  //   appleProvider: AppleProvider.appAttest,
-  // );
+
   final analytics = FirebaseAnalytics.instanceFor(app: app);
   analytics.logEvent(name: "login");
   ZegoUIKitPrebuiltCallInvitationService().setNavigatorKey(navigatorKey);

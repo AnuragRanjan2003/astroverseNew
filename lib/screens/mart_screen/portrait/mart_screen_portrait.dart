@@ -18,7 +18,12 @@ import '../../../controllers/auth_controller.dart';
 
 class MartScreenPortrait extends StatelessWidget {
   final BoxConstraints cons;
-  static const chipNames = ['item', 'job prediction', 'palm reading' , 'marriage prediction'];
+  static const chipNames = [
+    'item',
+    'job prediction',
+    'palm reading',
+    'marriage prediction'
+  ];
 
   const MartScreenPortrait({super.key, required this.cons});
 
@@ -44,16 +49,30 @@ class MartScreenPortrait extends StatelessWidget {
     loadMore() => service.fetchMoreServicesByLocation(auth.user.value!.uid,
         location.location.value!.geoPointFromLocationData()!, (p0) => null);
 
-
+    if (auth.bankDetails.value == null) {
+      auth.startBankDetailsStream(auth.user.value!.uid);
+    }
 
     return Scaffold(
       backgroundColor: ProjectColors.greyBackground,
       floatingActionButtonLocation: FloatingActionButtonLocation.endDocked,
       floatingActionButton: (auth.user.value?.astro == true)
           ? Container(
-        margin: const EdgeInsets.only(bottom: 100),
-            child: FloatingActionButton(
-                onPressed: _postItemScreen,
+              margin: const EdgeInsets.only(bottom: 100),
+              child: FloatingActionButton(
+                onPressed: () {
+                  if (auth.user.value == null) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text("user data not found")));
+                    return;
+                  }
+                  if (auth.bankDetails.value == null) {
+                    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                        content: Text("bank details not available")));
+                    return;
+                  }
+                  return _postItemScreen();
+                },
                 backgroundColor: Colors.lightBlue.shade300,
                 elevation: 0,
                 child: const Icon(
@@ -61,7 +80,7 @@ class MartScreenPortrait extends StatelessWidget {
                   color: Colors.white,
                 ),
               ),
-          )
+            )
           : null,
       body: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 10),
@@ -163,10 +182,10 @@ class MartScreenPortrait extends StatelessWidget {
                                   width: 5,
                                 ),
                                 Obx(() => buildFilterChip(chipNames[3], (e) {
-                                  e
-                                      ? service.selectedItem.value = 4
-                                      : service.selectedItem.value = 0;
-                                }, service.selectedItem.value == 4)),
+                                      e
+                                          ? service.selectedItem.value = 4
+                                          : service.selectedItem.value = 0;
+                                    }, service.selectedItem.value == 4)),
                               ],
                             ),
                           ),

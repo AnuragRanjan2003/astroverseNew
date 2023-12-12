@@ -1,4 +1,5 @@
 import 'package:astroverse/components/update_bank_bottomsheet.dart';
+import 'package:astroverse/components/upgrade_features_bottom_sheet.dart';
 import 'package:astroverse/components/upgrade_range_bottomsheet.dart';
 import 'package:astroverse/models/extra_info.dart';
 import 'package:astroverse/models/user_bank_details.dart';
@@ -366,8 +367,14 @@ class NamePlate extends StatelessWidget {
                                 size: _sizeIcon,
                               ),
                               'upgrade', () {
-                            Scaffold.of(context).showBottomSheet(
-                                (context) => UpgradeRangeBottomSheet(user: user,));
+                            Scaffold.of(context).showBottomSheet((context) {
+                              if (user.astro == false) {
+                                return UpgradeFeaturesBottomSheet(user: user);
+                              }
+                              return UpgradeRangeBottomSheet(
+                                user: user,
+                              );
+                            });
                           }),
                         ],
                       ),

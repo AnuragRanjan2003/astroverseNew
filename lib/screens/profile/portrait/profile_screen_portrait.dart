@@ -1,8 +1,6 @@
 import 'package:astroverse/components/buy_coins.dart';
 import 'package:astroverse/components/name_plate.dart';
-import 'package:astroverse/components/upgrade_range_bottomsheet.dart';
 import 'package:astroverse/controllers/auth_controller.dart';
-import 'package:astroverse/controllers/location_controller.dart';
 import 'package:astroverse/models/user.dart';
 import 'package:astroverse/res/colors/project_colors.dart';
 import 'package:astroverse/res/img/images.dart';
@@ -23,16 +21,17 @@ class ProfileScreenPortrait extends StatelessWidget {
     final ht = cons.maxHeight;
     final AuthController auth = Get.find();
 
-
     auth.getExtraInfo(auth.user.value!.uid);
 
-    auth.startBankDetailsStream(auth.user.value!.uid);
+    if (auth.bankDetails.value == null) {
+      auth.startBankDetailsStream(auth.user.value!.uid);
+    }
 
-    return WillPopScope(
-      onWillPop: () async {
+    return PopScope(
+      onPopInvoked: (e) async {
         auth.endBankDetailsStream();
-        return true;
       },
+      canPop: true,
       child: Scaffold(
         backgroundColor: ProjectColors.greyBackground,
         body: Stack(
@@ -77,7 +76,8 @@ class ProfileScreenPortrait extends StatelessWidget {
                   decoration: BoxDecoration(
                       color: Colors.white,
                       borderRadius: const BorderRadius.all(Radius.circular(10)),
-                      border: Border.all(width: 1.2, color: ProjectColors.disabled)),
+                      border: Border.all(
+                          width: 1.2, color: ProjectColors.disabled)),
                   child: Wrap(
                     spacing: 8,
                     crossAxisAlignment: WrapCrossAlignment.center,
@@ -92,8 +92,13 @@ class ProfileScreenPortrait extends StatelessWidget {
                       ),
                       Obx(() {
                         return Text(
-                          auth.user.value == null ? "XX" : NumberParser().toSocialMediaString(auth.user.value!.coins),
-                          style: const TextStyle(fontWeight: FontWeight.w600 , color: ProjectColors.disabled),
+                          auth.user.value == null
+                              ? "XX"
+                              : NumberParser()
+                                  .toSocialMediaString(auth.user.value!.coins),
+                          style: const TextStyle(
+                              fontWeight: FontWeight.w600,
+                              color: ProjectColors.disabled),
                         );
                       })
                     ],
