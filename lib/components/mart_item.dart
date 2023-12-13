@@ -69,15 +69,35 @@ class MartItem extends StatelessWidget {
                         color: Color(0xff444040),
                         fontWeight: FontWeight.bold),
                   ),
-                  Text(
-                    methodToString(item.deliveryMethod),
-                    style: const TextStyle(
-                      fontSize: 10,),
+                  Container(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
+                    decoration: BoxDecoration(
+                        borderRadius:
+                            const BorderRadius.all(Radius.circular(8)),
+                        border: Border.all(width: 1)),
+                    child: Wrap(
+                      crossAxisAlignment: WrapCrossAlignment.center,
+                      spacing: 3,
+                      children: [
+                        Icon(
+                          methodToIcon(item.deliveryMethod),
+                          size: 10,
+                        ),
+                        Text(
+                          methodToString(item.deliveryMethod),
+                          style: const TextStyle(
+                            fontSize: 10,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                   Text(
                     item.genre[0],
                     style: const TextStyle(
-                        fontSize: 10,),
+                      fontSize: 10,
+                    ),
                   ),
                   Text(
                     '₹${item.price.toInt()}',
@@ -105,11 +125,17 @@ class MartItem extends StatelessWidget {
   }
 
   String methodToString(int e) {
-    if(e==0) return "in-person";
-    if(e==1) {
+    if (e == 0) return "in-person";
+    if (e == 1) {
       return "chat";
     } else {
       return "call";
     }
+  }
+
+  IconData methodToIcon(int m) {
+    if (m == 0) return Icons.people_outline;
+    if (m == 1) return Icons.messenger_outline_outlined;
+    return Icons.call_outlined;
   }
 }

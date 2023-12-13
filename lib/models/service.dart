@@ -17,6 +17,7 @@ class Service extends Post {
   String geoHash;
   int deliveryMethod;
   final int range;
+  final bool active;
 
   Service({
     required this.price,
@@ -28,6 +29,7 @@ class Service extends Post {
     required super.title,
     required this.geoHash,
     required this.range,
+    required this.active,
     required this.deliveryMethod,
     required super.description,
     required super.genre,
@@ -36,6 +38,7 @@ class Service extends Post {
     required super.imageUrl,
     required super.authorName,
     required super.authorId,
+    required super.views,
     required this.place,
   }) : super(date: date);
 

@@ -10,7 +10,6 @@ import '../../../controllers/auth_controller.dart';
 import '../../../res/colors/project_colors.dart';
 import '../../../res/decor/button_decor.dart';
 import '../../../res/img/images.dart';
-import '../../../res/strings/user_login_strings.dart';
 import '../../../res/textStyles/text_styles.dart';
 import '../../../routes/routes.dart';
 
@@ -25,6 +24,7 @@ class AstroLogInPortrait extends StatelessWidget {
     final double ht = cons.maxHeight;
     final TextEditingController email = TextEditingController();
     final TextEditingController password = TextEditingController();
+    final TextEditingController resetEmail = TextEditingController();
     final AuthController auth = Get.find();
     return Scaffold(
       body: SingleChildScrollView(
@@ -37,7 +37,7 @@ class AstroLogInPortrait extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
               const Expanded(
-                  flex: 2,
+                  flex: 1,
                   child: SizedBox(
                     child: Image(
                       image: ProjectImages.login,
@@ -45,7 +45,7 @@ class AstroLogInPortrait extends StatelessWidget {
                     ),
                   )),
               Expanded(
-                  flex: 2,
+                  flex: 1,
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     mainAxisAlignment: MainAxisAlignment.end,
@@ -101,13 +101,115 @@ class AstroLogInPortrait extends StatelessWidget {
                                   ));
                             }
                           })),
-                      const SizedBox(
-                        height: 15,
-                      ),
+                      Builder(builder: (context) {
+                        return TextButton(
+                            onPressed: () {
+                              Scaffold.of(context).showBottomSheet((context) =>
+                                  IntrinsicHeight(
+                                    child: Container(
+                                      padding: const EdgeInsets.only(
+                                          right: 20,
+                                          left: 20,
+                                          bottom: 40,
+                                          top: 20),
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.stretch,
+                                        children: [
+                                          const Text(
+                                            "Reset Password",
+                                            style: TextStyle(
+                                                fontSize: 22,
+                                                fontWeight: FontWeight.w600),
+                                          ),
+                                          const SizedBox(
+                                            height: 20,
+                                          ),
+                                          TextField(
+                                            controller: resetEmail,
+                                            decoration: const InputDecoration(
+                                                border: OutlineInputBorder(),
+                                                hintText: "Email"),
+                                          ),
+                                          const SizedBox(
+                                            height: 30,
+                                          ),
+                                          Obx(
+                                            () => MaterialButton(
+                                              onPressed: auth
+                                                      .resetEmailLoading.isFalse
+                                                  ? () {
+                                                      if (resetEmail.value.text
+                                                          .isNotEmpty) {
+                                                        auth.resetEmailLoading
+                                                            .value = true;
+                                                        auth.sendResetPasswordEmail(
+                                                            resetEmail.value
+                                                                .text, (p0) {
+                                                          auth.resetEmailLoading
+                                                              .value = false;
+                                                          if (p0.isSuccess) {
+                                                            log("mail sent",
+                                                                name: "RESET");
+                                                            ScaffoldMessenger
+                                                                    .of(context)
+                                                                .showSnackBar(
+                                                                    const SnackBar(
+                                                                        content:
+                                                                            Text("reset email sent")));
+                                                          } else {
+                                                            log("mail not sent",
+                                                                name: "RESET");
+                                                            p0 as Failure<
+                                                                String>;
+                                                            ScaffoldMessenger
+                                                                    .of(context)
+                                                                .showSnackBar(
+                                                                    SnackBar(
+                                                                        content:
+                                                                            Text(p0.error)));
+                                                          }
+                                                          Navigator.of(context)
+                                                              .pop();
+                                                          resetEmail.clear();
+                                                        });
+                                                      }
+                                                    }
+                                                  : null,
+                                              color: Colors.blue,
+                                              disabledColor:
+                                                  ProjectColors.disabled,
+                                              disabledTextColor: Colors.white,
+                                              shape:
+                                                  const RoundedRectangleBorder(
+                                                      borderRadius:
+                                                          BorderRadius.all(
+                                                              Radius.circular(
+                                                                  12))),
+                                              padding:
+                                                  const EdgeInsets.symmetric(
+                                                      vertical: 15,
+                                                      horizontal: 15),
+                                              child: Text(
+                                                auth.resetEmailLoading.isFalse
+                                                    ? "Send Email"
+                                                    : "Sending..",
+                                                style: const TextStyle(
+                                                    color: Colors.white),
+                                              ),
+                                            ),
+                                          )
+                                        ],
+                                      ),
+                                    ),
+                                  ));
+                            },
+                            child: const Text("forgot password"));
+                      }),
                       MaterialButton(
                         onPressed: () {
                           auth.signInWithGoogle((p0) {
-                            log("login successful" , name: "GOOGLE");
+                            log("login successful", name: "GOOGLE");
                           });
                         },
                         shape: ButtonDecors.outlined,
@@ -120,36 +222,29 @@ class AstroLogInPortrait extends StatelessWidget {
                               height: 28,
                               width: 32,
                             ),
-                            Text(
-                              "Google",
-                              style: TextStylesLight().onButton,
+                            Obx(
+                              () => Text(
+                                auth.loading.isFalse
+                                    ? "Google"
+                                    : "Logging in..",
+                                style: TextStylesLight().onButton,
+                              ),
                             ),
                           ],
                         ),
                       ),
                     ],
                   )),
-              Expanded(
-                  flex: 1,
-                  child: Column(
-                    children: [
-                      Text(
-                        UserLoginStrings.signup,
-                        style: TextStylesLight().small,
-                        textAlign: TextAlign.center,
-                      ),
-                      TextButton(
-                        onPressed: () {
-                          Get.toNamed(Routes.astroSignUp);
-                        },
-                        child: Text(
-                          "Sign Up",
-                          style: TextStylesLight().bodyBold,
-                          textAlign: TextAlign.start,
-                        ),
-                      )
-                    ],
-                  )),
+              TextButton(
+                onPressed: () {
+                  Get.toNamed(Routes.astroSignUp);
+                },
+                child: Text(
+                  "Sign Up",
+                  style: TextStylesLight().bodyBold,
+                  textAlign: TextAlign.start,
+                ),
+              ),
             ],
           ),
         ),

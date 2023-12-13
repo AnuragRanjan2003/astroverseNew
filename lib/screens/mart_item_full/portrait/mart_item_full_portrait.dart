@@ -31,6 +31,8 @@ class MartItemFullPortrait extends StatelessWidget {
 
     service.fetchProviderDetails(item.authorId);
 
+    service.updateServiceView(item.id);
+
     return Scaffold(
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -78,7 +80,7 @@ class MartItemFullPortrait extends StatelessWidget {
                       mainAxisAlignment: MainAxisAlignment.start,
                       children: [
                         buildChip(
-                            '4.4',
+                            calculateMetric(item),
                             const Icon(
                               Icons.star,
                               color: Colors.lightGreen,
@@ -103,6 +105,21 @@ class MartItemFullPortrait extends StatelessWidget {
                             )),
                       ],
                     ),
+                  ),
+                  Row(
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 15, vertical: 5),
+                        child: buildChip(
+                            methodToString(item.deliveryMethod),
+                            Icon(
+                              methodToIcon(item.deliveryMethod),
+                              size: 20,
+                            )),
+                      ),
+                      const Spacer()
+                    ],
                   ),
                   Padding(
                     padding:
@@ -181,14 +198,18 @@ class MartItemFullPortrait extends StatelessWidget {
                       ],
                     ),
                   ),
-                  buildRow('seller', crypto.decryptFromBase64String(item.authorName), Icons.person_2),
+                  buildRow(
+                      'seller',
+                      crypto.decryptFromBase64String(item.authorName),
+                      Icons.person_2),
                   buildRow(
                       'date',
                       DateFormat.yMMMd().format(item.date).toString(),
                       Icons.date_range),
                   buildRow(
                       'uses', item.uses.toString(), Icons.data_thresholding),
-                  buildRow('likes', item.upVotes.toString(), Icons.favorite),
+                  buildRow(
+                      'views', item.views.toString(), Icons.remove_red_eye),
                 ],
               ),
             ),
@@ -205,7 +226,10 @@ class MartItemFullPortrait extends StatelessWidget {
                           providerState != BackEndStrings.providerFound)
                       ? null
                       : () async {
-                          service.makePayment(item, crypto.decryptFromBase64String(user.phNo), crypto.decryptFromBase64String(user.email));
+                          service.makePayment(
+                              item,
+                              crypto.decryptFromBase64String(user.phNo),
+                              crypto.decryptFromBase64String(user.email));
                         },
                   color: const Color(0xff444040),
                   disabledColor: ProjectColors.disabled,
@@ -238,7 +262,7 @@ class MartItemFullPortrait extends StatelessWidget {
 
   Container buildChip(String text, Icon icon) {
     return Container(
-        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
         decoration: BoxDecoration(
             borderRadius: const BorderRadius.all(Radius.circular(8)),
             border: Border.all(width: 1, color: Colors.grey)),
@@ -287,4 +311,25 @@ class MartItemFullPortrait extends StatelessWidget {
           ],
         ),
       );
+
+  String calculateMetric(Service item) {
+    if (item.views == 0) return '--';
+    final metric = (5 * item.uses) / item.views;
+    return metric.toStringAsFixed(1);
+  }
+
+  String methodToString(int e) {
+    if (e == 0) return "in-person";
+    if (e == 1) {
+      return "chat";
+    } else {
+      return "call";
+    }
+  }
+
+  IconData methodToIcon(int m) {
+    if (m == 0) return Icons.people_outline;
+    if (m == 1) return Icons.messenger_outline_outlined;
+    return Icons.call_outlined;
+  }
 }

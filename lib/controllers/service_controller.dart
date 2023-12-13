@@ -2,6 +2,7 @@ import 'dart:developer';
 import 'dart:io';
 
 import 'package:astroverse/models/purchase.dart';
+import 'package:astroverse/models/save_service.dart';
 import 'package:astroverse/models/service.dart';
 import 'package:astroverse/models/transaction.dart' as t;
 import 'package:astroverse/models/user.dart';
@@ -46,6 +47,8 @@ class ServiceController extends GetxController {
   RxInt selectedMode = 0.obs;
   Rxn<String> serviceProvider = Rxn();
   RxDouble selectedRange = 0.0.obs;
+  RxList<SaveService> myServices = RxList();
+  RxInt currPage = 0.obs;
 
   final searchController = TextEditingController(text: "");
 
@@ -224,6 +227,27 @@ class ServiceController extends GetxController {
     });
   }
 
+  fetchMyServices(String uid) {
+    _repo.fetchMyServices(uid).then((value) {
+      if (value.isSuccess) {
+        value as Success<List<QueryDocumentSnapshot<SaveService>>>;
+        log("got services ${value.data}", name: "MY SERVICES");
+        myServices.value = value.data.map((e) => e.data()).toList();
+      } else {
+        value as Failure<List<QueryDocumentSnapshot<SaveService>>>;
+        log("error  ${value.error}", name: "MY SERVICES");
+      }
+    });
+  }
+
+  deactivateService(
+      String serviceId, String uid, Function(Resource<Json>) updateUi) {
+    final data = {'active': false};
+    _repo.updateService(data, serviceId, uid).then((value) {
+      updateUi(value);
+    });
+  }
+
   clearList() {
     serviceList.clear();
     lastPostForLocality.value = null;
@@ -251,8 +275,9 @@ class ServiceController extends GetxController {
           for (var s in value.data) {
             if (s.exists) {
               list.add(s.data());
-              if (s.data().range == Ranges.locality)
+              if (s.data().range == Ranges.locality) {
                 lastPostForLocality.value = s;
+              }
               if (s.data().range == Ranges.city) lastPostForCity.value = s;
             }
           }
@@ -298,8 +323,9 @@ class ServiceController extends GetxController {
           for (var s in value.data) {
             if (s.exists) {
               list.add(s.data());
-              if (s.data().range == Ranges.locality)
+              if (s.data().range == Ranges.locality) {
                 lastPostForLocality.value = s;
+              }
               if (s.data().range == Ranges.city) lastPostForCity.value = s;
             }
           }
@@ -339,8 +365,9 @@ class ServiceController extends GetxController {
             if (element.data().range == Ranges.locality) {
               lastPostForLocality.value = element;
             }
-            if (element.data().range == Ranges.city)
+            if (element.data().range == Ranges.city) {
               lastPostForCity.value = element;
+            }
           }
         }
         //log("${lastPost.value!.data()}", name: "IS NULL");
@@ -423,6 +450,13 @@ class ServiceController extends GetxController {
       value = value as Failure<List<QueryDocumentSnapshot<Service>>>;
       log(value.error, name: "SERVICE LIST FAILED");
     }
+  }
+
+  void updateServiceView(String serviceId) {
+    final data = {"views": FieldValue.increment(1)};
+    _repo.updateService(data, serviceId, '').then((value) {
+      if (value.isSuccess) log("views updated", name: "SERVICE");
+    });
   }
 
   static double _computeFinalPrice(double price) {

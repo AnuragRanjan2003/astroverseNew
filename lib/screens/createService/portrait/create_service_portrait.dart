@@ -461,11 +461,13 @@ class CreateServicePortrait extends StatelessWidget {
                                       deliveryMethod:
                                           service.selectedMode.value,
                                       geoHash: "",
+                                      active: true,
                                       range:
                                           service.selectedRange.value.toInt(),
                                       date: DateTime.now(),
                                       place: place.value.text,
                                       imageUrl: '',
+                                      views: 0,
                                       authorName: user.name,
                                       authorId: user.uid);
                                   service.postService(

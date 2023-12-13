@@ -1,6 +1,5 @@
 import 'package:astroverse/models/save_service.dart';
 import 'package:astroverse/models/service.dart';
-import 'package:astroverse/utils/crypt.dart';
 import 'package:astroverse/utils/geo.dart';
 import 'package:astroverse/utils/postable.dart';
 import 'package:astroverse/utils/resource.dart';
@@ -16,11 +15,11 @@ final _serviceCollection = FirebaseFirestore.instance
       toFirestore: (item, options) => item.toJson(),
     );
 
-CollectionReference<SaveService> _usedServiceCollection(String uid) =>
+CollectionReference<SaveService> _userServiceCollection(String uid) =>
     FirebaseFirestore.instance
         .collection(BackEndStrings.userCollection)
         .doc(uid)
-        .collection(BackEndStrings.usedServiceCollection)
+        .collection(BackEndStrings.userServiceCollection)
         .withConverter<SaveService>(
           fromFirestore: (snapshot, options) =>
               SaveService.fromJson(snapshot.data()),
@@ -33,9 +32,7 @@ class ServiceUtils extends Postable<Service, SaveService> {
   String uid;
 
   ServiceUtils(this.uid)
-      : super(_serviceCollection, _usedServiceCollection(uid));
-
-  final _crypto = Crypt();
+      : super(_serviceCollection, _userServiceCollection(uid));
 
   @override
   Future<Resource<int>> dislike(String id) async {
@@ -160,7 +157,7 @@ class ServiceUtils extends Postable<Service, SaveService> {
   Future<Resource<int>> like(String id) async {
     try {
       await ref.doc(id).update({"upVotes": FieldValue.increment(1)});
-      await likeRef?.doc(id).set(SaveService(id, DateTime.now().toString()));
+      //await likeRef?.doc(id).set(SaveService(id, DateTime.now().toString(),));
       return Success(1);
     } on FirebaseException catch (e) {
       return Failure<int>(e.message.toString());
@@ -215,7 +212,15 @@ class ServiceUtils extends Postable<Service, SaveService> {
     final point = GeoHasher().encode(post.lng, post.lat);
     post.geoHash = point;
     try {
-      await ref.doc(post.id).set(post);
+      final batch = FirebaseFirestore.instance.batch();
+      batch.set(ref.doc(post.id), post);
+      final savePost =
+          SaveService(post.id, post.date.toIso8601String(), post.title);
+
+      batch.set(_userServiceCollection(uid).doc(post.id), savePost);
+
+      await batch.commit();
+
       return Success(post);
     } on FirebaseException catch (e) {
       return Failure<Service>(e.message.toString());
@@ -234,14 +239,32 @@ class ServiceUtils extends Postable<Service, SaveService> {
               .collection(BackEndStrings.userCollection)
               .doc(post.authorId);
       final batch = FirebaseFirestore.instance.batch();
+
+      final savePost =
+          SaveService(post.id, post.date.toIso8601String(), post.title);
+
       batch.set(ref.doc(post.id), post);
+      batch.set(_userServiceCollection(post.authorId).doc(post.id), savePost);
       batch.update(userDocument, {"coins": FieldValue.increment(-coinCost)});
+
       await batch.commit();
       return Success(post);
     } on FirebaseException catch (e) {
       return Failure<Service>(e.message.toString());
     } catch (e) {
       return Failure<Service>(e.toString());
+    }
+  }
+
+  Future<Resource<List<QueryDocumentSnapshot<SaveService>>>>
+      fetchMyServices() async {
+    try {
+      final res = await likeRef!.orderBy("date", descending: true).get();
+      return Success(res.docs);
+    } on FirebaseException catch (e) {
+      return Failure(e.message.toString());
+    } catch (e) {
+      return Failure(e.toString());
     }
   }
 

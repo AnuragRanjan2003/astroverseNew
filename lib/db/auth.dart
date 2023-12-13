@@ -21,8 +21,6 @@ class Auth {
           await mAuth.createUserWithEmailAndPassword(
               email: user.email, password: password));
 
-
-
   Future<Resource<String>> sendVerificationEmail() async =>
       await SafeCall().authCall<String>(() async {
         mAuth.currentUser?.reload();
@@ -79,6 +77,17 @@ class Auth {
     } catch (e) {
       log(e.toString(), name: "PHONE AUTH");
       return false;
+    }
+  }
+
+  Future<Resource<String>> sentForgotPasswordEmail(String email) async {
+    try {
+      await mAuth.sendPasswordResetEmail(email: email);
+      return Success("email sent");
+    } on FirebaseAuthException catch (e) {
+      return Failure(e.message.toString());
+    } catch (e) {
+      return Failure(e.toString());
     }
   }
 
