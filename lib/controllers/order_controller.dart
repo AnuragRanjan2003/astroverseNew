@@ -4,6 +4,7 @@ import 'dart:developer';
 import 'package:astroverse/models/purchase.dart';
 import 'package:astroverse/models/service.dart';
 import 'package:astroverse/repo/orders_repo.dart';
+import 'package:astroverse/res/strings/backend_strings.dart';
 import 'package:astroverse/utils/crypt.dart';
 import 'package:astroverse/utils/resource.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -17,6 +18,7 @@ class OrderController extends GetxController {
   RxBool confirming = false.obs;
   Rxn<Purchase> purchase = Rxn();
   RxBool checkBox = false.obs;
+  RxBool serviceDeleted = false.obs;
 
   StreamSubscription<DocumentSnapshot<Purchase?>>? _purchaseSub;
 
@@ -69,6 +71,7 @@ class OrderController extends GetxController {
   }
 
   fetchService(String uid, String serviceId) {
+    serviceDeleted.value = false;
     _repo.fetchService(uid, serviceId).then((value) {
       if (value.isSuccess) {
         value = value as Success<Service>;
@@ -78,7 +81,12 @@ class OrderController extends GetxController {
         value = value as Failure<Service>;
         service.value = null;
         log(value.error, name: "SERVICE FETCH");
+        serviceDeleted.value = value.error == Errors.docNotFound;
       }
+      // serviceDeleted.value = true;
+      // service.value = null;
     });
+
+
   }
 }

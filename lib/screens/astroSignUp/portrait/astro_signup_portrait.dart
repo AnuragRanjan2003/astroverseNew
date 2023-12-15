@@ -108,6 +108,7 @@ class AstroSignUpPortrait extends StatelessWidget {
                               true,
                               "",
                               "",
+                              false,
                               coins: 0,
                               profileViews: 0,
                             );

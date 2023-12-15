@@ -103,6 +103,7 @@ class UserSignUpPortrait extends StatelessWidget {
                               false,
                               "",
                               "",
+                              false,
                               coins: 0,
                               profileViews: 0,
                             );

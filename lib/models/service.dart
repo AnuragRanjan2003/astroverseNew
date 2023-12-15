@@ -40,14 +40,15 @@ class Service extends Post {
     required super.authorId,
     required super.views,
     required this.place,
+    required super.featured,
   }) : super(date: date);
 
   factory Service.fromJson(json) => _$ServiceFromJson(json);
 
-  static int _intFromNullable(dynamic value){
-    try{
+  static int _intFromNullable(dynamic value) {
+    try {
       return (value as num).toInt();
-    }catch(e){
+    } catch (e) {
       return 0;
     }
   }
@@ -65,8 +66,8 @@ class Service extends Post {
 
   static DateTime _dateAsIs(DateTime dateTime) => dateTime;
 
-  static String _genGeoHashNullSafe(double lat, double long , dynamic hash) {
-    if(hash!=null) return hash as String;
+  static String _genGeoHashNullSafe(double lat, double long, dynamic hash) {
+    if (hash != null) return hash as String;
     return GeoHasher().encode(long, lat);
   }
 }

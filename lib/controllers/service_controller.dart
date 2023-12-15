@@ -49,6 +49,7 @@ class ServiceController extends GetxController {
   RxDouble selectedRange = 0.0.obs;
   RxList<SaveService> myServices = RxList();
   RxInt currPage = 0.obs;
+  RxBool deletingService = false.obs;
 
   final searchController = TextEditingController(text: "");
 
@@ -125,6 +126,17 @@ class ServiceController extends GetxController {
   @override
   void onClose() {
     _razorPay.clear();
+  }
+
+  Future<Resource<Service>> fetchService(String serviceId) =>
+      _repo.fetchService(serviceId);
+
+  void deleteService(SaveService ss,String userId, Function(Resource<String>) updateUI) {
+    deletingService.value =true;
+    _repo.deleteService(ss,userId).then((value) {
+      deletingService.value = false;
+      updateUI(value);
+    });
   }
 
   attachPaymentEventListeners(User user, Service item) {
@@ -454,8 +466,13 @@ class ServiceController extends GetxController {
 
   void updateServiceView(String serviceId) {
     final data = {"views": FieldValue.increment(1)};
-    _repo.updateService(data, serviceId, '').then((value) {
-      if (value.isSuccess) log("views updated", name: "SERVICE");
+    _repo.updateService(data, serviceId, 'x').then((value) {
+      if (value.isSuccess) {
+        log("views updated", name: "SERVICE");
+      } else{
+        value as Failure<Json>;
+        log("views updated failed : ${value.error}", name: "SERVICE");
+      }
     });
   }
 

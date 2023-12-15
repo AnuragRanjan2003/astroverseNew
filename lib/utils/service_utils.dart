@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:astroverse/models/save_service.dart';
 import 'package:astroverse/models/service.dart';
 import 'package:astroverse/utils/geo.dart';
@@ -196,9 +198,10 @@ class ServiceUtils extends Postable<Service, SaveService> {
     try {
       final res = await ref.doc(serviceId).get();
       if (res.exists && res.data() != null) {
+        log("service : ${res.data()}");
         return Success<Service>(res.data()!);
       } else {
-        return Failure<Service>("null returned");
+        return Failure<Service>(Errors.docNotFound);
       }
     } on FirebaseException catch (e) {
       return Failure<Service>(e.message.toString());
@@ -253,6 +256,25 @@ class ServiceUtils extends Postable<Service, SaveService> {
       return Failure<Service>(e.message.toString());
     } catch (e) {
       return Failure<Service>(e.toString());
+    }
+  }
+
+  Future<Resource<String>> deleteService(SaveService ss) async {
+    try {
+      final batch = FirebaseFirestore.instance.batch();
+      batch.delete(ref.doc(ss.id));
+      batch.delete(_userServiceCollection(uid).doc(ss.id));
+      batch.set(
+          FirebaseFirestore.instance
+              .collection(BackEndStrings.deletedCollection)
+              .doc(ss.id),
+          ss);
+      await batch.commit();
+      return Success("deleted");
+    } on FirebaseException catch (e) {
+      return Failure(e.message.toString());
+    } catch (e) {
+      return Failure(e.toString());
     }
   }
 

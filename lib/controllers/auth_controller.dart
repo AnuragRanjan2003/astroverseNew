@@ -428,20 +428,22 @@ class AuthController extends GetxController {
             final cred = (value as Success<UserCredential>).data.user!;
             _analytics.logSignUp(signUpMethod: "Google");
             final user = models.User(
-                _crypto.encryptToBase64String(
-                    _parseValueForModel(cred.displayName)),
-                _crypto.encryptToBase64String(_parseValueForModel(cred.email)),
-                _parseValueForModel(cred.photoURL),
-                0,
-                location: loc,
-                coins: 0,
-                profileViews: 0,
-                _parseValueForModel(cred.uid),
-                astro,
-                _parseValueForModel(cred.phoneNumber),
-                loc == null
-                    ? ""
-                    : GeoHasher().encode(loc.longitude, loc.latitude));
+              _crypto
+                  .encryptToBase64String(_parseValueForModel(cred.displayName)),
+              _crypto.encryptToBase64String(_parseValueForModel(cred.email)),
+              _parseValueForModel(cred.photoURL),
+              0,
+              location: loc,
+              coins: 0,
+              profileViews: 0,
+              _parseValueForModel(cred.uid),
+              astro,
+              _parseValueForModel(cred.phoneNumber),
+              loc == null
+                  ? ""
+                  : GeoHasher().encode(loc.longitude, loc.latitude),
+              false,
+            );
             final info = ExtraInfo(
                 joiningDate: DateTime.now(),
                 lastActive: DateTime.now(),

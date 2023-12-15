@@ -4,6 +4,7 @@ import 'package:astroverse/components/order_bottom_sheet.dart';
 import 'package:astroverse/controllers/auth_controller.dart';
 import 'package:astroverse/controllers/order_controller.dart';
 import 'package:astroverse/models/purchase.dart';
+import 'package:astroverse/models/service.dart';
 import 'package:astroverse/res/img/images.dart';
 import 'package:astroverse/screens/messaging.dart';
 import 'package:astroverse/utils/crypt.dart';
@@ -48,9 +49,8 @@ class OrderedProductPortrait extends StatelessWidget {
 
     return Scaffold(
       floatingActionButtonLocation: FloatingActionButtonLocation.endDocked,
-      floatingActionButton: purchase != null
-          ? actionButton(purchase!, crypto, zegoService, context)
-          : const SizedBox.shrink(),
+      floatingActionButton:
+          Obx(() => _buildFab(purchase, order, crypto, zegoService, context)),
       body: SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -58,6 +58,19 @@ class OrderedProductPortrait extends StatelessWidget {
             Obx(() {
               final item = order.service.value;
               if (item == null) {
+                if (order.serviceDeleted.isTrue) {
+                  return Container(
+                    height: 200,
+                    color: Colors.grey,
+                    child: const Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(Icons.info_outline_rounded),
+                        Text("service deleted"),
+                      ],
+                    ),
+                  );
+                }
                 return Container(
                   color: Colors.grey,
                 );
@@ -90,7 +103,11 @@ class OrderedProductPortrait extends StatelessWidget {
               child: Obx(() {
                 final item = order.service.value;
                 return Text(
-                  item == null ? "fetching" : item.title,
+                  item == null
+                      ? (order.serviceDeleted.isFalse
+                          ? "fetching"
+                          : "service deleted")
+                      : item.title,
                   style: const TextStyle(
                     fontSize: 24,
                     fontWeight: FontWeight.bold,
@@ -110,6 +127,19 @@ class OrderedProductPortrait extends StatelessWidget {
                       flex: 1,
                       child: Obx(() {
                         if (order.purchase.value == null) {
+                          if (order.serviceDeleted.isTrue) {
+                            return const SizedBox(
+                              width: 150,
+                              height: 50,
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Icon(Icons.info_outline_rounded),
+                                  Text("service deleted"),
+                                ],
+                              ),
+                            );
+                          }
                           return Container(
                             width: 150,
                             height: 50,
@@ -148,42 +178,72 @@ class OrderedProductPortrait extends StatelessWidget {
               child: Obx(() {
                 final item = order.service.value;
                 if (item == null) {
+                  if (order.serviceDeleted.isTrue) {
+                    return const SizedBox(
+                      width: 200,
+                      height: 70,
+                      child: Column(
+                        children: [
+                          Icon(Icons.info_outline_rounded),
+                          Text("service deleted"),
+                        ],
+                      ),
+                    );
+                  }
                   return Container(
                     color: Colors.grey,
                     width: 200,
                     height: 70,
                   );
                 }
-                return Row(
-                  mainAxisAlignment: MainAxisAlignment.start,
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    buildChip(
-                        '4.4',
-                        const Icon(
-                          Icons.star,
-                          color: Colors.lightGreen,
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: [
+                        buildChip(
+                            _calculateMetric(item),
+                            const Icon(
+                              Icons.star,
+                              color: Colors.lightGreen,
+                            ),
+                            null),
+                        const SizedBox(
+                          width: 10,
                         ),
-                        null),
-                    const SizedBox(
-                      width: 10,
+                        buildChip(
+                            item.uses.toString(),
+                            const Icon(
+                              Icons.data_exploration_outlined,
+                              color: Colors.blueAccent,
+                            ),
+                            null),
+                        const SizedBox(
+                          width: 10,
+                        ),
+                        buildChip(
+                            item.genre.first,
+                            const Icon(
+                              Icons.category_outlined,
+                              color: Colors.black,
+                            ),
+                            null),
+                      ],
                     ),
-                    buildChip(
-                        item.uses.toString(),
-                        const Icon(
-                          Icons.data_exploration_outlined,
-                          color: Colors.blueAccent,
-                        ),
-                        null),
-                    const SizedBox(
-                      width: 10,
+                    const SizedBox(height: 10,),
+                    Row(
+                      children: [
+                        buildChip(
+                            methodToString(item.deliveryMethod),
+                            Icon(
+                              methodToIcon(item.deliveryMethod),
+                              color: Colors.black,
+                            ),
+                            null),
+                        const Spacer(),
+                      ],
                     ),
-                    buildChip(
-                        item.genre.first,
-                        const Icon(
-                          Icons.category_outlined,
-                          color: Colors.black,
-                        ),
-                        null),
                   ],
                 );
               }),
@@ -195,6 +255,9 @@ class OrderedProductPortrait extends StatelessWidget {
                 final item = order.service.value;
                 log(item.toString(), name: "ITEM");
                 if (item == null) {
+                  if (order.serviceDeleted.isTrue) {
+                    return const SizedBox.shrink();
+                  }
                   return Container(
                     color: Colors.grey,
                     width: 200,
@@ -215,6 +278,9 @@ class OrderedProductPortrait extends StatelessWidget {
               child: Obx(() {
                 final item = order.service.value;
                 if (item == null) {
+                  if (order.serviceDeleted.isTrue) {
+                    return const SizedBox.shrink();
+                  }
                   return Container(
                     color: Colors.grey,
                     width: 200,
@@ -299,6 +365,17 @@ class OrderedProductPortrait extends StatelessWidget {
             Obx(() {
               final item = order.service.value;
               if (item == null) {
+                if (order.serviceDeleted.isTrue) {
+                  return const SizedBox(
+                    height: 200,
+                    child: Column(
+                      children: <Widget>[
+                        Icon(Icons.info_outline_rounded),
+                        Text("service deleted"),
+                      ],
+                    ),
+                  );
+                }
                 return Container(
                   color: Colors.grey,
                   width: 200,
@@ -313,6 +390,7 @@ class OrderedProductPortrait extends StatelessWidget {
             Obx(() {
               final item = order.service.value;
               if (item == null) {
+                if (order.serviceDeleted.isTrue) return const SizedBox.shrink();
                 return Container(
                   color: Colors.grey,
                   width: 200,
@@ -327,6 +405,7 @@ class OrderedProductPortrait extends StatelessWidget {
             Obx(() {
               final item = order.service.value;
               if (item == null) {
+                if (order.serviceDeleted.isTrue) return const SizedBox.shrink();
                 return Container(
                   color: Colors.grey,
                   width: 200,
@@ -339,13 +418,15 @@ class OrderedProductPortrait extends StatelessWidget {
             Obx(() {
               final item = order.service.value;
               if (item == null) {
+                if (order.serviceDeleted.isTrue) return const SizedBox.shrink();
                 return Container(
                   color: Colors.grey,
                   width: 200,
                   height: 70,
                 );
               }
-              return buildRow('likes', item.upVotes.toString(), Icons.favorite);
+              return buildRow(
+                  'views', item.views.toString(), Icons.remove_red_eye);
             }),
             const SizedBox(
               height: 20,
@@ -471,7 +552,8 @@ class OrderedProductPortrait extends StatelessWidget {
               child: Obx(() {
                 final user = auth.user.value!;
                 return MaterialButton(
-                  onPressed: order.purchase.value!.delivered
+                  onPressed: order.purchase.value!.delivered ||
+                          order.serviceDeleted.isTrue
                       ? null
                       : () {
                           if (order.purchase.value == null) return;
@@ -569,12 +651,12 @@ class OrderedProductPortrait extends StatelessWidget {
 
   Widget actionButton(Purchase purchase, Crypt crypto,
       ZegoCloudServices zegoService, BuildContext context) {
-    if (purchase.deliveryMethod == 1) {
+    if (purchase.deliveryMethod == 2) {
       return Container(
           child: zegoService.callButton(purchase.sellerId,
               crypto.decryptFromBase64String(purchase.sellerName)));
     }
-    if (purchase.deliveryMethod == 2) {
+    if (purchase.deliveryMethod == 1) {
       comet.User receiver = comet.User(
           uid: purchase.sellerId,
           name: crypto.decryptFromBase64String(purchase.sellerName));
@@ -587,8 +669,9 @@ class OrderedProductPortrait extends StatelessWidget {
           );
         },
         child: Container(
-          width: 80, // Set the width of the button
-          height: 80, // Set the height of the button
+          width: 60, // Set the width of the button
+          height: 60,
+          margin: const EdgeInsets.only(bottom: 80),// Set the height of the button
           decoration: const BoxDecoration(
             shape: BoxShape.circle, // Makes the container circular
             color: Colors.lightBlue, // Set the background color of the button
@@ -604,4 +687,55 @@ class OrderedProductPortrait extends StatelessWidget {
 
     return const SizedBox.shrink();
   }
+
+  Widget _buildFab(Purchase? purchase, OrderController order, Crypt crypto,
+      ZegoCloudServices zegoService, BuildContext context) {
+    if (order.serviceDeleted.isTrue) {
+      return Container(
+        margin: const EdgeInsets.only(bottom: 80),
+        child: Tooltip(
+          triggerMode: TooltipTriggerMode.tap,
+          message:
+              "The service has been deleted.\nRefund should be in process and may take some time.\nYou may contact us.",
+          padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 15),
+          showDuration: const Duration(seconds: 8),
+          child: Container(
+            padding: const EdgeInsets.all(17),
+            decoration: const BoxDecoration(
+                color: Color.fromRGBO(255, 0, 0, 1),
+                borderRadius: BorderRadius.all(Radius.circular(15))),
+            child: const Icon(
+              Icons.info_outline_rounded,
+              color: Colors.white,
+            ),
+          ),
+        ),
+      );
+    }
+    if (purchase != null && order.serviceDeleted.isFalse) {
+      return actionButton(purchase, crypto, zegoService, context);
+    }
+    return const SizedBox.shrink();
+  }
+}
+
+String _calculateMetric(Service item) {
+  if (item.views == 0) return '--';
+  final metric = (5 * item.uses) / item.views;
+  return metric.toStringAsFixed(1);
+}
+
+String methodToString(int e) {
+  if (e == 0) return "in-person";
+  if (e == 1) {
+    return "chat";
+  } else {
+    return "call";
+  }
+}
+
+IconData methodToIcon(int m) {
+  if (m == 0) return Icons.people_outline;
+  if (m == 1) return Icons.messenger_outline_outlined;
+  return Icons.call_outlined;
 }

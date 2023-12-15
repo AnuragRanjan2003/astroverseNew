@@ -75,6 +75,7 @@ class MartScreenPortrait extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
                   FloatingActionButton(
+                    heroTag: 'hero1+fab',
                     onPressed: () {
                       if (auth.user.value == null) {
                         ScaffoldMessenger.of(context).showSnackBar(
@@ -109,6 +110,7 @@ class MartScreenPortrait extends StatelessWidget {
                     height: 5,
                   ),
                   FloatingActionButton(
+                    heroTag: 'hero2+fab',
                     onPressed: () {
                       if (auth.user.value == null) {
                         ScaffoldMessenger.of(context).showSnackBar(
@@ -288,6 +290,9 @@ class MartScreenPortrait extends StatelessWidget {
                     return ListTile(
                       leading: const Icon(Icons.shopping_bag_outlined),
                       title: Text(s.name),
+                      onTap: (){
+                        Get.toNamed(Routes.myMartItemScreen ,arguments: s);
+                      },
                       subtitle: Text(DateFormat.yMMMd().format(DateTime.parse(s.date)),
                     ));
                   },

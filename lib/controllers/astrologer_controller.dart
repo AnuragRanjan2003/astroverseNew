@@ -2,7 +2,6 @@ import 'dart:developer';
 
 import 'package:astroverse/models/user.dart';
 import 'package:astroverse/repo/astrologer_repo.dart';
-import 'package:astroverse/utils/crypt.dart';
 import 'package:astroverse/utils/geo.dart';
 import 'package:astroverse/utils/resource.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -13,6 +12,8 @@ class AstrologerController extends GetxController {
   RxList<User> list = RxList();
   Rxn<QueryDocumentSnapshot<User>> lastForLocality = Rxn();
   Rxn<QueryDocumentSnapshot<User>> lastForCity = Rxn();
+  Rxn<QueryDocumentSnapshot<User>> lastForState = Rxn();
+  Rxn<QueryDocumentSnapshot<User>> lastForAll = Rxn();
   RxBool moreUsers = true.obs;
   RxString searchText = RxString("");
   Rx<bool> nothingToShow = false.obs;
@@ -32,24 +33,31 @@ class AstrologerController extends GetxController {
           if (it.data().plan == VisibilityPlans.city) {
             lastForCity.value = value.data.last;
           }
+          if (it.data().plan == VisibilityPlans.state) {
+            lastForState.value = value.data.last;
+          }
+          if (it.data().plan == VisibilityPlans.all) {
+            lastForAll.value = value.data.last;
+          }
         }
 
         this.list.value = list;
-        log("$list" , name: "ASTRO");
+        log("$list", name: "ASTRO");
       } else {}
     });
   }
 
-
-
   void fetchMoreAstrologers(GeoPoint geoPoint, String uid) {
-    if (lastForLocality.value == null && lastForCity.value == null) {
+    if (lastForLocality.value == null &&
+        lastForCity.value == null &&
+        lastForState.value == null &&
+        lastForAll.value == null) {
       fetchAstrologers(geoPoint, uid);
     }
     loadingMore.value = true;
     _repo
-        .fetchMoreAstrologersByLocation(
-            uid, geoPoint, lastForLocality.value, lastForCity.value)
+        .fetchMoreAstrologersByLocation(uid, geoPoint, lastForLocality.value,
+            lastForCity.value, lastForState.value, lastForAll.value)
         .then((value) {
       loadingMore.value = false;
       if (value.isSuccess) {
@@ -61,6 +69,8 @@ class AstrologerController extends GetxController {
             lastForLocality.value = it;
           }
           if (it.data().plan == VisibilityPlans.city) lastForCity.value = it;
+          if (it.data().plan == VisibilityPlans.state) lastForState.value = it;
+          if (it.data().plan == VisibilityPlans.all) lastForAll.value = it;
         }
         moreUsers.value = list.isNotEmpty;
 

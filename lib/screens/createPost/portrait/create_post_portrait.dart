@@ -207,6 +207,7 @@ class CreatePostPortrait extends StatelessWidget {
                                     lng: location.longitude!,
                                     title: title.value.text,
                                     comments: 0,
+                                    featured: user.featured,
                                     upVotes: 0,
                                     views: 0,
                                     id: "",

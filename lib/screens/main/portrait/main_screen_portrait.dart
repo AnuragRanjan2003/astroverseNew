@@ -9,6 +9,7 @@ import 'package:astroverse/screens/mart_screen/mart_screen.dart';
 import 'package:astroverse/screens/peopleScreen/portrait/people_screen_portrait.dart';
 import 'package:astroverse/screens/profile/profile_screen.dart';
 import 'package:astroverse/screens/purchasesScreen/purchases_screen.dart';
+import 'package:astroverse/utils/crypt.dart';
 import 'package:astroverse/utils/env_vars.dart';
 import 'package:cometchat_chat_uikit/cometchat_chat_uikit.dart' as c;
 import 'package:firebase_analytics/firebase_analytics.dart';
@@ -36,6 +37,8 @@ class MainScreenPortrait extends StatelessWidget {
     final double ht = cons.maxHeight;
 
     final AuthController auth = Get.find();
+
+    final crypto = Crypt();
 
     c.UIKitSettings uiKitSettings = (c.UIKitSettingsBuilder()
           ..subscriptionType = c.CometChatSubscriptionType.allUsers
@@ -65,7 +68,7 @@ class MainScreenPortrait extends StatelessWidget {
         log("user not found , creating user!", name: "CHAT");
         var user = auth.user.value!;
         final authUser =
-            c.User(name: user.name, uid: user.uid, avatar: user.image);
+            c.User(name: crypto.decryptFromBase64String(user.name), uid: user.uid, avatar: user.image);
         c.CometChatUIKit.createUser(
             c.User(
                 name: authUser.name,
@@ -76,10 +79,12 @@ class MainScreenPortrait extends StatelessWidget {
           c.CometChatUIKit.login(authUser.uid);
         }, onError: (e) {
           log("sign up failed with exception: ${e.message}", name: "CHAT");
+          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("could not connect to chat servers")));
         });
       } else {
         log("login failed with exception: ${e.message} ; code : ${e.code}",
             name: "CHAT");
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("could not connect to chat servers")));
       }
     });
 

@@ -9,6 +9,7 @@ import 'package:astroverse/screens/emailverfication/email_verification_screen.da
 import 'package:astroverse/screens/main/main_screen.dart';
 import 'package:astroverse/screens/mart_item_full/mart_item_full_screen.dart';
 import 'package:astroverse/screens/moreProfile/more_profile_screen.dart';
+import 'package:astroverse/screens/my_mart_item_full_screen/my_mart_item_full_screen.dart';
 import 'package:astroverse/screens/orderedProductScreen/ordered_product_screen.dart';
 import 'package:astroverse/screens/otpScreen/otp_screen.dart';
 import 'package:astroverse/screens/phoneAuth/phone_auth_screen.dart';
@@ -41,6 +42,7 @@ class Routes {
   static const publicProfile = '/public_profile_screen';
   static const purchasesScreen = '/purchases_screen';
   static const purchaseFullScreen = '/purchase_full_screen';
+  static const myMartItemScreen = '/my_mart_item_screen';
   static const orderedProductScreen = '/ordered_product_screen';
 }
 
@@ -130,5 +132,9 @@ class AppRoutes {
           name: Routes.orderedProductScreen,
           page: () => const OrderedProductScreen(),
         ),
+    GetPage(
+      name: Routes.myMartItemScreen,
+      page: () => const MyMartItemFullScreen(),
+    ),
       ];
 }

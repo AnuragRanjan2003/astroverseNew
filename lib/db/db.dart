@@ -437,6 +437,8 @@ class Database {
       fetchMoreAstrologersByLocation(
           QueryDocumentSnapshot<models.User>? lastForLocality,
           QueryDocumentSnapshot<models.User>? lastForCity,
+          QueryDocumentSnapshot<models.User>? lastForState,
+          QueryDocumentSnapshot<models.User>? lastForAll,
           String currentUid,
           GeoPoint userLocation) async {
     try {
@@ -463,6 +465,27 @@ class Database {
             .limit(_limit);
         final resCity = await queryCity.get();
         data.addOtherPeople(currentUid, resCity.docs);
+      }
+      if(lastForState!=null){
+        final Query<models.User> queryState = Geo()
+            .createGeoQuery(
+            _userCollection, VisibilityPlans.stateRadius, userLocation)
+            .where('astro', isEqualTo: true)
+            .where('plan', isEqualTo: VisibilityPlans.state)
+            .startAfterDocument(lastForState)
+            .limit(_limit);
+        final resState = await queryState.get();
+        data.addOtherPeople(currentUid, resState.docs);
+      }
+      if(lastForAll!=null){
+        final Query<models.User> queryAll =
+            _userCollection
+            .where('astro', isEqualTo: true)
+            .where('plan', isEqualTo: VisibilityPlans.all)
+            .startAfterDocument(lastForAll)
+            .limit(_limit);
+        final resAll = await queryAll.get();
+        data.addOtherPeople(currentUid, resAll.docs);
       }
 
       return Success(data);
@@ -591,6 +614,8 @@ class Database {
 
   Future<Resource<Service>> fetchService(String uid, String serviceId) =>
       ServiceUtils(uid).fetchService(serviceId);
+
+  Future<Resource<String>> deleteService(SaveService ss ,String userId)=> ServiceUtils(userId).deleteService(ss);
 
   Future<Resource<List<QueryDocumentSnapshot<Service>>>>
       fetchMoreServicesByLocation(

@@ -462,6 +462,7 @@ class CreateServicePortrait extends StatelessWidget {
                                           service.selectedMode.value,
                                       geoHash: "",
                                       active: true,
+                                      featured: user.featured,
                                       range:
                                           service.selectedRange.value.toInt(),
                                       date: DateTime.now(),

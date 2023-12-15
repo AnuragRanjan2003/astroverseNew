@@ -12,6 +12,7 @@ class BackEndStrings {
   static const purchasesCollection = "purchases";
   static const userBankAccountDocument = "bankAccount";
   static const replyCollection = "replies";
+  static const deletedCollection = "deletedServices";
 
   static const profileImage = "profileImage";
   static const serviceImage = "serviceImage";
@@ -25,4 +26,8 @@ class BackEndStrings {
 
   static const String providerNotFound = "provider_not_found";
   static const String providerFound = "provider_found";
+}
+
+class Errors{
+  static const docNotFound = "could not find this item";
 }

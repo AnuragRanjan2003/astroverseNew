@@ -70,6 +70,10 @@ class ServiceRepo {
           String uid) =>
       _db.fetchMyServices(uid);
 
+  Future<Resource<Service>> fetchService(String serviceId) =>
+      _db.fetchService('abc', serviceId);
+
+  Future<Resource<String>> deleteService(SaveService ss ,String userId) => _db.deleteService(ss , userId);
 
   fetchMoreByLocation(
           String uid,

@@ -15,6 +15,7 @@ User _$UserFromJson(Map json) => User(
       json['astro'] as bool,
       json['phNo'] as String,
       json['geoHash'] as String,
+      json['featured'] as bool,
       location: User._fromJsonGeoPoint(json['location'] as GeoPoint?),
       coins: json['coins'] as int? ?? 0,
       profileViews: json['profileViews'] as int? ?? 0,
@@ -32,5 +33,6 @@ Map<String, dynamic> _$UserToJson(User instance) => <String, dynamic>{
       'points': instance.coins,
       'profileViews': instance.profileViews,
       'phNo': instance.phNo,
-      'coins':instance.coins,
+      'coins': instance.coins,
+      'featured': instance.featured,
     };
