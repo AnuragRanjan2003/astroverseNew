@@ -72,6 +72,8 @@ class ServiceUtils extends Postable<Service, SaveService> {
   Future<Resource<List<QueryDocumentSnapshot<Service>>>> fetchByLocation(
       String uid, GeoPoint userLocation) async {
     try {
+      final List<QueryDocumentSnapshot<Service>> data = [];
+
       Query<Service> queryLocality = Geo()
           .createGeoQuery(ref, Ranges.localityRadius, userLocation)
           .where("range", isEqualTo: Ranges.locality)
@@ -90,24 +92,34 @@ class ServiceUtils extends Postable<Service, SaveService> {
           .createGeoQuery(ref, Ranges.stateRadius, userLocation)
           .where("range", isEqualTo: Ranges.state)
           .orderBy("geoHash")
-          .orderBy("date", descending: true)
+          .orderBy("data", descending: true)
           .limit(_limit);
 
       Query<Service> queryAll = ref
           .where("range", isEqualTo: Ranges.all)
           .orderBy("geoHash")
-          .orderBy("date", descending: true)
+          .orderBy("data", descending: true)
           .limit(_limit);
 
-      final List<QueryDocumentSnapshot<Service>> data = [];
-      final res1 = await queryLocality.get();
-      final res2 = await queryCity.get();
-      final res3 = await queryState.get();
-      final res4 = await queryAll.get();
-      data.addIfNotUser(uid, res1.docs);
-      data.addIfNotUser(uid, res2.docs);
-      data.addIfNotUser(uid, res3.docs);
-      data.addIfNotUser(uid, res4.docs);
+      Query<Service> queryFeatured = ref
+          .where("featured", isEqualTo: true)
+          .orderBy("geoHash")
+          .orderBy("data", descending: true)
+          .limit(_limit);
+
+      final res = await Future.wait([
+        queryLocality.get(),
+        queryCity.get(),
+        queryState.get(),
+        queryAll.get(),
+        queryFeatured.get(),
+      ]);
+
+      data.addIfNotUser(uid, res[0].docs);
+      data.addIfNotUser(uid, res[1].docs);
+      data.addIfNotUser(uid, res[2].docs);
+      data.addIfNotUser(uid, res[3].docs);
+      data.addIfNotUser(uid, res[4].docs);
       return Success(data);
     } on FirebaseException catch (e) {
       return Failure<List<QueryDocumentSnapshot<Service>>>(
@@ -120,32 +132,79 @@ class ServiceUtils extends Postable<Service, SaveService> {
   Future<Resource<List<QueryDocumentSnapshot<Service>>>> fetchMoreByLocation(
       QueryDocumentSnapshot<Service>? lastPostForLocality,
       QueryDocumentSnapshot<Service>? lastPostForCity,
+      QueryDocumentSnapshot<Service>? lastPostForState,
+      QueryDocumentSnapshot<Service>? lastPostForAll,
+      QueryDocumentSnapshot<Service>? lastPostForFeatured,
       GeoPoint userLocation,
       String uid) async {
     try {
       final List<QueryDocumentSnapshot<Service>> data = [];
+
+      Query<Service> queryLocality = Geo()
+          .createGeoQuery(ref, Ranges.localityRadius, userLocation)
+          .where("range", isEqualTo: Ranges.locality)
+          .orderBy("geoHash")
+          .orderBy("date", descending: true)
+          .limit(_limit);
+
+      Query<Service> queryCity = Geo()
+          .createGeoQuery(ref, Ranges.cityRadius, userLocation)
+          .where("range", isEqualTo: Ranges.city)
+          .orderBy("geoHash")
+          .orderBy("date", descending: true)
+          .limit(_limit);
+
+      Query<Service> queryState = Geo()
+          .createGeoQuery(ref, Ranges.stateRadius, userLocation)
+          .where("range", isEqualTo: Ranges.state)
+          .orderBy("geoHash")
+          .orderBy("data", descending: true)
+          .limit(_limit);
+
+      Query<Service> queryAll = ref
+          .where("range", isEqualTo: Ranges.state)
+          .orderBy("geoHash")
+          .orderBy("data", descending: true)
+          .limit(_limit);
+
+      Query<Service> queryFeatured = ref
+          .where("featured", isEqualTo: true)
+          .orderBy("geoHash")
+          .orderBy("data", descending: true)
+          .limit(_limit);
+
       if (lastPostForLocality != null) {
-        Query<Service> queryLocality = Geo()
-            .createGeoQuery(ref, Ranges.localityRadius, userLocation)
-            .where("range", isEqualTo: Ranges.locality)
-            .orderBy("geoHash")
-            .orderBy("date", descending: true)
-            .startAfterDocument(lastPostForLocality)
-            .limit(_limit);
-        final res1 = await queryLocality.get();
-        data.addIfNotUser(uid, res1.docs);
+        queryLocality = queryLocality.startAfterDocument(lastPostForLocality);
       }
+
       if (lastPostForCity != null) {
-        Query<Service> queryCity = Geo()
-            .createGeoQuery(ref, Ranges.cityRadius, userLocation)
-            .where("range", isEqualTo: Ranges.city)
-            .orderBy("geoHash")
-            .orderBy("date", descending: true)
-            .startAfterDocument(lastPostForCity)
-            .limit(_limit);
-        final res2 = await queryCity.get();
-        data.addIfNotUser(uid, res2.docs);
+        queryCity = queryCity..startAfterDocument(lastPostForCity);
       }
+
+      if (lastPostForState != null) {
+        queryState = queryState.startAfterDocument(lastPostForState);
+      }
+
+      if (lastPostForAll != null) {
+        queryAll = queryCity.startAfterDocument(lastPostForAll);
+      }
+      if (lastPostForFeatured != null) {
+        queryFeatured = queryFeatured.startAfterDocument(lastPostForFeatured);
+      }
+      final res = await Future.wait([
+        queryLocality.get(),
+        queryCity.get(),
+        queryState.get(),
+        queryAll.get(),
+        queryFeatured.get()
+      ]);
+
+      data.addOthersPost(uid, res[0].docs);
+      data.addOthersPost(uid, res[1].docs);
+      data.addOthersPost(uid, res[2].docs);
+      data.addOthersPost(uid, res[3].docs);
+      data.addOthersPost(uid, res[4].docs);
+
       return Success(data);
     } on FirebaseException catch (e) {
       return Failure<List<QueryDocumentSnapshot<Service>>>(
@@ -305,6 +364,14 @@ class ServiceUtils extends Postable<Service, SaveService> {
 
 extension on List<QueryDocumentSnapshot<Service>> {
   addIfNotUser(String userId, Iterable<QueryDocumentSnapshot<Service>> itr) {
+    for (var it in itr) {
+      if (it.data().authorId != userId) add(it);
+    }
+  }
+}
+
+extension on List<QueryDocumentSnapshot<Service>> {
+  addOthersPost(String userId, Iterable<QueryDocumentSnapshot<Service>> itr) {
     for (var it in itr) {
       if (it.data().authorId != userId) add(it);
     }

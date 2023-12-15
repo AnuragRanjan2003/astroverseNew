@@ -16,6 +16,7 @@ class MainController extends GetxController {
   RxList<Post> postList = <Post>[].obs;
   Rx<bool> morePostsToLoad = true.obs;
   Rxn<QueryDocumentSnapshot<Post>> lastPost = Rxn();
+  Rxn<QueryDocumentSnapshot<Post>> lastPostForFeatured = Rxn();
   static const _maxPostLimit = 50;
   Rx<bool> nothingToShow = false.obs;
   Rx<bool> loadingMorePosts = false.obs;
@@ -74,10 +75,10 @@ class MainController extends GetxController {
       return;
     }
     loadingMorePosts.value = true;
-    if (lastPost.value == null) {
+    if (lastPost.value == null && lastPostForFeatured.value==null) {
       fetchPostsByGenreAndPage(NewPageController.genresList, uid);
     } else {
-      _postRepo.fetchMorePost(lastPost.value!, genre, uid).then((value) {
+      _postRepo.fetchMorePost(lastPost.value,lastPostForFeatured.value, genre, uid).then((value) {
         loadingMorePosts.value = false;
         if (value.isSuccess) {
           value = value as Success<List<QueryDocumentSnapshot<Post>>>;
@@ -86,7 +87,11 @@ class MainController extends GetxController {
           for (var s in value.data) {
             if (s.exists) {
               list.add(s.data());
-              lastPost.value = s;
+              if(s.data().featured) {
+                lastPostForFeatured.value = s;
+              } else {
+                lastPost.value = s;
+              }
             }
           }
           log("${lastPost.value!.data()}", name: "IS NULL");

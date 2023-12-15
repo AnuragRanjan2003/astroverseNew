@@ -381,6 +381,48 @@ class NamePlate extends StatelessWidget {
                     ),
                   ],
                 ),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      "Contact Us",
+                      textAlign: TextAlign.start,
+                      style:
+                          TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
+                    ),
+                    Container(
+                      margin: const EdgeInsets.symmetric(vertical: 10),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 0, vertical: 5),
+                      decoration: const BoxDecoration(
+                          borderRadius: BorderRadius.all(Radius.circular(20)),
+                          color: Colors.white),
+                      child: Column(
+                        children: [
+                          nameItem(
+                            const Icon(
+                              Icons.call_outlined,
+                              color: Colors.blue,
+                              size: _sizeIcon,
+                            ),
+                            'Ph.no',
+                            "+91 82106 93766"
+
+                          ),
+                          divider,
+                          nameItem(
+                              const Icon(
+                                Icons.mail_outline,
+                                color: Colors.blue,
+                                size: _sizeIcon,
+                              ),
+                              'Email',
+                          'Demouser9@gmail.com'),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
               ],
             ),
             const SizedBox(

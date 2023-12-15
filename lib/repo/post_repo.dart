@@ -22,10 +22,11 @@ class PostRepo {
       await _db.fetchPostsByGenreAndPage(genre, uid);
 
   Future<Resource<List<QueryDocumentSnapshot<Post>>>> fetchMorePost(
-          QueryDocumentSnapshot<Post> lastPost,
+          QueryDocumentSnapshot<Post>? lastPost,
+          QueryDocumentSnapshot<Post>? lastPostForFeatured,
           List<String> genre,
           String uid) async =>
-      await _db.fetchMorePosts(lastPost, genre, uid);
+      await _db.fetchMorePosts(lastPost,lastPostForFeatured, genre, uid);
 
   Future<Resource<int>> increaseVote(
           String id, String uid, String authorId) async =>

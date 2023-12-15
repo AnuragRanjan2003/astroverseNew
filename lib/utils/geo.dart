@@ -44,6 +44,7 @@ class Ranges {
   static const state = 2;
   static const stateRadius = 200000.00;
   static const all = 3;
+  static const featured = -1;
 }
 
 class VisibilityPlans {
@@ -54,6 +55,7 @@ class VisibilityPlans {
   static const state = 2;
   static const stateRadius = 200000.00;
   static const all = 3;
+  static const featured = -1;
 }
 
 class GeoRange {

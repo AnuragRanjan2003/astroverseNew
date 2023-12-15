@@ -28,11 +28,14 @@ class PostFullPortrait extends StatelessWidget {
     final FullPostPageController controller = Get.put(FullPostPageController());
     final Post post = Get.arguments;
     log(post.authorId, name: "UID");
-    controller.addPostView(post.id, post.authorId);
+
+    if (auth.user.value != null && auth.user.value!.uid != post.authorId) {
+      controller.addPostView(post.id, post.authorId);
+    }
 
     controller.getAuthor(post.authorId);
-    //controller.postComment(dummy, post.id);
     controller.fetchComments(post.id);
+
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.grey.shade200,
@@ -136,25 +139,27 @@ class PostFullPortrait extends StatelessWidget {
                     children: [
                       Obx(
                         () => IconButton(
-                          onPressed: post.authorId!=auth.user.value!.uid?() {
-                            if (!isUpVoted(main.upVotedPosts, post.id)) {
-                              main.postList.firstWhere(
-                                  (element) => element.id == post.id);
-                              main.increaseVote(
-                                post.id,
-                                auth.user.value!.uid,
-                                post.authorId,
-                                () {},
-                              );
-                            } else {
-                              main.decrementVote(
-                                post.id,
-                                auth.user.value!.uid,
-                                post.authorId,
-                                () {},
-                              );
-                            }
-                          }:null,
+                          onPressed: post.authorId != auth.user.value!.uid
+                              ? () {
+                                  if (!isUpVoted(main.upVotedPosts, post.id)) {
+                                    main.postList.firstWhere(
+                                        (element) => element.id == post.id);
+                                    main.increaseVote(
+                                      post.id,
+                                      auth.user.value!.uid,
+                                      post.authorId,
+                                      () {},
+                                    );
+                                  } else {
+                                    main.decrementVote(
+                                      post.id,
+                                      auth.user.value!.uid,
+                                      post.authorId,
+                                      () {},
+                                    );
+                                  }
+                                }
+                              : null,
                           icon: isUpVoted(main.upVotedPosts, post.id)
                               ? const FaIcon(
                                   FontAwesomeIcons.solidHeart,
@@ -212,7 +217,6 @@ class PostFullPortrait extends StatelessWidget {
                 onTap: () {
                   Get.bottomSheet(
                     isScrollControlled: true,
-
                     CommentsBottomSheet(
                       user: auth.user.value!,
                       post: post,

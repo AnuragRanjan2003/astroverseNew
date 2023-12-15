@@ -207,13 +207,21 @@ class Database {
   Future<Resource<List<QueryDocumentSnapshot<Post>>>> fetchPostsByGenreAndPage(
       List<String> genre, String uid) async {
     try {
-      QuerySnapshot<Post> res = await _postCollection
+      Query<Post> q1 = _postCollection
           .limit(_limit)
-          .where("authorId", isNotEqualTo: uid)
-          .orderBy("authorId")
-          .orderBy("date", descending: true)
-          .get();
-      final data = res.docs;
+          .where("featured", isEqualTo: false)
+          .orderBy("date", descending: true);
+
+      Query<Post> q2 = _postCollection
+          .limit(_limit)
+          .where("featured", isEqualTo: true)
+          .orderBy("date", descending: true);
+      final res = await Future.wait([q1.get(), q2.get()]);
+      var data = <QueryDocumentSnapshot<Post>>[];
+
+      data.addOthersPost(uid, res[0].docs);
+      data.addOthersPost(uid, res[1].docs);
+
       return Success(data);
     } on FirebaseException catch (e) {
       return Failure<List<QueryDocumentSnapshot<Post>>>(e.message.toString());
@@ -239,18 +247,37 @@ class Database {
   }
 
   Future<Resource<List<QueryDocumentSnapshot<Post>>>> fetchMorePosts(
-      QueryDocumentSnapshot<Post> lastPost,
+      QueryDocumentSnapshot<Post>? lastPost,
+      QueryDocumentSnapshot<Post>? lastPostForFeatured,
       List<String> genre,
       String uid) async {
     try {
-      final res = await _postCollection
+      Query<Post> q1 = _postCollection
           .limit(_limit)
-          .where("authorId", isNotEqualTo: uid)
-          .orderBy("authorId")
-          .orderBy("date", descending: true)
-          .startAfterDocument(lastPost)
-          .get();
-      return Success(res.docs);
+          .where("featured", isEqualTo: false)
+          .orderBy("date", descending: true);
+
+      Query<Post> q2 = _postCollection
+          .limit(_limit)
+          .where("featured", isEqualTo: true)
+          .orderBy("date", descending: true);
+
+      if (lastPost != null) {
+        q1 = q1.startAfterDocument(lastPost);
+      }
+
+      if (lastPostForFeatured != null) {
+        q2 = q2.startAfterDocument(lastPostForFeatured);
+      }
+
+      final res = await Future.wait([q1.get(), q2.get()]);
+
+      var data = <QueryDocumentSnapshot<Post>>[];
+
+      data.addOthersPost(uid, res[0].docs);
+      data.addOthersPost(uid, res[1].docs);
+
+      return Success(data);
     } on FirebaseException catch (e) {
       return Failure<List<QueryDocumentSnapshot<Post>>>(e.message.toString());
     } catch (e) {
@@ -466,10 +493,10 @@ class Database {
         final resCity = await queryCity.get();
         data.addOtherPeople(currentUid, resCity.docs);
       }
-      if(lastForState!=null){
+      if (lastForState != null) {
         final Query<models.User> queryState = Geo()
             .createGeoQuery(
-            _userCollection, VisibilityPlans.stateRadius, userLocation)
+                _userCollection, VisibilityPlans.stateRadius, userLocation)
             .where('astro', isEqualTo: true)
             .where('plan', isEqualTo: VisibilityPlans.state)
             .startAfterDocument(lastForState)
@@ -477,9 +504,8 @@ class Database {
         final resState = await queryState.get();
         data.addOtherPeople(currentUid, resState.docs);
       }
-      if(lastForAll!=null){
-        final Query<models.User> queryAll =
-            _userCollection
+      if (lastForAll != null) {
+        final Query<models.User> queryAll = _userCollection
             .where('astro', isEqualTo: true)
             .where('plan', isEqualTo: VisibilityPlans.all)
             .startAfterDocument(lastForAll)
@@ -615,7 +641,8 @@ class Database {
   Future<Resource<Service>> fetchService(String uid, String serviceId) =>
       ServiceUtils(uid).fetchService(serviceId);
 
-  Future<Resource<String>> deleteService(SaveService ss ,String userId)=> ServiceUtils(userId).deleteService(ss);
+  Future<Resource<String>> deleteService(SaveService ss, String userId) =>
+      ServiceUtils(userId).deleteService(ss);
 
   Future<Resource<List<QueryDocumentSnapshot<Service>>>>
       fetchMoreServicesByLocation(
@@ -623,10 +650,16 @@ class Database {
     GeoPoint userLocation,
     QueryDocumentSnapshot<Service>? lastForLocality,
     QueryDocumentSnapshot<Service>? lastForCity,
+    QueryDocumentSnapshot<Service>? lastForState,
+    QueryDocumentSnapshot<Service>? lastForAll,
+    QueryDocumentSnapshot<Service>? lastForFeatured,
   ) =>
           ServiceUtils(uid).fetchMoreByLocation(
             lastForLocality,
             lastForCity,
+            lastForState,
+            lastForAll,
+            lastForFeatured,
             userLocation,
             uid,
           );
@@ -637,6 +670,14 @@ extension on List<QueryDocumentSnapshot<models.User>> {
       String userId, Iterable<QueryDocumentSnapshot<models.User>> itr) {
     for (var it in itr) {
       if (it.data().uid != userId) add(it);
+    }
+  }
+}
+
+extension on List<QueryDocumentSnapshot<Post>> {
+  addOthersPost(String userId, Iterable<QueryDocumentSnapshot<Post>> itr) {
+    for (var it in itr) {
+      if (it.data().authorId != userId) add(it);
     }
   }
 }

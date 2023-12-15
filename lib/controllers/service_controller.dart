@@ -31,6 +31,9 @@ class ServiceController extends GetxController {
   Rx<bool> morePostsToLoad = true.obs;
   Rxn<QueryDocumentSnapshot<Service>> lastPostForLocality = Rxn();
   Rxn<QueryDocumentSnapshot<Service>> lastPostForCity = Rxn();
+  Rxn<QueryDocumentSnapshot<Service>> lastPostForState = Rxn();
+  Rxn<QueryDocumentSnapshot<Service>> lastPostForAll = Rxn();
+  Rxn<QueryDocumentSnapshot<Service>> lastPostForFeatured = Rxn();
   static const _maxPostLimit = 50;
   Rx<bool> nothingToShow = false.obs;
   Rx<bool> loadingMorePosts = false.obs;
@@ -131,9 +134,10 @@ class ServiceController extends GetxController {
   Future<Resource<Service>> fetchService(String serviceId) =>
       _repo.fetchService(serviceId);
 
-  void deleteService(SaveService ss,String userId, Function(Resource<String>) updateUI) {
-    deletingService.value =true;
-    _repo.deleteService(ss,userId).then((value) {
+  void deleteService(
+      SaveService ss, String userId, Function(Resource<String>) updateUI) {
+    deletingService.value = true;
+    _repo.deleteService(ss, userId).then((value) {
       deletingService.value = false;
       updateUI(value);
     });
@@ -315,7 +319,11 @@ class ServiceController extends GetxController {
       return;
     }
     loadingMorePosts.value = true;
-    if (lastPostForLocality.value == null && lastPostForCity.value == null) {
+    if (lastPostForLocality.value == null &&
+        lastPostForCity.value == null &&
+        lastPostForState.value != null &&
+        lastPostForAll.value != null &&
+        lastPostForFeatured.value != null) {
       fetchServiceByLocation(uid, (p0) {
         onFetch(p0);
       }, userLocation);
@@ -326,6 +334,9 @@ class ServiceController extends GetxController {
         userLocation,
         lastPostForLocality.value,
         lastPostForCity.value,
+        lastPostForState.value,
+        lastPostForAll.value,
+        lastPostForFeatured.value,
       )
           .then((value) {
         loadingMorePosts.value = false;
@@ -469,7 +480,7 @@ class ServiceController extends GetxController {
     _repo.updateService(data, serviceId, 'x').then((value) {
       if (value.isSuccess) {
         log("views updated", name: "SERVICE");
-      } else{
+      } else {
         value as Failure<Json>;
         log("views updated failed : ${value.error}", name: "SERVICE");
       }

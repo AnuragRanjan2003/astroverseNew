@@ -73,13 +73,24 @@ class ServiceRepo {
   Future<Resource<Service>> fetchService(String serviceId) =>
       _db.fetchService('abc', serviceId);
 
-  Future<Resource<String>> deleteService(SaveService ss ,String userId) => _db.deleteService(ss , userId);
+  Future<Resource<String>> deleteService(SaveService ss, String userId) =>
+      _db.deleteService(ss, userId);
 
   fetchMoreByLocation(
-          String uid,
-          GeoPoint userLocation,
-          QueryDocumentSnapshot<Service>? lastPostForLocality,
-          QueryDocumentSnapshot<Service>? lastPostForCity) =>
+    String uid,
+    GeoPoint userLocation,
+    QueryDocumentSnapshot<Service>? lastPostForLocality,
+    QueryDocumentSnapshot<Service>? lastPostForCity,
+    QueryDocumentSnapshot<Service>? lastPostForState,
+    QueryDocumentSnapshot<Service>? lastPostForAll,
+    QueryDocumentSnapshot<Service>? lastPostForFeatured,
+  ) =>
       _db.fetchMoreServicesByLocation(
-          uid, userLocation, lastPostForLocality, lastPostForCity);
+          uid,
+          userLocation,
+          lastPostForLocality,
+          lastPostForCity,
+          lastPostForState,
+          lastPostForAll,
+          lastPostForFeatured);
 }
