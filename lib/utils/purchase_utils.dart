@@ -153,4 +153,19 @@ class PurchaseUtils extends Postable<Purchase, Purchase> {
   Stream<DocumentSnapshot<Purchase>> purchaseStream(String id) {
     return ref.doc(id).snapshots();
   }
+
+  Future<Resource<Json>> cancelPurchaseByUser(String id) async {
+    try {
+      final data = {'active': false};
+      final batch = FirebaseFirestore.instance.batch();
+      batch.update(ref.doc(id), data);
+      batch.update(likeRef!.doc(id), data);
+      await batch.commit();
+      return Success<Json>(data);
+    } on FirebaseException catch (e) {
+      return Failure<Json>(e.message.toString());
+    } catch (e) {
+      return Failure<Json>(e.toString());
+    }
+  }
 }

@@ -8,6 +8,7 @@ import 'package:astroverse/models/service.dart';
 import 'package:astroverse/res/img/images.dart';
 import 'package:astroverse/screens/messaging.dart';
 import 'package:astroverse/utils/crypt.dart';
+import 'package:astroverse/utils/resource.dart';
 import 'package:astroverse/utils/zego_cloud_services.dart';
 import 'package:cometchat_chat_uikit/cometchat_chat_uikit.dart' as comet;
 import 'package:flutter/material.dart';
@@ -49,8 +50,8 @@ class OrderedProductPortrait extends StatelessWidget {
 
     return Scaffold(
       floatingActionButtonLocation: FloatingActionButtonLocation.endDocked,
-      floatingActionButton:
-          Obx(() => _buildFab(purchase, order, crypto, zegoService, context)),
+      floatingActionButton: Obx(() =>
+          _buildFab(order.purchase.value, order, crypto, zegoService, context)),
       body: SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -157,7 +158,9 @@ class OrderedProductPortrait extends StatelessWidget {
                               Colors.green);
                         } else {
                           return buildChip(
-                              'pending',
+                              order.purchase.value!.active
+                                  ? 'pending'
+                                  : 'canceled',
                               const FaIcon(
                                 FontAwesomeIcons.truckFast,
                                 size: 20,
@@ -231,7 +234,9 @@ class OrderedProductPortrait extends StatelessWidget {
                             null),
                       ],
                     ),
-                    const SizedBox(height: 10,),
+                    const SizedBox(
+                      height: 10,
+                    ),
                     Row(
                       children: [
                         buildChip(
@@ -553,13 +558,13 @@ class OrderedProductPortrait extends StatelessWidget {
                 final user = auth.user.value!;
                 return MaterialButton(
                   onPressed: order.purchase.value!.delivered ||
-                          order.serviceDeleted.isTrue
+                          order.serviceDeleted.isTrue || order.purchase.value!.active==false
                       ? null
                       : () {
                           if (order.purchase.value == null) return;
                           Get.bottomSheet(
                               OrderBottomSheet(
-                                purchase: purchase,
+                                purchase: order.purchase.value,
                                 item: order.service.value,
                                 currentUser: auth.user.value,
                               ),
@@ -577,6 +582,50 @@ class OrderedProductPortrait extends StatelessWidget {
                             : "Received")
                         : "fetching",
                     style: const TextStyle(
+                        fontSize: 15,
+                        color: Colors.white,
+                        fontWeight: FontWeight.w500),
+                  ),
+                );
+              }),
+            ),
+            const SizedBox(
+              height: 10,
+            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 35),
+              child: Obx(() {
+                return MaterialButton(
+                  onPressed: order.purchase.value!.delivered ||
+                          order.cancelingPurchase.isTrue || order.purchase.value!.active==false
+                      ? null
+                      : () {
+                          if (order.purchase.value == null) return;
+                          order.cancelPurchase(
+                              order.purchase.value!.purchaseId,
+                              order.purchase.value!.buyerId,
+                              order.purchase.value!.sellerId, (e) {
+                            String? text;
+                            if (e.isSuccess) {
+                              text =
+                                  "Purchase has been deleted. Refund will be initiated.";
+                            } else {
+                              e as Failure<Json>;
+                              text =
+                                  "Could not cancel the purchase. Try again later";
+                            }
+                            ScaffoldMessenger.of(context)
+                                .showSnackBar(SnackBar(content: Text(text)));
+                          });
+                        },
+                  disabledColor: ProjectColors.disabled,
+                  color: Colors.red,
+                  padding: const EdgeInsets.symmetric(vertical: 12),
+                  shape: const RoundedRectangleBorder(
+                      borderRadius: BorderRadius.all(Radius.circular(10))),
+                  child: const Text(
+                    "Cancel",
+                    style: TextStyle(
                         fontSize: 15,
                         color: Colors.white,
                         fontWeight: FontWeight.w500),
@@ -669,9 +718,11 @@ class OrderedProductPortrait extends StatelessWidget {
           );
         },
         child: Container(
-          width: 60, // Set the width of the button
+          width: 60,
+          // Set the width of the button
           height: 60,
-          margin: const EdgeInsets.only(bottom: 80),// Set the height of the button
+          margin: const EdgeInsets.only(bottom: 60),
+          // Set the height of the button
           decoration: const BoxDecoration(
             shape: BoxShape.circle, // Makes the container circular
             color: Colors.lightBlue, // Set the background color of the button
@@ -692,7 +743,7 @@ class OrderedProductPortrait extends StatelessWidget {
       ZegoCloudServices zegoService, BuildContext context) {
     if (order.serviceDeleted.isTrue) {
       return Container(
-        margin: const EdgeInsets.only(bottom: 80),
+        margin: const EdgeInsets.only(bottom: 60),
         child: Tooltip(
           triggerMode: TooltipTriggerMode.tap,
           message:
@@ -712,7 +763,7 @@ class OrderedProductPortrait extends StatelessWidget {
         ),
       );
     }
-    if (purchase != null && order.serviceDeleted.isFalse) {
+    if (purchase != null && order.serviceDeleted.isFalse && purchase.active) {
       return actionButton(purchase, crypto, zegoService, context);
     }
     return const SizedBox.shrink();

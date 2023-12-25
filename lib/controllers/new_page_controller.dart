@@ -3,7 +3,12 @@ import 'dart:developer';
 import 'package:get/get.dart';
 
 class NewPageController extends GetxController {
-  static const genresList = ["event prediction", "entertainment" ,"promotion"];
+  static const genresList = [
+    "event prediction",
+    "entertainment",
+    "promotion",
+    "marriage prediction"
+  ];
   RxList<bool> genres = List.generate(genresList.length, (index) => false).obs;
   RxList<String> selectedGenres = <String>[].obs;
 

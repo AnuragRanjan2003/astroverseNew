@@ -21,6 +21,7 @@ Purchase _$PurchaseFromJson(Map json) => Purchase(
       boughtOn: Purchase._dateFromTimeStamp(json['boughtOn'] as Timestamp),
       delivered: json['delivered'] as bool,
       review: json['review'] as int?,
+      active: (json['active'] ?? true) as bool,
       deliveryMethod: (json['deliveryMethod'] as num).toInt(),
       deliveredOn: Purchase._nullableDateFromTimeStamp(
           json['deliveredOn'] as Timestamp?),
@@ -43,6 +44,7 @@ Map<String, dynamic> _$PurchaseToJson(Purchase instance) => <String, dynamic>{
       'review': instance.review,
       'deliveredOn': Purchase._nullableDateAsIs(instance.deliveredOn),
       'paymentId': instance.paymentId,
-      'secretCode':instance.secretCode,
-      'deliveryMethod':instance.deliveryMethod
+      'secretCode': instance.secretCode,
+      'deliveryMethod': instance.deliveryMethod,
+      'active': instance.active,
     };

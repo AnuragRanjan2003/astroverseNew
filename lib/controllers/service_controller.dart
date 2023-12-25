@@ -85,6 +85,7 @@ class ServiceController extends GetxController {
         boughtOn: DateTime.now(),
         delivered: false,
         review: null,
+        active: true,
         deliveredOn: null);
     final res1 = await _repo.postPurchase(purchase);
     final res2 = await _repo.updateService(

@@ -19,6 +19,7 @@ class OrderController extends GetxController {
   Rxn<Purchase> purchase = Rxn();
   RxBool checkBox = false.obs;
   RxBool serviceDeleted = false.obs;
+  RxBool cancelingPurchase = false.obs;
 
   StreamSubscription<DocumentSnapshot<Purchase?>>? _purchaseSub;
 
@@ -83,10 +84,14 @@ class OrderController extends GetxController {
         log(value.error, name: "SERVICE FETCH");
         serviceDeleted.value = value.error == Errors.docNotFound;
       }
-      // serviceDeleted.value = true;
-      // service.value = null;
     });
+  }
 
-
+  cancelPurchase(String id, String buyerId,String sellerId, Function(Resource) updateUI) {
+    cancelingPurchase.value = true;
+    _repo.cancelPurchase(id, buyerId ,sellerId).then((value) {
+      cancelingPurchase.value = false;
+      updateUI(value);
+    });
   }
 }

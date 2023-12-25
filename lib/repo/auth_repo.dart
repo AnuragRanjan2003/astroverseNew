@@ -85,7 +85,12 @@ class AuthRepo {
   Future<Resource<Json>> updateRangeForUser(String uid, int range, int cost) =>
       _db.upgradeRangeForUser(uid, cost, range);
 
-  Future<Resource<String>> sendPasswordResetEmail(String email) => _auth.sentForgotPasswordEmail(email);
+  Future<Resource<User>> deleteAccount(User user) => _auth.deleteAccount(user);
+
+  Future<Resource<User>> deleteUserData(User user) => _db.deleteUserData(user);
+
+  Future<Resource<String>> sendPasswordResetEmail(String email) =>
+      _auth.sentForgotPasswordEmail(email);
 
   Future<void> logOut() async => await _auth.logOut();
 }

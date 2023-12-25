@@ -1,3 +1,4 @@
+import 'package:astroverse/components/delete_account_bottom_sheet.dart';
 import 'package:astroverse/components/update_bank_bottomsheet.dart';
 import 'package:astroverse/components/upgrade_features_bottom_sheet.dart';
 import 'package:astroverse/components/upgrade_range_bottomsheet.dart';
@@ -70,7 +71,7 @@ class NamePlate extends StatelessWidget {
                   style: const TextStyle(
                       fontSize: 20, fontWeight: FontWeight.w500),
                 ),
-                Text(
+                SelectableText(
                   user.uid,
                   style: const TextStyle(
                       fontSize: 12, fontWeight: FontWeight.w500),
@@ -357,7 +358,7 @@ class NamePlate extends StatelessWidget {
                                 color: Colors.blue,
                                 size: _sizeIcon,
                               ),
-                              'Terms of Service',
+                              'terms of service',
                               () {}),
                           divider,
                           nameItemWithButton(
@@ -374,6 +375,18 @@ class NamePlate extends StatelessWidget {
                               return UpgradeRangeBottomSheet(
                                 user: user,
                               );
+                            });
+                          }),
+                          divider,
+                          nameItemWithButton(
+                              const Icon(
+                                Icons.delete_outline,
+                                color: Colors.red,
+                                size: _sizeIcon,
+                              ),
+                              'delete', () {
+                            Scaffold.of(context).showBottomSheet((context) {
+                              return const DeleteAccountBottomSheet();
                             });
                           }),
                         ],
@@ -400,15 +413,13 @@ class NamePlate extends StatelessWidget {
                       child: Column(
                         children: [
                           nameItem(
-                            const Icon(
-                              Icons.call_outlined,
-                              color: Colors.blue,
-                              size: _sizeIcon,
-                            ),
-                            'Ph.no',
-                            "+91 82106 93766"
-
-                          ),
+                              const Icon(
+                                Icons.call_outlined,
+                                color: Colors.blue,
+                                size: _sizeIcon,
+                              ),
+                              'Ph.no',
+                              "+91 8210693766"),
                           divider,
                           nameItem(
                               const Icon(
@@ -417,7 +428,7 @@ class NamePlate extends StatelessWidget {
                                 size: _sizeIcon,
                               ),
                               'Email',
-                          'Demouser9@gmail.com'),
+                              'Demouser9@gmail.com'),
                         ],
                       ),
                     ),

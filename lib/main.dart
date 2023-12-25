@@ -1,5 +1,6 @@
 import 'dart:developer';
 
+import 'package:astroverse/controllers/in_app_purchase_controller.dart';
 import 'package:astroverse/controllers/location_controller.dart';
 import 'package:astroverse/firebase_options.dart';
 import 'package:astroverse/res/colors/project_colors.dart';
@@ -43,6 +44,7 @@ class MyApp extends StatelessWidget {
     observer.analytics.logLogin(loginMethod: "gmail");
     analytics.logLogin(loginMethod: "Email");
     Get.put(LocationController());
+
     return GetMaterialApp(
       title: 'Flutter Demo',
       navigatorKey: navigatorKey,

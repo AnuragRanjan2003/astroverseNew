@@ -22,6 +22,7 @@ class Purchase {
   @JsonKey(fromJson: _dateFromTimeStamp, toJson: _dateAsIs)
   DateTime boughtOn;
   final bool delivered;
+  final bool active;
   final int? review;
   final int deliveryMethod;
   @JsonKey(fromJson: _nullableDateFromTimeStamp, toJson: _nullableDateAsIs)
@@ -44,6 +45,7 @@ class Purchase {
       required this.boughtOn,
       required this.delivered,
       required this.review,
+      required this.active,
       required this.deliveryMethod,
       required this.deliveredOn});
 
@@ -84,6 +86,7 @@ class Purchase {
       review: 0,
       secretCode: "000",
       deliveryMethod: 0,
+      active: true,
       itemImage:
           "https://firebasestorage.googleapis.com/v0/b/astroverse-5f2ae.appspot.com/o/serviceImage%2Fplanet.png?alt=media&token=7587f430-3ff2-41d4-8c47-6899db4b2db0",
       sellerId: '2dbSVMhJgjaUUqXxD6ryXjOBzOl2',

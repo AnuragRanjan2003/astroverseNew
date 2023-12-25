@@ -3,6 +3,7 @@ import 'dart:developer';
 import 'package:astroverse/utils/phone_auth_callbacks.dart';
 import 'package:astroverse/utils/resource.dart';
 import 'package:astroverse/utils/safe_call.dart';
+import 'package:cometchat_chat_uikit/cometchat_chat_uikit.dart' as c;
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
@@ -88,6 +89,17 @@ class Auth {
       return Failure(e.message.toString());
     } catch (e) {
       return Failure(e.toString());
+    }
+  }
+
+  Future<Resource<User>> deleteAccount(User user) async {
+    try {
+      await user.delete();
+      return Success<User>(user);
+    } on FirebaseAuthException catch (e) {
+      return Failure<User>(e.message.toString());
+    } catch (e) {
+      return Failure<User>(e.toString());
     }
   }
 

@@ -5,7 +5,6 @@ import 'package:astroverse/components/post_item.dart';
 import 'package:astroverse/controllers/auth_controller.dart';
 import 'package:astroverse/controllers/main_controller.dart';
 import 'package:astroverse/controllers/new_page_controller.dart';
-import 'package:astroverse/res/textStyles/text_styles.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -87,10 +86,10 @@ class NewPostsPage extends StatelessWidget {
             top: 70,
             left: 10,
             child: SizedBox(
-              width: wd-20,
+              width: wd - 20,
               height: 50,
               child: Obx(() => ListView(
-                scrollDirection: Axis.horizontal,
+                    scrollDirection: Axis.horizontal,
                     children: List.generate(
                         genres.length,
                         (index) => buildFilterChip(
@@ -118,7 +117,8 @@ class NewPostsPage extends StatelessWidget {
       label: Text(
         genres[index],
         style: TextStyle(
-            fontSize: 12, color: newPage.genres[index] ? Colors.white : Colors.black),
+            fontSize: 12,
+            color: newPage.genres[index] ? Colors.white : Colors.black),
       ),
       selected: newPage.genres[index],
       selectedColor: Colors.lightBlue.shade300,

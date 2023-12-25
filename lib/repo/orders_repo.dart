@@ -23,4 +23,7 @@ class OrderRepo {
           orderId,
           buyerId,
           sellerId);
+
+  Future<Resource<Json>> cancelPurchase(String id, String buyerId , String sellerId) =>
+      _db.cancelPurchase(id, buyerId , sellerId);
 }

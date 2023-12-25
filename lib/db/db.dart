@@ -20,6 +20,7 @@ import 'package:astroverse/utils/resource.dart';
 import 'package:astroverse/utils/safe_call.dart';
 import 'package:astroverse/utils/service_utils.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 typedef SetInfo = String;
 typedef Json = Map<String, dynamic>;
@@ -181,6 +182,20 @@ class Database {
       return Failure<Post>(e.message.toString());
     } catch (e) {
       return Failure<Post>(e.toString());
+    }
+  }
+
+  Future<Resource<User>> deleteUserData(User user) async {
+    try {
+      final batch = FirebaseFirestore.instance.batch();
+      batch.delete(_userCollection.doc(user.uid));
+      batch.delete(_extraInfoDocument(user.uid));
+      await batch.commit();
+      return Success<User>(user);
+    } on FirebaseException catch (e) {
+      return Failure<User>(e.message.toString());
+    } catch (e) {
+      return Failure<User>(e.toString());
     }
   }
 
@@ -629,6 +644,12 @@ class Database {
           QueryDocumentSnapshot<Purchase> lastPost, String uid) async =>
       await PurchaseUtils(_purchasesCollection(uid), null, null, null)
           .fetchMore(lastPost, [], uid);
+
+  Future<Resource<Json>> cancelPurchase(
+          String id, String buyerId, String sellerId) =>
+      PurchaseUtils(_purchasesCollection(buyerId),
+              _purchasesCollection(sellerId), null, null)
+          .cancelPurchaseByUser(id);
 
   Future<Resource<Json>> updateService(
           Json data, String serviceId, String uid) async =>

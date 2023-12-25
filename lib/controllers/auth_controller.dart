@@ -16,6 +16,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:cometchat_chat_uikit/cometchat_chat_uikit.dart';
 import 'package:dart_geohash/dart_geohash.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
+import 'package:firebase_auth/firebase_auth.dart' as fb;
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -418,6 +419,16 @@ class AuthController extends GetxController {
     });
   }
 
+  deleteAccount(fb.User user, Function(Resource<fb.User>) updateUI) {
+    _repo.deleteUserData(user).then((value) {
+      if (value.isSuccess) {
+        _repo.deleteAccount(user).then((value) {
+          updateUI(value);
+        });
+      } else {}
+    });
+  }
+
   signUpWithGoogle(
       void Function(models.User) onComplete, bool astro, GeoPoint? loc) {
     _repo.signInWithGoogle().then((value) {
@@ -453,14 +464,17 @@ class AuthController extends GetxController {
               if (value.isSuccess) {
                 onComplete(user);
               } else {
+                loading.value = false;
                 _showError("Error", (value as Failure<String>).error);
               }
             });
           } else {
+            loading.value = false;
             _showError("Error", "user already exists");
           }
         });
       } else {
+        loading.value = false;
         _showError("Error", (value as Failure<UserCredential>).error);
       }
     });
