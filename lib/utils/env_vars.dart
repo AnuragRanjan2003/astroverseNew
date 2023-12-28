@@ -8,4 +8,5 @@ class EnvVars {
   static const String cometAppId = "COMETCHATAPPID";
   static const String cometAuthId = "COMETCHATAUTHKEY";
   static const String cometRegionId = "COMETCHATREGION";
+  static const String cryptKey = "CRYPTKEY";
 }

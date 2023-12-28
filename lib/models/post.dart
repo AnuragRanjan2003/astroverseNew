@@ -19,6 +19,7 @@ class Post {
   String authorName;
   final String authorId;
   final bool featured;
+  final bool astrologer;
 
   Post({
     required this.lat,
@@ -31,6 +32,7 @@ class Post {
     @JsonKey(fromJson: _dateFromTimeStamp, toJson: _dateAsIs)
     required this.date,
     required this.imageUrl,
+    required this.astrologer,
     this.upVotes = 0,
     this.comments = 0,
     this.views = 0,

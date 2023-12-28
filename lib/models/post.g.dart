@@ -21,6 +21,8 @@ Post _$PostFromJson(Map json) => Post(
       authorName: json['authorName'] as String,
       authorId: json['authorId'] as String,
       featured: json['featured'] as bool,
+      astrologer:
+          json["astrologer"] == null ? false : json["astrologer"] as bool,
     );
 
 Map<String, dynamic> _$PostToJson(Post instance) => <String, dynamic>{
@@ -38,4 +40,5 @@ Map<String, dynamic> _$PostToJson(Post instance) => <String, dynamic>{
       'authorName': instance.authorName,
       'authorId': instance.authorId,
       'featured': instance.featured,
+      'astrologer': instance.astrologer,
     };

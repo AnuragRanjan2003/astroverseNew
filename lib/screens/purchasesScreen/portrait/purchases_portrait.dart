@@ -165,7 +165,7 @@ class PurchasesPortrait extends StatelessWidget {
         top: 70,
         child: SearchBox(
           controller: searchText,
-          hint: 'Search for "received"',
+          hint: 'Search for "Prediction"',
           width: cons.maxWidth * _searchWidth,
         ),
       )
@@ -217,7 +217,7 @@ class PurchasesPortrait extends StatelessWidget {
         top: 70,
         child: SearchBox(
             controller: searchText,
-            hint: 'Search for "delivered"',
+            hint: 'Search for "Prediction"',
             width: cons.maxWidth * _searchWidth),
       )
     ]);

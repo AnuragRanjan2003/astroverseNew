@@ -28,6 +28,7 @@ class AstroSignUpPortrait extends StatelessWidget {
     final TextEditingController password = TextEditingController();
     final TextEditingController name = TextEditingController();
     final AuthController auth = Get.find();
+    auth.loading.value = false;
     final LocationController location = Get.find();
     GoogleSignIn().signOut();
     return Scaffold(

@@ -102,28 +102,31 @@ class NewPostsPage extends StatelessWidget {
     );
   }
 
-  FilterChip buildFilterChip(MainController main, NewPageController newPage,
+  Widget buildFilterChip(MainController main, NewPageController newPage,
       int index, List<String> genres) {
-    return FilterChip(
-      backgroundColor: Colors.white,
-      checkmarkColor: Colors.white,
-      onSelected: (e) {
-        if (e == true) {
-          newPage.addItem(index);
-        } else {
-          newPage.removeItem(index);
-        }
-      },
-      label: Text(
-        genres[index],
-        style: TextStyle(
-            fontSize: 12,
-            color: newPage.genres[index] ? Colors.white : Colors.black),
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 4),
+      child: FilterChip(
+        backgroundColor: Colors.white,
+        checkmarkColor: Colors.white,
+        onSelected: (e) {
+          if (e == true) {
+            newPage.addItem(index);
+          } else {
+            newPage.removeItem(index);
+          }
+        },
+        label: Text(
+          genres[index],
+          style: TextStyle(
+              fontSize: 12,
+              color: newPage.genres[index] ? Colors.white : Colors.black),
+        ),
+        selected: newPage.genres[index],
+        selectedColor: Colors.lightBlue.shade300,
+        shape: const RoundedRectangleBorder(
+            borderRadius: BorderRadius.all(Radius.circular(30))),
       ),
-      selected: newPage.genres[index],
-      selectedColor: Colors.lightBlue.shade300,
-      shape: const RoundedRectangleBorder(
-          borderRadius: BorderRadius.all(Radius.circular(30))),
     );
   }
 
@@ -146,7 +149,7 @@ class NewPostsPage extends StatelessWidget {
     List<Post> filter = <Post>[];
     if (g.isEmpty) return l1;
     for (Post it in l1) {
-      if (areEqual(it.genre, g)) filter.add(it);
+      if (it.genre.any((element) => g.contains(element))) filter.add(it);
     }
 
     return filter;

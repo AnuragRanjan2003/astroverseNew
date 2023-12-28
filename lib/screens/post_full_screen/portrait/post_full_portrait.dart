@@ -84,7 +84,6 @@ class PostFullPortrait extends StatelessWidget {
       ),
       body: SingleChildScrollView(
         child: Container(
-          height: Get.height * 0.9,
           padding: const EdgeInsets.symmetric(
               horizontal: GlobalDims.horizontalPadding, vertical: 20),
           child: Column(

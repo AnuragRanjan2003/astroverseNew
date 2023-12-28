@@ -93,6 +93,32 @@ class MartItem extends StatelessWidget {
                       ],
                     ),
                   ),
+                  item.featured?Container(
+                    padding:
+                    const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
+                    decoration: BoxDecoration(
+                        borderRadius:
+                        const BorderRadius.all(Radius.circular(8)),
+                        border: Border.all(width: 1)),
+                    child: const Wrap(
+                      crossAxisAlignment: WrapCrossAlignment.center,
+                      spacing: 3,
+                      children: [
+                        Icon(
+                          Icons.star,
+                          color: Colors.orangeAccent,
+                          size: 10,
+                        ),
+                        Text(
+                          'featured',
+                          style: TextStyle(
+                            fontSize: 10,
+                            color: Colors.orangeAccent
+                          ),
+                        ),
+                      ],
+                    ),
+                  ):const SizedBox.shrink(),
                   Text(
                     item.genre[0],
                     style: const TextStyle(

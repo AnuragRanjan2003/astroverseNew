@@ -24,6 +24,7 @@ class UserLoginScreenPortrait extends StatelessWidget {
   Widget build(BuildContext context) {
     final AuthController auth = Get.find();
     GoogleSignIn().signOut();
+    auth.loading.value = false;
     final double wd = cons.maxWidth;
     final double ht = cons.maxHeight;
     final TextEditingController email = TextEditingController();

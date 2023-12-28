@@ -8,7 +8,6 @@ import 'package:astroverse/screens/astroSignUp/portrait/astro_signup_portrait.da
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:dart_geohash/dart_geohash.dart';
 import 'package:flutter/material.dart';
-import 'package:geocode/geocode.dart';
 import 'package:get/get.dart';
 import 'package:location/location.dart';
 
@@ -31,8 +30,29 @@ class AskLocationPortrait extends StatelessWidget {
     final google = parcel.google;
     final LocationController location = Get.find();
 
+    if (location.location.value == null) {
+      return  Center(
+        child: RichText(
+          textAlign: TextAlign.center,
+          maxLines: 2,
+          textDirection: TextDirection.rtl,
+          text: const TextSpan(
+            text: "Unable to access location\n",
+            style: TextStyle(fontSize: 20 , fontWeight: FontWeight.bold),
+            children: [
+              TextSpan(text:"Please check location permission in settings" , ),
+
+            ]
+          ),
+
+        ),
+      );
+    }
+
+    location.getAddress(
+        location.location.value!.latitude, location.location.value!.longitude);
+
     log(user.toString(), name: "USER");
-    final TextEditingController upi = TextEditingController();
     if (user == null) Get.snackbar("Error", "unexpected error");
     return Scaffold(
         backgroundColor: Colors.blue.shade100,
@@ -88,7 +108,23 @@ class AskLocationPortrait extends StatelessWidget {
                                   TextStyle(fontSize: 13, color: Colors.black),
                             ),
                             const SizedBox(
-                              height: 20,
+                              height: 10,
+                            ),
+                            IconButton(
+                                onPressed: () {
+                                  location.getAddress(
+                                      location.location.value!.latitude,
+                                      location.location.value!.longitude);
+                                },
+                                icon: const CircleAvatar(
+                                  backgroundColor: Colors.white,
+                                  child: Icon(
+                                    Icons.refresh_sharp,
+                                    color: Colors.blue,
+                                  ),
+                                )),
+                            const SizedBox(
+                              height: 10,
                             ),
                             Container(
                               decoration: BoxDecoration(
@@ -109,12 +145,9 @@ class AskLocationPortrait extends StatelessWidget {
                                     Icons.my_location_outlined,
                                     color: Colors.blue,
                                   ),
-                                  FutureBuilder(
-                                    future: getAddress(
-                                        location.location.value!.latitude,
-                                        location.location.value!.longitude),
-                                    builder: (context, snapshot) => Text(
-                                      snapshot.data.toString(),
+                                  Obx(
+                                    () => Text(
+                                      location.address.string,
                                       style: const TextStyle(fontSize: 12),
                                     ),
                                   ),
@@ -124,9 +157,9 @@ class AskLocationPortrait extends StatelessWidget {
                             const SizedBox(
                               height: 20,
                             ),
+
                             MaterialButton(
                               onPressed: () {
-                                //log(upi.value.text, name: "UPI");
                                 if (location.location.value == null) {
                                   ScaffoldMessenger.of(context).showSnackBar(
                                       const SnackBar(
@@ -137,7 +170,9 @@ class AskLocationPortrait extends StatelessWidget {
                                 }
                                 user!.location = location.location.value!
                                     .geoPointFromLocationData();
-                                user.geoHash = GeoHasher().encode(location.location.value!.longitude!, location.location.value!.latitude!);
+                                user.geoHash = GeoHasher().encode(
+                                    location.location.value!.longitude!,
+                                    location.location.value!.latitude!);
 
                                 Get.toNamed(Routes.phoneAuth,
                                     arguments:
@@ -179,12 +214,4 @@ extension on LocationData {
     if (latitude == null || longitude == null) return null;
     return GeoPoint(latitude!, longitude!);
   }
-}
-
-Future<String> getAddress(double? lat, double? lng) async {
-  if (lat == null || lng == null) return "";
-  final geoCode = GeoCode();
-  Address address =
-      await geoCode.reverseGeocoding(latitude: lat, longitude: lng);
-  return "${address.streetAddress} , ${address.postal}";
 }

@@ -8,7 +8,6 @@ import 'package:astroverse/models/service.dart';
 import 'package:astroverse/res/img/images.dart';
 import 'package:astroverse/screens/messaging.dart';
 import 'package:astroverse/utils/crypt.dart';
-import 'package:astroverse/utils/resource.dart';
 import 'package:astroverse/utils/zego_cloud_services.dart';
 import 'package:cometchat_chat_uikit/cometchat_chat_uikit.dart' as comet;
 import 'package:flutter/material.dart';
@@ -17,6 +16,7 @@ import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 
 import '../../../res/colors/project_colors.dart';
+import '../../../utils/resource.dart';
 
 class OrderedProductPortrait extends StatelessWidget {
   final BoxConstraints cons;
@@ -157,16 +157,25 @@ class OrderedProductPortrait extends StatelessWidget {
                               ),
                               Colors.green);
                         } else {
-                          return buildChip(
-                              order.purchase.value!.active
-                                  ? 'pending'
-                                  : 'canceled',
-                              const FaIcon(
-                                FontAwesomeIcons.truckFast,
-                                size: 20,
-                                color: Colors.red,
-                              ),
-                              Colors.red);
+                          if (order.purchase.value!.active) {
+                            return buildChip(
+                                'pending',
+                                const FaIcon(
+                                  FontAwesomeIcons.truckFast,
+                                  size: 20,
+                                  color: Colors.orange,
+                                ),
+                                Colors.orange);
+                          } else {
+                            return buildChip(
+                                'canceled',
+                                const FaIcon(
+                                  FontAwesomeIcons.cancel,
+                                  size: 16,
+                                  color: Colors.red,
+                                ),
+                                Colors.red);
+                          }
                         }
                       })),
                   const Expanded(
@@ -558,7 +567,8 @@ class OrderedProductPortrait extends StatelessWidget {
                 final user = auth.user.value!;
                 return MaterialButton(
                   onPressed: order.purchase.value!.delivered ||
-                          order.serviceDeleted.isTrue || order.purchase.value!.active==false
+                          order.serviceDeleted.isTrue ||
+                          order.purchase.value!.active == false
                       ? null
                       : () {
                           if (order.purchase.value == null) return;
@@ -597,26 +607,49 @@ class OrderedProductPortrait extends StatelessWidget {
               child: Obx(() {
                 return MaterialButton(
                   onPressed: order.purchase.value!.delivered ||
-                          order.cancelingPurchase.isTrue || order.purchase.value!.active==false
+                          order.cancelingPurchase.isTrue ||
+                          order.purchase.value!.active == false
                       ? null
                       : () {
                           if (order.purchase.value == null) return;
-                          order.cancelPurchase(
-                              order.purchase.value!.purchaseId,
-                              order.purchase.value!.buyerId,
-                              order.purchase.value!.sellerId, (e) {
-                            String? text;
-                            if (e.isSuccess) {
-                              text =
-                                  "Purchase has been deleted. Refund will be initiated.";
-                            } else {
-                              e as Failure<Json>;
-                              text =
-                                  "Could not cancel the purchase. Try again later";
-                            }
-                            ScaffoldMessenger.of(context)
-                                .showSnackBar(SnackBar(content: Text(text)));
-                          });
+
+                          showDialog(
+                            context: context,
+                            builder: (context) => AlertDialog(
+                              surfaceTintColor: Colors.white,
+                              title: const Text("Cancel Order"),
+                              content: const Text(
+                                  "Are you sure you want to cancel the order"),
+                              actionsAlignment: MainAxisAlignment.center,
+                              actions: [
+                                TextButton(
+                                    onPressed: () {
+                                      order.cancelPurchase(
+                                          order.purchase.value!.purchaseId,
+                                          order.purchase.value!.buyerId,
+                                          order.purchase.value!.sellerId, (e) {
+                                        String? text;
+                                        Navigator.pop(context);
+                                        if (e.isSuccess) {
+                                          text =
+                                              "Purchase has been deleted. Refund will be initiated.";
+                                        } else {
+                                          e as Failure<Json>;
+                                          text =
+                                              "Could not cancel the purchase. Try again later";
+                                        }
+                                        ScaffoldMessenger.of(context)
+                                            .showSnackBar(
+                                                SnackBar(content: Text(text)));
+                                      });
+                                    },
+                                    child: const Text(
+                                      "Yes",
+                                      style: TextStyle(color: Colors.red),
+                                    )),
+                              ],
+                            ),
+                          );
                         },
                   disabledColor: ProjectColors.disabled,
                   color: Colors.red,

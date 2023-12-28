@@ -1,12 +1,15 @@
+import 'package:astroverse/components/buy_coins.dart';
 import 'package:astroverse/components/delete_account_bottom_sheet.dart';
 import 'package:astroverse/components/update_bank_bottomsheet.dart';
 import 'package:astroverse/components/upgrade_features_bottom_sheet.dart';
 import 'package:astroverse/components/upgrade_range_bottomsheet.dart';
+import 'package:astroverse/db/plans_db.dart';
 import 'package:astroverse/models/extra_info.dart';
 import 'package:astroverse/models/user_bank_details.dart';
 import 'package:astroverse/res/colors/project_colors.dart';
 import 'package:astroverse/res/dims/global.dart';
 import 'package:astroverse/utils/crypt.dart';
+import 'package:astroverse/utils/geo.dart';
 import 'package:astroverse/utils/num_parser.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -126,7 +129,7 @@ class NamePlate extends StatelessWidget {
                                 size: _sizeIcon,
                               ),
                               'Plan',
-                              user.plan.toString()),
+                              _planToName(user.plan, user.astro)),
                           divider,
                           nameItem(
                               const Icon(
@@ -380,6 +383,19 @@ class NamePlate extends StatelessWidget {
                           divider,
                           nameItemWithButton(
                               const Icon(
+                                Icons.add_circle,
+                                color: Colors.blue,
+                              ),
+                              "buy coins", () {
+                            Scaffold.of(context).showBottomSheet(
+                              (context) => const BuyCoinsSheet(),
+                              constraints:
+                                  BoxConstraints(maxHeight: Get.height * 0.8),
+                            );
+                          }),
+                          divider,
+                          nameItemWithButton(
+                              const Icon(
                                 Icons.delete_outline,
                                 color: Colors.red,
                                 size: _sizeIcon,
@@ -526,5 +542,19 @@ class NamePlate extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  String? _planToName(int plan, bool astro) {
+    if (astro) {
+      return Plans.astroPlans
+          .firstWhere((element) => element.value == plan)
+          .name;
+    } else {
+      if (plan == 0) return Plans.plans.first.name;
+      return Plans.plans
+          .firstWhere(
+              (element) => element.value + VisibilityPlans.all + 1 == plan)
+          .name;
+    }
   }
 }

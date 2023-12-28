@@ -1,6 +1,5 @@
 import 'package:astroverse/models/purchase.dart';
 import 'package:astroverse/res/colors/project_colors.dart';
-import 'package:astroverse/utils/crypt.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -13,7 +12,6 @@ class PurchaseItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final crypto = Crypt();
     return IntrinsicHeight(
       child: Container(
         decoration: const BoxDecoration(
@@ -68,12 +66,15 @@ class PurchaseItem extends StatelessWidget {
               children: [
                 purchase.delivered
                     ? _buildChip("delivered", null, Colors.green, Colors.green)
-                    : _buildChip(
-                        "pending",
-                        null,
-                        Colors.red.shade200,
-                        Colors.red,
-                      ),
+                    : purchase.active
+                        ? _buildChip(
+                            "pending",
+                            null,
+                            Colors.orange.shade200,
+                            Colors.orange,
+                          )
+                        : _buildChip(
+                            "canceled", null, Colors.red.shade200, Colors.red),
                 MaterialButton(
                   onPressed: () {
                     Get.toNamed(

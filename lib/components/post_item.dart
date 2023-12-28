@@ -4,7 +4,6 @@ import 'package:astroverse/res/colors/project_colors.dart';
 import 'package:astroverse/res/textStyles/text_styles.dart';
 import 'package:astroverse/routes/routes.dart';
 import 'package:astroverse/utils/crypt.dart';
-import 'package:astroverse/utils/hero_tag.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -19,7 +18,7 @@ class PostItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final crypto  = Crypt();
+    final crypto = Crypt();
     return GestureDetector(
       onTap: () {
         log("tapped", name: "POST ITEM");
@@ -31,28 +30,30 @@ class PostItem extends StatelessWidget {
             borderRadius: BorderRadius.all(Radius.circular(20))),
         margin: const EdgeInsets.symmetric(horizontal: 10),
         padding:
-        const EdgeInsets.only(left: 18, right: 18, top: 15, bottom: 10),
+            const EdgeInsets.only(left: 18, right: 18, top: 15, bottom: 10),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Row(
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                Text(
+                  post.title,
+                  style: TextStylesLight().coloredBodyBold(Colors.black),
+                  textAlign: TextAlign.left,
+                ),
+                const SizedBox(
+                  height: 2,
+                ),
+                Text("@${crypto.decryptFromBase64String(post.authorName)}",
+                    style: const TextStyle(fontSize: 12)),
+                const SizedBox(
+                  height: 5,
+                ),
+                Wrap(
+                  runSpacing: 8,
+                  spacing: 4,
                   children: [
-                    Text(
-                      post.title,
-                      style: TextStylesLight().coloredBodyBold(Colors.black),
-                      textAlign: TextAlign.left,
-                    ),
-                    const SizedBox(
-                      height: 2,
-                    ),
-                    Text("@${crypto.decryptFromBase64String(post.authorName)}",
-                        style: const TextStyle(fontSize: 12)),
-                    const SizedBox(
-                      height: 5,
-                    ),
                     _buildChip(
                         toTimeDelay(post.date),
                         const Icon(
@@ -60,18 +61,48 @@ class PostItem extends StatelessWidget {
                           size: 15,
                         ),
                         ProjectColors.disabled,
-                        ProjectColors.lightBlack)
+                        ProjectColors.lightBlack),
+                    post.astrologer
+                        ? _buildChip(
+                            "astrologer",
+                            const Icon(
+                              Icons.person_outline_outlined,
+                              size: 16,
+                              color: Colors.lightGreen,
+                            ),
+                            Colors.lightGreen,
+                            Colors.lightGreen)
+                        : const SizedBox.shrink(),
+                    post.featured
+                        ? _buildChip(
+                            'featured',
+                            const Icon(
+                              Icons.star,
+                              size: 15,
+                              color: Colors.orangeAccent,
+                            ),
+                            Colors.orangeAccent,
+                            Colors.orangeAccent)
+                        : const SizedBox.shrink(),
+                    _buildChip(
+                        post.genre.first,
+                        const Icon(
+                          Icons.category_outlined,
+                          size: 15,
+                        ),
+                        Colors.black,
+                        Colors.black)
                   ],
                 ),
               ],
             ),
             post.imageUrl.isNotEmpty
                 ? const SizedBox(
-              height: 15,
-            )
+                    height: 15,
+                  )
                 : const SizedBox(
-              height: 0,
-            ),
+                    height: 0,
+                  ),
             buildContent(post),
             const SizedBox(
               height: 15,
@@ -166,18 +197,18 @@ class PostItem extends StatelessWidget {
   Widget buildContent(Post post) {
     return post.imageUrl.isNotEmpty
         ? AspectRatio(
-        aspectRatio: 4 / 3,
-        child: ClipRRect(
-          borderRadius: const BorderRadius.all(Radius.circular(15)),
-          child: Image(
-            image: CachedNetworkImageProvider(post.imageUrl),
-            width: double.infinity,
-            fit: BoxFit.cover,
-          ),
-        ))
+            aspectRatio: 4 / 3,
+            child: ClipRRect(
+              borderRadius: const BorderRadius.all(Radius.circular(15)),
+              child: Image(
+                image: CachedNetworkImageProvider(post.imageUrl),
+                width: double.infinity,
+                fit: BoxFit.cover,
+              ),
+            ))
         : const SizedBox(
-      height: 0,
-    );
+            height: 0,
+          );
   }
 
   Container _buildChip(String text, Icon? icon, Color color, Color textColor) {

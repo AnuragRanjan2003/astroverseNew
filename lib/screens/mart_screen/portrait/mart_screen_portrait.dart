@@ -2,6 +2,7 @@ import 'dart:developer';
 
 import 'package:astroverse/components/load_more_button.dart';
 import 'package:astroverse/components/mart_item.dart';
+import 'package:astroverse/components/message_screen.dart';
 import 'package:astroverse/components/search_box.dart';
 import 'package:astroverse/controllers/location_controller.dart';
 import 'package:astroverse/controllers/service_controller.dart';
@@ -175,6 +176,10 @@ class MartScreenPortrait extends StatelessWidget {
                           int len = list.length.isEven
                               ? list.length ~/ 2
                               : (list.length + 1) ~/ 2;
+
+                          if (list.isEmpty) {
+                            return const MessageScreen(text: "No relevant services");
+                          }
                           return ListView.separated(
                             itemCount: len + 2,
                             itemBuilder: (context, index) {
@@ -281,24 +286,37 @@ class MartScreenPortrait extends StatelessWidget {
                 service.fetchMyServices(auth.user.value!.uid);
                 return;
               },
-              child: Obx(() {
-                var list = service.myServices;
-                return ListView.separated(
-                  itemCount: list.length,
-                  itemBuilder: (context, index) {
-                    final s = list[index];
-                    return ListTile(
-                      leading: const Icon(Icons.shopping_bag_outlined),
-                      title: Text(s.name),
-                      onTap: (){
-                        Get.toNamed(Routes.myMartItemScreen ,arguments: s);
-                      },
-                      subtitle: Text(DateFormat.yMMMd().format(DateTime.parse(s.date)),
-                    ));
-                  },
-                  separatorBuilder: (context, index) => const Divider(),
-                );
-              }),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 20),
+                    child: Text("Your\nServices" , style: TextStyle(fontSize: 24 , fontWeight: FontWeight.bold ,color: ProjectColors.lightBlack),),
+                  ),
+                  Expanded(
+                    child: Obx(() {
+                      var list = service.myServices;
+                      if(list.isEmpty) return const MessageScreen(text: "You have not posted services");
+                      return ListView.separated(
+                        itemCount: list.length,
+                        itemBuilder: (context, index) {
+                          final s = list[index];
+                          return ListTile(
+                              leading: const Icon(Icons.shopping_bag_outlined),
+                              title: Text(s.name),
+                              onTap: () {
+                                Get.toNamed(Routes.myMartItemScreen, arguments: s);
+                              },
+                              subtitle: Text(
+                                DateFormat.yMMMd().format(DateTime.parse(s.date)),
+                              ));
+                        },
+                        separatorBuilder: (context, index) => const Divider(),
+                      );
+                    }),
+                  ),
+                ],
+              ),
             ),
           ],
         ),

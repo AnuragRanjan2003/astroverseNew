@@ -105,25 +105,33 @@ class OtpScreenPortrait extends StatelessWidget {
                                                     .otpEntered.value
                                                     .toString());
                                         controller.checkOtp(cred, () {
-                                          controller.verifyOtpLoading.value = false;
-                                          user!.phNo = Crypt().encryptToBase64String(number);
+                                          controller.verifyOtpLoading.value =
+                                              false;
+                                          user!.phNo = Crypt()
+                                              .encryptToBase64String(number);
                                           final loc = location.location.value;
                                           GeoPoint? geo;
                                           if (loc != null) {
                                             geo = GeoPoint(
                                                 loc.latitude!, loc.longitude!);
                                           }
-                                          user!.location = geo;
+                                          user.location = geo;
                                           if (!google) {
                                             auth.createUserWithEmailForAstro(
                                                 user, auth.pass.value, (p0) {
-                                              if (p0 is Success) {
+                                              if (p0.isSuccess) {
                                                 Get.toNamed(
                                                   Routes.emailVerify,
                                                 );
                                               } else {
-                                                log((p0 as Failure).error,
+                                                log(
+                                                    (p0 as Failure<String>)
+                                                        .error,
                                                     name: "CREATE USER");
+                                                ScaffoldMessenger.of(context)
+                                                    .showSnackBar(SnackBar(
+                                                        content:
+                                                            Text(p0.error)));
                                               }
                                             });
                                           } else {
@@ -142,6 +150,10 @@ class OtpScreenPortrait extends StatelessWidget {
                                         }, () {
                                           controller.verifyOtpLoading.value =
                                               false;
+                                          ScaffoldMessenger.of(context)
+                                              .showSnackBar(const SnackBar(
+                                                  content: Text(
+                                                      "Verification failed")));
                                         });
                                       }
                                     : null,
@@ -181,6 +193,7 @@ class OtpScreenPortrait extends StatelessWidget {
                           Obx(() => ElevatedButton(
                               onPressed: controller.resendTimer.value == 0
                                   ? () {
+                                      controller.resetTimer();
                                       controller.sendOtp(callbacks, number);
                                     }
                                   : null,

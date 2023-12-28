@@ -26,6 +26,7 @@ class AstroLogInPortrait extends StatelessWidget {
     final TextEditingController password = TextEditingController();
     final TextEditingController resetEmail = TextEditingController();
     final AuthController auth = Get.find();
+    auth.loading.value = false;
     return Scaffold(
       body: SingleChildScrollView(
         child: Container(

@@ -52,8 +52,7 @@ class _BuyCoinsSheetState extends State<BuyCoinsSheet> {
               element.id))
           .toList();
 
-      coinsData.sort(
-          (a, b) => a.price.compareTo(b.price));
+      coinsData.sort((a, b) => a.price.compareTo(b.price));
 
       return Scaffold(
         body: CarouselSlider(
@@ -142,4 +141,6 @@ class _BuyCoinsSheetState extends State<BuyCoinsSheet> {
 
   static String _productToTitle(ProductDetails element) =>
       CoinsData().coins.firstWhere((e) => e.productId == element.id).name;
+
+
 }

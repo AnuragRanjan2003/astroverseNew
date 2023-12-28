@@ -23,24 +23,39 @@ class UpgradeRangeBottomSheet extends StatelessWidget {
     auth.selectedUpgradePlan.value = -1;
     return Container(
       color: Colors.white,
-      padding: const EdgeInsets.only(top: 20 , left: 20, right: 20),
+      padding: const EdgeInsets.only(top: 20, left: 20, right: 20),
       child: SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            const Text("Select a plan" ,style: TextStyle(fontSize: 20 ,fontWeight: FontWeight.bold),),
-            const SizedBox(height: 20,),
+            const Text(
+              "Select a plan",
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(
+              height: 20,
+            ),
             ...List.generate(
-                Plans.astroPlans.length,
-                (index) => Plans.astroPlans[index].value > user.plan
+                Plans.astroPlans.sublist(1).length,
+                (index) => Plans.astroPlans.sublist(1)[index].value > user.plan
                     ? Obx(() => PlanItem(
-                        plan: Plans.astroPlans[index],
+                        plan: Plans.astroPlans.sublist(1)[index],
                         selected: auth.selectedUpgradePlan.value,
                         onChange: (p) {
                           auth.selectedUpgradePlan.value = p.value;
                         }))
-                    : const SizedBox.shrink()),
-            const SizedBox(height: 10,),
+                    : Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 5),
+                        child: PlanItem(
+                          plan: Plans.plans.sublist(1)[index],
+                          selected: -1,
+                          taken: true,
+                          onChange: (p) {},
+                        ),
+                      )),
+            const SizedBox(
+              height: 10,
+            ),
             Row(
               children: [
                 const Spacer(),
@@ -107,10 +122,12 @@ class UpgradeRangeBottomSheet extends StatelessWidget {
 
   bool validate(AuthController auth) {
     final x = (auth.selectedUpgradePlan.value == -1 ||
-        user.coins <
-            Plans.astroPlans
-                .singleWhere((p) => auth.selectedUpgradePlan.value == p.value)
-                .price) || auth.upgradingPlan.isTrue;
+            user.coins <
+                Plans.astroPlans
+                    .singleWhere(
+                        (p) => auth.selectedUpgradePlan.value == p.value)
+                    .price) ||
+        auth.upgradingPlan.isTrue;
     log("$x", name: "VALIDATE");
     return x;
   }

@@ -2,6 +2,7 @@ import 'dart:developer';
 
 import 'package:astroverse/components/glass_morph_container.dart';
 import 'package:astroverse/controllers/auth_controller.dart';
+import 'package:astroverse/models/user.dart' as m;
 import 'package:astroverse/res/colors/project_colors.dart';
 import 'package:astroverse/res/textStyles/text_styles.dart';
 import 'package:astroverse/routes/routes.dart';
@@ -11,8 +12,12 @@ import 'package:astroverse/screens/profile/profile_screen.dart';
 import 'package:astroverse/screens/purchasesScreen/purchases_screen.dart';
 import 'package:astroverse/utils/crypt.dart';
 import 'package:astroverse/utils/env_vars.dart';
+import 'package:astroverse/utils/resource.dart';
+import 'package:astroverse/utils/zego_cloud_services.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:cometchat_chat_uikit/cometchat_chat_uikit.dart' as c;
 import 'package:firebase_analytics/firebase_analytics.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -22,71 +27,26 @@ import 'package:shimmer/shimmer.dart';
 
 import '../../discover/discover_screen.dart';
 
-class MainScreenPortrait extends StatelessWidget {
+class MainScreenPortrait extends StatefulWidget {
   final BoxConstraints cons;
-  static const _testCometUid = "SUPERHERO1";
 
   const MainScreenPortrait({super.key, required this.cons});
+
+  @override
+  State<MainScreenPortrait> createState() => _MainScreenPortraitState();
+}
+
+class _MainScreenPortraitState extends State<MainScreenPortrait> {
+  late AuthController auth;
 
   @override
   Widget build(BuildContext context) {
     var observer =
         FirebaseAnalyticsObserver(analytics: FirebaseAnalytics.instance);
     final PageController pageController = PageController(initialPage: 0);
-    final double wd = cons.maxWidth;
-    final double ht = cons.maxHeight;
+    final double wd = widget.cons.maxWidth;
 
-    final AuthController auth = Get.find();
 
-    final crypto = Crypt();
-
-    c.UIKitSettings uiKitSettings = (c.UIKitSettingsBuilder()
-          ..subscriptionType = c.CometChatSubscriptionType.allUsers
-          ..autoEstablishSocketConnection = true
-          ..region =
-              dotenv.get(EnvVars.cometRegionId) //Replace with your region
-          ..appId = dotenv.get(EnvVars.cometAppId) //replace with your app Id
-          ..authKey = dotenv.get(EnvVars.cometAuthId)
-          ..extensions = c.CometChatUIKitChatExtensions
-              .getDefaultExtensions() //replace this with empty array you want to disable all extensions
-        ) //replace with your auth Key
-        .build();
-
-    c.CometChatUIKit.init(
-        uiKitSettings: uiKitSettings,
-        onSuccess: (String successMessage) {
-          debugPrint("Initialization completed successfully  $successMessage");
-        },
-        onError: (c.CometChatException e) {
-          debugPrint("Initialization failed with exception: ${e.message}");
-        });
-
-    c.CometChatUIKit.login(auth.user.value!.uid, onSuccess: (e) {
-      log("login completed successfully  ${e.toString()}", name: "CHAT");
-    }, onError: (e) {
-      if (e.code == "ERR_UID_NOT_FOUND") {
-        log("user not found , creating user!", name: "CHAT");
-        var user = auth.user.value!;
-        final authUser =
-            c.User(name: crypto.decryptFromBase64String(user.name), uid: user.uid, avatar: user.image);
-        c.CometChatUIKit.createUser(
-            c.User(
-                name: authUser.name,
-                uid: authUser.uid,
-                avatar: authUser.avatar), onSuccess: (e) {
-          log("created user successfully  ${e.toString()}", name: "CHAT");
-
-          c.CometChatUIKit.login(authUser.uid);
-        }, onError: (e) {
-          log("sign up failed with exception: ${e.message}", name: "CHAT");
-          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("could not connect to chat servers")));
-        });
-      } else {
-        log("login failed with exception: ${e.message} ; code : ${e.code}",
-            name: "CHAT");
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("could not connect to chat servers")));
-      }
-    });
 
     final tabs = [
       const GButton(
@@ -130,7 +90,7 @@ class MainScreenPortrait extends StatelessWidget {
                   const DiscoverScreen(),
                   const MartScreen(),
                   const ProfileScreen(),
-                  PeopleScreenPortrait(cons: cons),
+                  PeopleScreenPortrait(cons: widget.cons),
                   const PurchasesScreen()
                 ],
               ),
@@ -223,5 +183,24 @@ class MainScreenPortrait extends StatelessWidget {
         baseColor: Colors.grey.shade200,
         highlightColor: Colors.grey.shade100,
         child: child);
+  }
+
+  @override
+  void initState() {
+    auth = Get.find();
+    var user = auth.user.value;
+    if (user == null) {
+      auth.getUserData(FirebaseAuth.instance.currentUser!.uid).then((value) {
+        if (value.isSuccess) {
+          value as Success<DocumentSnapshot<m.User>>;
+          ZegoCloudServices().initCallInvitationService(value.data.data()!.uid,
+              Crypt().decryptFromBase64String(value.data.data()!.name));
+        }
+      });
+    } else {
+      ZegoCloudServices().initCallInvitationService(
+          user.uid, Crypt().decryptFromBase64String(user.name));
+    }
+    super.initState();
   }
 }

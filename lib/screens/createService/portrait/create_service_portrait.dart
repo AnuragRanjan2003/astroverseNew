@@ -82,10 +82,9 @@ class CreateServicePortrait extends StatelessWidget {
     } else {
       service.formValid.value &= true;
     }
-    return WillPopScope(
-      onWillPop: () async {
+    return PopScope(
+      onPopInvoked: (e) async {
         service.resetServiceCreationValues();
-        return true;
       },
       child: Scaffold(
         body: SafeArea(
@@ -112,34 +111,52 @@ class CreateServicePortrait extends StatelessWidget {
                       mainAxisAlignment: MainAxisAlignment.spaceAround,
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Obx(() {
-                          var image = const Image(
-                            image: ProjectImages.planet,
-                            height: 150,
-                            width: 150,
-                            fit: BoxFit.cover,
-                          );
-                          if (service.image.value != null) {
-                            image = Image.file(
-                              File(service.image.value!.path),
-                              height: 150,
-                              width: 150,
-                              fit: BoxFit.cover,
-                            );
-                          }
-                          return GestureDetector(
-                            child: ClipRRect(
-                              borderRadius:
-                                  const BorderRadius.all(Radius.circular(20)),
-                              child: image,
-                            ),
-                            onTap: () async {
-                              service.selectImage((e) {
-                                service.formValid.value &= e != null;
-                              });
-                            },
-                          );
-                        }),
+                        SizedBox(
+                          width: 170,
+                          height: 170,
+                          child: Stack(
+                            children: [
+                              Obx(() {
+                                var image = const Image(
+                                  image: ProjectImages.planet,
+                                  height: 150,
+                                  width: 150,
+                                  fit: BoxFit.cover,
+                                );
+                                if (service.image.value != null) {
+                                  image = Image.file(
+                                    File(service.image.value!.path),
+                                    height: 150,
+                                    width: 150,
+                                    fit: BoxFit.cover,
+                                  );
+                                }
+                                return ClipRRect(
+                                  borderRadius: const BorderRadius.all(
+                                      Radius.circular(20)),
+                                  child: image,
+                                );
+                              }),
+                              Align(
+                                alignment: Alignment.bottomRight,
+                                child: IconButton(
+                                  onPressed: () async {
+                                    service.selectImage((e) {
+                                      service.formValid.value &= e != null;
+                                    });
+                                  },
+                                  icon: const Icon(
+                                    Icons.link,
+                                    color: Colors.white,
+                                  ),
+                                  style: const ButtonStyle(
+                                      backgroundColor: MaterialStatePropertyAll(
+                                          Colors.blue)),
+                                ),
+                              )
+                            ],
+                          ),
+                        ),
                         const SizedBox(
                           height: 30,
                         ),
@@ -188,7 +205,8 @@ class CreateServicePortrait extends StatelessWidget {
                               if (e == null) {
                               } else {
                                 service.selectedItem.value = _list[e]!;
-                                if(_list[e]==1) service.selectedRange.value = 0;
+                                if (_list[e] == 1)
+                                  service.selectedRange.value = 0;
                               }
                               log(service.selectedItem.value.toString(),
                                   name: 'DROPDOWN');
@@ -288,6 +306,10 @@ class CreateServicePortrait extends StatelessWidget {
                               ),
                             )),
                         Obx(() => Visibility(
+                          visible: service.selectedItem.value == 1,
+                          child: const SizedBox(height: 10,),
+                        )),
+                        Obx(() => Visibility(
                             visible: service.selectedItem.value == 1,
                             child: TextField(
                               controller: place,
@@ -360,7 +382,12 @@ class CreateServicePortrait extends StatelessWidget {
                             Wrap(
                               crossAxisAlignment: WrapCrossAlignment.center,
                               children: [
-                                const Text("coin cost" , style: TextStyle(fontSize: 15 , fontWeight: FontWeight.w600),),
+                                const Text(
+                                  "coin cost",
+                                  style: TextStyle(
+                                      fontSize: 15,
+                                      fontWeight: FontWeight.w600),
+                                ),
                                 const CircleAvatar(
                                   backgroundColor: Colors.transparent,
                                   foregroundImage: ProjectImages.singleCoin,
@@ -544,7 +571,6 @@ bool validate(
   int productType,
   int mode,
 ) {
-
   final t = title.value.text;
   final b = body.value.text;
   final add = address.value.text;

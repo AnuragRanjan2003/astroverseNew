@@ -26,8 +26,7 @@ typedef SetInfo = String;
 typedef Json = Map<String, dynamic>;
 
 class Database {
-  static const int _limit = 20;
-  final _crypt = Crypt();
+  static const int _limit = 10;
   final _fireStore = FirebaseFirestore.instance;
   final _userCollection = FirebaseFirestore.instance
       .collection(BackEndStrings.userCollection)

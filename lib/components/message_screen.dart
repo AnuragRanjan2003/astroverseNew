@@ -1,3 +1,4 @@
+import 'package:astroverse/res/img/images.dart';
 import 'package:astroverse/res/textStyles/text_styles.dart';
 import 'package:flutter/material.dart';
 
@@ -15,7 +16,7 @@ class MessageScreen extends StatelessWidget {
         direction: Axis.vertical,
         spacing: 30,
         children: [
-          if(image!=null)Image(image:image!, height: 100,),
+          Image(image:image??ProjectImages.emptyBox, height: 100,),
           Text(text , style: TextStylesLight().bodyBold,)
 
         ],

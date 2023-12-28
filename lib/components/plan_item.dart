@@ -7,17 +7,20 @@ import '../models/plan.dart';
 class PlanItem extends StatelessWidget {
   final Plan plan;
   final int selected;
+  final bool taken;
   final void Function(Plan) onChange;
 
-  const PlanItem(
-      {super.key,
-      required this.plan,
-      required this.selected,
-      required this.onChange});
+  const PlanItem({
+    super.key,
+    required this.plan,
+    required this.selected,
+    required this.onChange,
+    this.taken = false,
+  });
 
   @override
   Widget build(BuildContext context) {
-    final Color color = getColor(selected!=plan.value);
+    final Color color = getColor(selected != plan.value);
     return InkWell(
       onTap: () {
         onChange(plan);
@@ -28,15 +31,30 @@ class PlanItem extends StatelessWidget {
           margin: const EdgeInsets.symmetric(vertical: 5),
           constraints: const BoxConstraints(minWidth: 140),
           decoration: BoxDecoration(
-            borderRadius: const BorderRadius.all(Radius.circular(5)),
-            border: Border.all(color: color)
-          ),
+              borderRadius: const BorderRadius.all(Radius.circular(20)),
+              border: Border.all(color: color)),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                plan.name,
-                style: TextStylesLight().coloredBodyBold(color),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    plan.name,
+                    style: TextStylesLight().coloredBodyBold(color),
+                  ),
+                  taken?Container(
+                    padding:
+                        const EdgeInsets.symmetric(vertical: 3, horizontal: 10),
+                    decoration: BoxDecoration(
+                        borderRadius: const BorderRadius.all(Radius.circular(10)),
+                        border: Border.all(color: ProjectColors.disabled)),
+                    child: const Text(
+                      "taken",
+                      style: TextStyle(color: ProjectColors.disabled, fontSize: 12),
+                    ),
+                  ):const SizedBox.shrink(),
+                ],
               ),
               const SizedBox(
                 height: 10,
@@ -58,11 +76,11 @@ class PlanItem extends StatelessWidget {
     );
   }
 
-   Color getColor(bool p) {
+  Color getColor(bool p) {
     if (p == true) {
-      return  ProjectColors.onBackground;
+      return ProjectColors.onBackground;
     } else {
-      return  ProjectColors.main;
+      return ProjectColors.main;
     }
   }
 }

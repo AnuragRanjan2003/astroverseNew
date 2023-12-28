@@ -1,5 +1,6 @@
 import 'dart:developer';
 
+import 'package:astroverse/components/message_screen.dart';
 import 'package:astroverse/components/post_item.dart';
 import 'package:astroverse/controllers/auth_controller.dart';
 import 'package:astroverse/controllers/main_controller.dart';
@@ -38,6 +39,9 @@ class MyPostPage extends StatelessWidget {
           Obx(
             () {
               final list = mainController.myPosts;
+              if (list.isEmpty) {
+                return const MessageScreen(text: "You have not posted");
+              }
               return ListView.separated(
                   physics: const AlwaysScrollableScrollPhysics(),
                   controller: scrollController,

@@ -10,15 +10,11 @@ class UpdateBankBottomSheet extends StatefulWidget {
   const UpdateBankBottomSheet({super.key, required this.bankDetails});
 
   @override
-  State<UpdateBankBottomSheet> createState() =>
-      _UpdateBankBottomSheetState(bankDetails);
+  State<UpdateBankBottomSheet> createState() => _UpdateBankBottomSheetState();
 }
 
 class _UpdateBankBottomSheetState extends State<UpdateBankBottomSheet> {
-  final UserBankDetails _bankDetails;
   final AuthController auth = Get.find();
-
-  _UpdateBankBottomSheetState(this._bankDetails);
 
   @override
   void dispose() {
@@ -29,32 +25,36 @@ class _UpdateBankBottomSheetState extends State<UpdateBankBottomSheet> {
 
   @override
   void initState() {
-    auth.disableAccountUpdate.value = _disableButton(_bankDetails.upiId,
-        _bankDetails.accountNumber, _bankDetails.ifscCode, _bankDetails.branch);
+    auth.disableAccountUpdate.value = disableButton(
+        widget.bankDetails.upiId,
+        widget.bankDetails.accountNumber,
+        widget.bankDetails.ifscCode,
+        widget.bankDetails.branch);
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
-    final upi = TextEditingController(text: _bankDetails.upiId);
-    final account = TextEditingController(text: _bankDetails.accountNumber);
-    final ifsc = TextEditingController(text: _bankDetails.ifscCode);
-    final branch = TextEditingController(text: _bankDetails.branch);
+    final upi = TextEditingController(text: widget.bankDetails.upiId);
+    final account =
+        TextEditingController(text: widget.bankDetails.accountNumber);
+    final ifsc = TextEditingController(text: widget.bankDetails.ifscCode);
+    final branch = TextEditingController(text: widget.bankDetails.branch);
 
     upi.addListener(() {
-      auth.disableAccountUpdate.value = _disableButton(upi.value.text,
+      auth.disableAccountUpdate.value = disableButton(upi.value.text,
           account.value.text, ifsc.value.text, branch.value.text);
     });
     account.addListener(() {
-      auth.disableAccountUpdate.value = _disableButton(upi.value.text,
+      auth.disableAccountUpdate.value = disableButton(upi.value.text,
           account.value.text, ifsc.value.text, branch.value.text);
     });
     ifsc.addListener(() {
-      auth.disableAccountUpdate.value = _disableButton(upi.value.text,
+      auth.disableAccountUpdate.value = disableButton(upi.value.text,
           account.value.text, ifsc.value.text, branch.value.text);
     });
     branch.addListener(() {
-      auth.disableAccountUpdate.value = _disableButton(upi.value.text,
+      auth.disableAccountUpdate.value = disableButton(upi.value.text,
           account.value.text, ifsc.value.text, branch.value.text);
     });
 
@@ -88,21 +88,21 @@ class _UpdateBankBottomSheetState extends State<UpdateBankBottomSheet> {
               height: 20,
             ),
             Obx(() {
-              return editField(account, Icons.numbers_sharp, "upi Id", "A/C",
-                  auth.accError.value);
+              return editField(account, Icons.numbers_sharp, "A/C number",
+                  "A/C", auth.accError.value);
             }),
             const SizedBox(
               height: 20,
             ),
             Obx(() {
-              return editField(
-                  ifsc, Icons.numbers, "upi Id", "IFSC", auth.ifscError.value);
+              return editField(ifsc, Icons.numbers, "Ifsc code", "IFSC",
+                  auth.ifscError.value);
             }),
             const SizedBox(
               height: 20,
             ),
             Obx(() {
-              return editField(branch, Icons.alt_route_outlined, "upi Id",
+              return editField(branch, Icons.alt_route_outlined, "branch name",
                   "Branch", auth.branchError.value);
             }),
             const SizedBox(
@@ -148,19 +148,24 @@ class _UpdateBankBottomSheetState extends State<UpdateBankBottomSheet> {
         (p0) => _handelFailure(p0));
   }
 
-  bool _disableButton(String upi, String acc, String ifsc, String branch) {
+  bool disableButton(String upi, String acc, String ifsc, String branch) {
     auth.clearError();
-    if (_bankDetails.isUnchanged(acc, ifsc, branch, upi)) return true;
+    if (widget.bankDetails.isUnchanged(acc, ifsc, branch, upi)) return true;
     if (auth.user.value == null) return true;
     if (upi.isEmpty && (acc.isEmpty || ifsc.isEmpty || branch.isEmpty)) {
       return true;
     }
-    if (acc.length < 10 || acc.length > 20) {
-      auth.accError.value = "length too ${acc.length < 10 ? "short" : "long"}";
+    if (upi.isNotEmpty && !upi.contains('@')) {
+      auth.upiError.value = "must contain '@'";
       return true;
     }
-    if (!upi.contains('@')) {
-      auth.upiError.value = "must contain '@'";
+    if (upi.isEmpty && (acc.isNotEmpty && ifsc.isNotEmpty && branch.isNotEmpty))
+      return false;
+
+    if (upi.isNotEmpty && upi.contains('@')) return false;
+
+    if (acc.isNotEmpty && (acc.length < 10 || acc.length > 20)) {
+      auth.accError.value = "length too ${acc.length < 10 ? "short" : "long"}";
       return true;
     }
     return false;

@@ -65,31 +65,22 @@ class ProfileScreenPortrait extends StatelessWidget {
                 onTap: () {
                   Scaffold.of(context).showBottomSheet(
                       (context) => const BuyCoinsSheet(),
-                      constraints: BoxConstraints(maxHeight: Get.height * 0.8),
-                      enableDrag: false);
+                      constraints: BoxConstraints(maxHeight: Get.height * 0.8));
                 },
                 child: Container(
                   margin:
                       const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
                   padding:
-                      const EdgeInsets.symmetric(horizontal: 20, vertical: 5),
+                      const EdgeInsets.symmetric(horizontal: 15, vertical: 5),
                   decoration: BoxDecoration(
                       color: Colors.white,
                       borderRadius: const BorderRadius.all(Radius.circular(10)),
                       border: Border.all(
                           width: 1.2, color: ProjectColors.disabled)),
                   child: Wrap(
-                    spacing: 8,
+                    spacing: 5,
                     crossAxisAlignment: WrapCrossAlignment.center,
                     children: [
-                      const CircleAvatar(
-                        radius: 14,
-                        backgroundColor: Colors.transparent,
-                        child: Image(
-                          image: ProjectImages.singleCoin,
-                          fit: BoxFit.fill,
-                        ),
-                      ),
                       Obx(() {
                         return Text(
                           auth.user.value == null
@@ -100,7 +91,15 @@ class ProfileScreenPortrait extends StatelessWidget {
                               fontWeight: FontWeight.w600,
                               color: ProjectColors.disabled),
                         );
-                      })
+                      }),
+                      const CircleAvatar(
+                        radius: 14,
+                        backgroundColor: Colors.transparent,
+                        child: Image(
+                          image: ProjectImages.singleCoin,
+                          fit: BoxFit.fill,
+                        ),
+                      ),
                     ],
                   ),
                 ),

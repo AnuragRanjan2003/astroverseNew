@@ -71,32 +71,49 @@ class CreatePostPortrait extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.spaceAround,
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Obx(() {
-                        var image = const Image(
-                          image: ProjectImages.planet,
-                          height: 150,
-                          width: 150,
-                          fit: BoxFit.cover,
-                        );
-                        if (controller.image.value != null) {
-                          image = Image.file(
-                            File(controller.image.value!.path),
-                            height: 150,
-                            width: 150,
-                            fit: BoxFit.cover,
-                          );
-                        }
-                        return GestureDetector(
-                          child: ClipRRect(
-                            borderRadius:
-                                const BorderRadius.all(Radius.circular(20)),
-                            child: image,
-                          ),
-                          onTap: () async {
-                            await controller.pickImage();
-                          },
-                        );
-                      }),
+                      SizedBox(
+                        height: 170,
+                        width: 170,
+                        child: Stack(
+                          children: [
+                            Obx(() {
+                              var image = const Image(
+                                image: ProjectImages.planet,
+                                height: 150,
+                                width: 150,
+                                fit: BoxFit.cover,
+                              );
+                              if (controller.image.value != null) {
+                                image = Image.file(
+                                  File(controller.image.value!.path),
+                                  height: 150,
+                                  width: 150,
+                                  fit: BoxFit.cover,
+                                );
+                              }
+                              return ClipRRect(
+                                borderRadius:
+                                    const BorderRadius.all(Radius.circular(20)),
+                                child: image,
+                              );
+                            }),
+                            Align(
+                                alignment: Alignment.bottomRight,
+                                child: IconButton(
+                                    onPressed: () async {
+                                      await controller.pickImage();
+                                    },
+                                    style: const ButtonStyle(
+                                        backgroundColor:
+                                            MaterialStatePropertyAll(
+                                                Colors.blue)),
+                                    icon: const Icon(
+                                      Icons.link,
+                                      color: Colors.white,
+                                    )))
+                          ],
+                        ),
+                      ),
                       const SizedBox(
                         height: 30,
                       ),
@@ -207,6 +224,7 @@ class CreatePostPortrait extends StatelessWidget {
                                     lng: location.longitude!,
                                     title: title.value.text,
                                     comments: 0,
+                                    astrologer: user.astro,
                                     featured: user.featured,
                                     upVotes: 0,
                                     views: 0,

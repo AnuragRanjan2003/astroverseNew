@@ -13,14 +13,22 @@ import 'package:get/get.dart';
 
 typedef Json = Map<String, dynamic>;
 
-class UpgradeFeaturesBottomSheet extends StatelessWidget {
+class UpgradeFeaturesBottomSheet extends StatefulWidget {
   final User user;
 
   const UpgradeFeaturesBottomSheet({super.key, required this.user});
 
   @override
+  State<UpgradeFeaturesBottomSheet> createState() =>
+      _UpgradeFeaturesBottomSheetState();
+}
+
+class _UpgradeFeaturesBottomSheetState
+    extends State<UpgradeFeaturesBottomSheet> {
+  late AuthController auth;
+
+  @override
   Widget build(BuildContext context) {
-    final AuthController auth = Get.find();
     return Container(
       color: Colors.white,
       padding: const EdgeInsets.only(top: 20, left: 20, right: 20),
@@ -36,19 +44,27 @@ class UpgradeFeaturesBottomSheet extends StatelessWidget {
               height: 20,
             ),
             ...List.generate(
-                Plans.plans.length,
-                (index) => Plans.plans[index].value + VisibilityPlans.all + 1 >
-                        user.plan
+                Plans.plans.sublist(1).length,
+                (index) => Plans.plans.sublist(1)[index].value + VisibilityPlans.all + 1 >
+                        widget.user.plan
                     ? Obx(() => Padding(
                           padding: const EdgeInsets.symmetric(vertical: 5),
                           child: PlanItem(
-                              plan: Plans.plans[index],
+                              plan: Plans.plans.sublist(1)[index],
                               selected: auth.selectedUpgradeFeatures.value,
                               onChange: (p) {
                                 auth.selectedUpgradeFeatures.value = p.value;
                               }),
                         ))
-                    : const SizedBox.shrink()),
+                    : Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 5),
+                        child: PlanItem(
+                          plan: Plans.plans.sublist(1)[index],
+                          selected: -1,
+                          taken: true,
+                          onChange: (p) {},
+                        ),
+                      )),
             const SizedBox(
               height: 10,
             ),
@@ -69,7 +85,7 @@ class UpgradeFeaturesBottomSheet extends StatelessWidget {
                             ? null
                             : () {
                                 auth.updateRangeForUser(
-                                    user.uid,
+                                    widget.user.uid,
                                     plan!.value + VisibilityPlans.all + 1,
                                     plan.price, (p0) {
                                   if (p0.isSuccess) {
@@ -120,7 +136,7 @@ class UpgradeFeaturesBottomSheet extends StatelessWidget {
 
   validate(AuthController auth) {
     final x = (auth.selectedUpgradeFeatures.value == -1 ||
-            user.coins <
+            widget.user.coins <
                 Plans.plans
                     .singleWhere(
                         (p) => auth.selectedUpgradeFeatures.value == p.value)
@@ -128,5 +144,12 @@ class UpgradeFeaturesBottomSheet extends StatelessWidget {
         auth.upgradingFeatures.isTrue;
     log("$x", name: "VALIDATE");
     return x;
+  }
+
+  @override
+  void initState() {
+    auth = Get.find();
+    auth.selectedUpgradeFeatures.value = -1;
+    super.initState();
   }
 }

@@ -9,6 +9,7 @@ import 'package:astroverse/models/user_bank_details.dart';
 import 'package:astroverse/repo/auth_repo.dart';
 import 'package:astroverse/res/strings/backend_strings.dart';
 import 'package:astroverse/routes/routes.dart';
+import 'package:astroverse/screens/main/main_screen.dart';
 import 'package:astroverse/utils/crypt.dart';
 import 'package:astroverse/utils/resource.dart';
 import 'package:astroverse/utils/zego_cloud_services.dart';
@@ -18,7 +19,6 @@ import 'package:dart_geohash/dart_geohash.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:firebase_auth/firebase_auth.dart' as fb;
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_sign_in/google_sign_in.dart';
@@ -77,7 +77,11 @@ class AuthController extends GetxController {
             {"lastActive": FieldValue.serverTimestamp()}, fUser.uid);
         emailVerified.value = _repo.checkIfEmailVerified();
         if (emailVerified.value == true) {
-          Get.toNamed(Routes.main);
+          Navigator.pushReplacement(
+              Get.context!,
+              MaterialPageRoute(
+                builder: (context) => const MainScreen(),
+              ));
         }
       }
     }
@@ -128,7 +132,7 @@ class AuthController extends GetxController {
 
   startListeningToUser(String uid) async {
     userLoading.value = true;
-    await _zegoService.initCallInvitationService(uid, "You");
+
     _sub = _repo.getUserStream(uid).listen((event) {
       debugPrint("user:${event.data()}");
       userLoading.value = false;
@@ -139,6 +143,9 @@ class AuthController extends GetxController {
       }
     });
   }
+
+  Future<Resource<DocumentSnapshot<models.User>>> getUserData(String id) =>
+      _repo.getUserData(id);
 
   getExtraInfo(String uid) {
     _repo.getExtraInfo(uid).then((value) {
@@ -222,8 +229,8 @@ class AuthController extends GetxController {
     super.onClose();
   }
 
-  createUserWithEmailForAstro(
-      models.User user, String password, void Function(Resource) updateUI) {
+  createUserWithEmailForAstro(models.User user, String password,
+      void Function(Resource<String>) updateUI) {
     user.plan = 0;
     String path = BackEndStrings.defaultImage;
     if (image.value != null) path = image.value!.path;
@@ -252,7 +259,7 @@ class AuthController extends GetxController {
                 _repo.setExtraInfo(info, user.uid).then((value) {
                   _analytics.logSignUp(signUpMethod: "Email");
                   loading.value = false;
-                  updateUI(p0);
+                  updateUI(value);
                 });
               }, (event as Success<UserCredential>).data);
             } else {
@@ -271,7 +278,7 @@ class AuthController extends GetxController {
             _repo.setExtraInfo(info, user.uid).then((value) {
               _analytics.logSignUp(signUpMethod: "Email");
               loading.value = false;
-              updateUI(p0);
+              updateUI(value);
             });
           }, event.data);
         }
@@ -279,7 +286,7 @@ class AuthController extends GetxController {
         loading.value = false;
         event = event as Failure<UserCredential>;
         error.value = event.error;
-        updateUI(event);
+        updateUI(Failure("error"));
       }
     });
   }
@@ -339,10 +346,10 @@ class AuthController extends GetxController {
       debugPrint("checking email verification");
       if (emailVerified.value == true) {
         debugPrint("email verified");
-        onVerified();
         timer.cancel();
         _timer?.cancel();
-        Get.offAllNamed(Routes.main);
+        onVerified();
+        Get.toNamed(Routes.main);
       }
     });
   }

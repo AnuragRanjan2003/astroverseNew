@@ -24,7 +24,8 @@ class PhoneAuthController extends GetxController {
     }).onError((error, stackTrace) {});
   }
 
-  checkOtp(PhoneAuthCredential cred , void Function() onVerified , void Function() onFailed) {
+  checkOtp(PhoneAuthCredential cred, void Function() onVerified,
+      void Function() onFailed) {
     _repo.checkOTP(cred).then((value) {
       if (value == true) {
         log("phone verified", name: _tag);

@@ -6,6 +6,7 @@ import 'package:astroverse/firebase_options.dart';
 import 'package:astroverse/res/colors/project_colors.dart';
 import 'package:astroverse/routes/routes.dart';
 import 'package:astroverse/utils/crypt.dart';
+import 'package:astroverse/utils/env_vars.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
@@ -18,7 +19,10 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   final app = await Firebase.initializeApp(
       options: DefaultFirebaseOptions.currentPlatform);
+
   await dotenv.load(fileName: '.env');
+
+  Crypt.initialize(dotenv.get(EnvVars.cryptKey));
 
 
   final analytics = FirebaseAnalytics.instanceFor(app: app);

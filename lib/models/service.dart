@@ -41,7 +41,7 @@ class Service extends Post {
     required super.views,
     required this.place,
     required super.featured,
-  }) : super(date: date);
+  }) : super(date: date, astrologer: true);
 
   factory Service.fromJson(json) => _$ServiceFromJson(json);
 

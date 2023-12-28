@@ -1,7 +1,9 @@
 import 'dart:async';
 import 'dart:developer';
+import 'dart:ffi';
 
 import 'package:astroverse/repo/location_repo.dart';
+import 'package:geocode/geocode.dart';
 import 'package:get/get.dart';
 import 'package:location/location.dart';
 
@@ -11,6 +13,7 @@ class LocationController extends GetxController {
   Rx<bool> permission = false.obs;
   Rxn<LocationData> location = Rxn();
   StreamSubscription<LocationData>? _locationSub;
+  RxString address = "fetching address..".obs;
 
   @override
   void onInit() {
@@ -31,6 +34,26 @@ class LocationController extends GetxController {
       log("$event", name: "LOCATION");
       onLocationChanged(LatLng(event.latitude!, event.longitude!));
     });
+  }
+
+  getAddress(double? lat, double? lng) async {
+    if (lat == null || lng == null) return address.value = "invalid location";
+    address.value=  "fetching address..";
+    final geoCode = GeoCode();
+    try{
+      Address address =
+      await geoCode.reverseGeocoding(latitude: lat, longitude: lng);
+      if(address.streetAddress == null || address.postal==null){
+          return this.address.value = "could not fetch";
+      }
+      return  this.address.value = "${address.streetAddress} , ${address.postal}";
+
+    } on GeocodeException catch(e){
+      return address.value = "Error!Please refresh[${lat.toStringAsFixed(2)},${lng.toStringAsFixed(2)}]";
+    }catch(e){
+      return address.value = "Error!Please refresh[${lat.toStringAsFixed(2)},${lng.toStringAsFixed(2)}]";
+    }
+
   }
 
   checkServiceEnabled() {

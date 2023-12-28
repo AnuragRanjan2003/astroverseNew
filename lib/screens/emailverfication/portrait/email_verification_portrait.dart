@@ -4,6 +4,7 @@ import 'package:astroverse/res/decor/button_decor.dart';
 import 'package:astroverse/res/dims/global.dart';
 import 'package:astroverse/res/strings/verify_email_string.dart';
 import 'package:astroverse/res/textStyles/text_styles.dart';
+import 'package:astroverse/routes/routes.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 

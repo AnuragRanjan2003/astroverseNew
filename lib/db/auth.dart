@@ -3,7 +3,6 @@ import 'dart:developer';
 import 'package:astroverse/utils/phone_auth_callbacks.dart';
 import 'package:astroverse/utils/resource.dart';
 import 'package:astroverse/utils/safe_call.dart';
-import 'package:cometchat_chat_uikit/cometchat_chat_uikit.dart' as c;
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
@@ -18,9 +17,10 @@ class Auth {
 
   Future<Resource<UserCredential>> signupWithEmail(
           models.User user, String password) async =>
-      await SafeCall().authCall<UserCredential>(() async =>
-          await mAuth.createUserWithEmailAndPassword(
-              email: user.email, password: password));
+      await SafeCall().authCall<UserCredential>(
+        () async => await mAuth.createUserWithEmailAndPassword(
+            email: user.email, password: password),
+      );
 
   Future<Resource<String>> sendVerificationEmail() async =>
       await SafeCall().authCall<String>(() async {

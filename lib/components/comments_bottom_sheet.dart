@@ -55,7 +55,8 @@ class CommentsBottomSheet extends StatelessWidget {
                   ),
                   Obx(() {
                     final list = postPageController.replies;
-                    if(postPageController.repliesLoading.isTrue) return const CircularProgressIndicator();
+                    if (postPageController.repliesLoading.isTrue)
+                      return const CircularProgressIndicator();
                     return Expanded(
                         child: list.isNotEmpty
                             ? ListView.separated(
@@ -63,32 +64,19 @@ class CommentsBottomSheet extends StatelessWidget {
                                     const SizedBox(
                                   height: 20,
                                 ),
-                                itemBuilder: (context, index) {
-                                  if (index == list.length) {
-                                    return TextButton(
-                                        onPressed: postPageController
-                                                .moreCommentsToLoad.isTrue
-                                            ? () {
-                                                postPageController
-                                                    .fetchMoreComments(post.id);
-                                              }
-                                            : null,
-                                        child: const Text("load more"));
-                                  }
-                                  return CommentItem(
-                                    item: list[index],
-                                    onClick: () {
-                                      postPageController.commentId.value =
-                                          list[index].id;
-                                      pageController.animateToPage(1,
-                                          duration:
-                                              const Duration(milliseconds: 300),
-                                          curve: Curves.linear);
-                                    },
-                                    replyButton: false,
-                                  );
-                                },
-                                itemCount: list.length + 1,
+                                itemBuilder: (context, index) => CommentItem(
+                                  item: list[index],
+                                  onClick: () {
+                                    postPageController.commentId.value =
+                                        list[index].id;
+                                    pageController.animateToPage(1,
+                                        duration:
+                                            const Duration(milliseconds: 300),
+                                        curve: Curves.linear);
+                                  },
+                                  replyButton: false,
+                                ),
+                                itemCount: list.length,
                               )
                             : const Center(
                                 child: Column(
@@ -181,8 +169,10 @@ class CommentsBottomSheet extends StatelessWidget {
                                 return CommentItem(
                                   item: list[index],
                                   onClick: () {
-                                    postPageController.commentId.value = list[index].id;
-                                    postPageController.getReplies(post.id, list[index].id);
+                                    postPageController.commentId.value =
+                                        list[index].id;
+                                    postPageController.getReplies(
+                                        post.id, list[index].id);
                                     pageController.animateToPage(1,
                                         duration:
                                             const Duration(milliseconds: 300),
@@ -267,8 +257,9 @@ class CommentsBottomSheet extends StatelessWidget {
     c.commentList.add(comment);
   }
 
-  _postReply(String postId , String commentId ,String text , User user ,FullPostPageController c){
-    if(commentId.isEmpty) return;
+  _postReply(String postId, String commentId, String text, User user,
+      FullPostPageController c) {
+    if (commentId.isEmpty) return;
     final comment = Comment(
       user.name,
       user.uid,
