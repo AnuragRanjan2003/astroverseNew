@@ -6,6 +6,8 @@ import 'package:astroverse/res/img/images.dart';
 import 'package:astroverse/res/strings/ask_screen_strings.dart';
 import 'package:astroverse/res/textStyles/text_styles.dart';
 import 'package:astroverse/routes/routes.dart';
+import 'package:astroverse/screens/astroLogIn/astro_login_screen.dart';
+import 'package:astroverse/screens/userLogin/user_login_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -49,7 +51,7 @@ class AskScreenPortrait extends StatelessWidget {
                 height: 30,
               ),
               MaterialButton(
-                  onPressed: () => navigateToUserLogin(),
+                  onPressed: () => navigateToUserLogin(context),
                   padding: const EdgeInsets.symmetric(vertical: 15),
                   shape: ButtonDecors.outlined,
                   child: Text(
@@ -60,7 +62,7 @@ class AskScreenPortrait extends StatelessWidget {
                 height: 15,
               ),
               MaterialButton(
-                onPressed: navigateToAstroLogin,
+                onPressed: ()=>navigateToAstroLogin(context),
                 padding: const EdgeInsets.symmetric(vertical: 15),
                 color: ProjectColors.main,
                 shape: ButtonDecors.filled,
@@ -76,11 +78,13 @@ class AskScreenPortrait extends StatelessWidget {
     );
   }
 
-  void navigateToUserLogin() {
-    Get.toNamed(Routes.userLogin);
+  void navigateToUserLogin(BuildContext context) {
+    //Get.toNamed(Routes.userLogin);
+    Navigator.of(context).push(MaterialPageRoute(builder: (context) => const UserLoginScreen(),));
   }
 
-  void navigateToAstroLogin() {
-    Get.toNamed(Routes.astroLogin);
+  void navigateToAstroLogin(BuildContext context) {
+    //Get.toNamed(Routes.astroLogin);
+    Navigator.of(context).push(MaterialPageRoute(builder: (context) => const AstroLogInScreen(),));
   }
 }

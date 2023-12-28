@@ -1,6 +1,7 @@
 import 'dart:developer';
 
 import 'package:astroverse/res/dims/global.dart';
+import 'package:astroverse/screens/main/main_screen.dart';
 import 'package:astroverse/utils/resource.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -209,9 +210,16 @@ class AstroLogInPortrait extends StatelessWidget {
                       }),
                       MaterialButton(
                         onPressed: () {
-                          auth.signInWithGoogle((p0) {
-                            log("login successful", name: "GOOGLE");
-                          });
+                          auth.signInWithGoogle(
+                            (p0) {
+                              log("login successful", name: "GOOGLE");
+                            },
+                            () {
+                              Navigator.of(context).push(MaterialPageRoute(
+                                builder: (context) => const MainScreen(),
+                              ));
+                            },
+                          );
                         },
                         shape: ButtonDecors.outlined,
                         padding: const EdgeInsets.symmetric(vertical: 12),

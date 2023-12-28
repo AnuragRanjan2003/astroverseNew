@@ -7,14 +7,15 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 class PublicProfileScreen extends StatelessWidget {
-  const PublicProfileScreen({super.key});
+  final User user;
+  const PublicProfileScreen({super.key, required this.user});
 
   @override
   Widget build(BuildContext context) {
     final controller = Get.put(PublicProfileController());
     return Responsive(
-      portrait: (p0) => PublicProfilePortrait(cons: p0),
-      landscape: (p0) => PublicProfileLandscape(cons: p0),
+      portrait: (p0) => PublicProfilePortrait(cons: p0 , user: user),
+      landscape: (p0) => PublicProfileLandscape(cons: p0 , user : user),
     );
   }
 }

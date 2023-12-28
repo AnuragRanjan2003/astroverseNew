@@ -20,12 +20,14 @@ import '../../../utils/resource.dart';
 
 class OrderedProductPortrait extends StatelessWidget {
   final BoxConstraints cons;
+  Purchase? purchase;
 
-  const OrderedProductPortrait({super.key, required this.cons});
+  OrderedProductPortrait(
+      {super.key, required this.cons, required this.purchase});
 
   @override
   Widget build(BuildContext context) {
-    Purchase? purchase = Get.arguments;
+    //Purchase? purchase = Get.arguments;
     final OrderController order = Get.find();
     final AuthController auth = Get.find();
     final crypto = Crypt();
@@ -41,8 +43,8 @@ class OrderedProductPortrait extends StatelessWidget {
     order.purchase.value = purchase;
 
     if (auth.user.value != null) {
-      order.fetchService(auth.user.value!.uid, purchase.itemId);
-      order.startPurchaseStream(auth.user.value!.uid, purchase.purchaseId,
+      order.fetchService(auth.user.value!.uid, purchase!.itemId);
+      order.startPurchaseStream(auth.user.value!.uid, purchase!.purchaseId,
           (p0) {
         purchase = p0;
       });

@@ -115,7 +115,8 @@ class AstroSignUpPortrait extends StatelessWidget {
                             );
                             debugPrint(" sent : ${user.toString()}");
                             auth.pass.value = password.value.text;
-                            Get.toNamed(Routes.upiScreen,
+                            //TODO("nav")
+                            Get.offNamed(Routes.upiScreen,
                                 arguments: Parcel(data: user, google: false));
                           },
                           shape: ButtonDecors.filled,
@@ -137,13 +138,15 @@ class AstroSignUpPortrait extends StatelessWidget {
                               auth.saveGoogleData(
                                   p0,
                                   (value) {
-                                    Get.toNamed(Routes.upiScreen,
+                                    //TODO("nav")
+                                    Get.offNamed(Routes.upiScreen,
                                         arguments:
                                             Parcel(data: p0, google: true));
                                   },
                                   true,
                                   () {
-                                    Get.toNamed(Routes.upiScreen,
+                                    // TODO("nav")
+                                    Get.offNamed(Routes.upiScreen,
                                         arguments:
                                             Parcel(data: p0, google: true));
                                   });

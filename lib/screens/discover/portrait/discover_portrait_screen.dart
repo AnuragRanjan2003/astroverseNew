@@ -3,7 +3,7 @@ import 'package:astroverse/components/my_post_page.dart';
 import 'package:astroverse/components/new_posts_page.dart';
 import 'package:astroverse/controllers/location_controller.dart';
 import 'package:astroverse/res/colors/project_colors.dart';
-import 'package:astroverse/routes/routes.dart';
+import 'package:astroverse/screens/createPost/create_post_screen.dart';
 import 'package:dart_geohash/dart_geohash.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -40,7 +40,10 @@ class DiscoverScreenPortrait extends StatelessWidget {
           margin: const EdgeInsets.only(top: 10),
           child: FloatingActionButton(
             onPressed: () {
-              Get.toNamed(Routes.createPostScreen);
+              // Get.toNamed(Routes.createPostScreen);
+              Navigator.of(context).push(MaterialPageRoute(
+                builder: (context) => const CreatePostScreen(),
+              ));
             },
             backgroundColor: Colors.lightBlue,
             elevation: 0,

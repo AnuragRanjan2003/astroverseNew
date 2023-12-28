@@ -65,7 +65,7 @@ class DeleteAccountBottomSheet extends StatelessWidget {
                   if (res.user != null) {
                     auth.deleteAccount(res.user!, (p) {
                       if (p.isSuccess) {
-                        Get.offAllNamed(Routes.ask);
+                        Navigator.of(context)..pop()..pop();
                       } else {
                         ScaffoldMessenger.of(context).showSnackBar(
                             const SnackBar(
@@ -89,9 +89,13 @@ class DeleteAccountBottomSheet extends StatelessWidget {
               const Row(
                 children: [
                   Expanded(child: Divider()),
-                  SizedBox(width: 5,),
+                  SizedBox(
+                    width: 5,
+                  ),
                   Text("OR"),
-                  SizedBox(width: 5,),
+                  SizedBox(
+                    width: 5,
+                  ),
                   Expanded(child: Divider()),
                 ],
               ),

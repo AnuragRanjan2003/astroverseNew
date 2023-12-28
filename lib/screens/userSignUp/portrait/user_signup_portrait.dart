@@ -109,7 +109,10 @@ class UserSignUpPortrait extends StatelessWidget {
                               coins: 0,
                               profileViews: 0,
                             );
-                            Get.toNamed(Routes.upiScreen,
+                            // Get.toNamed(Routes.upiScreen,
+                            //     arguments: Parcel(data: user, google: false));
+                            //TODO("nav")
+                            Get.offNamed(Routes.upiScreen,
                                 arguments: Parcel(data: user, google: false));
                           },
                           shape: ButtonDecors.filled,
@@ -131,13 +134,21 @@ class UserSignUpPortrait extends StatelessWidget {
                               auth.saveGoogleData(
                                   p0,
                                   (value) {
-                                    Get.toNamed(Routes.upiScreen,
+                                    // Get.toNamed(Routes.upiScreen,
+                                    //     arguments:
+                                    //         Parcel(data: p0, google: true));
+                                    //TODO("nav")
+                                    Get.offNamed(Routes.upiScreen,
                                         arguments:
                                             Parcel(data: p0, google: true));
                                   },
                                   false,
                                   () {
-                                    Get.toNamed(Routes.upiScreen,
+                                    // Get.toNamed(Routes.upiScreen,
+                                    //     arguments:
+                                    //         Parcel(data: p0, google: true));
+                                    //TODO("nav")
+                                    Get.offNamed(Routes.upiScreen,
                                         arguments:
                                             Parcel(data: p0, google: true));
                                   });

@@ -36,6 +36,7 @@ class Auth {
 
   bool checkEmailVerified() {
     mAuth.currentUser?.reload();
+    if(mAuth.currentUser==null) return false;
     return mAuth.currentUser!.emailVerified;
   }
 

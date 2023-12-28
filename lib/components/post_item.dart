@@ -2,12 +2,11 @@ import 'dart:developer';
 
 import 'package:astroverse/res/colors/project_colors.dart';
 import 'package:astroverse/res/textStyles/text_styles.dart';
-import 'package:astroverse/routes/routes.dart';
+import 'package:astroverse/screens/post_full_screen/post_full_screen.dart';
 import 'package:astroverse/utils/crypt.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:get/get.dart';
 
 import '../models/post.dart';
 
@@ -22,7 +21,11 @@ class PostItem extends StatelessWidget {
     return GestureDetector(
       onTap: () {
         log("tapped", name: "POST ITEM");
-        Get.toNamed(Routes.postFullScreen, arguments: post);
+        // Get.toNamed(Routes.postFullScreen, arguments: post);
+        // TODO("nav")
+        Navigator.of(context).push(MaterialPageRoute(
+          builder: (context) => PostFullScreen(post: post),
+        ));
       },
       child: Container(
         decoration: const BoxDecoration(

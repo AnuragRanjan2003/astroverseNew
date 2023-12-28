@@ -9,6 +9,8 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:shimmer/shimmer.dart';
 
+import '../../../routes/routes.dart';
+
 class ProfileScreenPortrait extends StatelessWidget {
   final BoxConstraints cons;
   final User? user;
@@ -45,7 +47,9 @@ class ProfileScreenPortrait extends StatelessWidget {
                     bankDetails: auth.bankDetails.value,
                     onEdit: () {},
                     onLogOut: () {
-                      auth.logOut();
+                      auth.logOut(() {
+                        Navigator.of(context).popUntil(ModalRoute.withName(Routes.ask));
+                      },);
                     },
                   );
                 } else {

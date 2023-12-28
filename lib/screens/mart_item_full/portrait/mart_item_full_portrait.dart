@@ -13,12 +13,13 @@ import 'package:intl/intl.dart';
 
 class MartItemFullPortrait extends StatelessWidget {
   final BoxConstraints cons;
+  final Service item;
 
-  const MartItemFullPortrait({super.key, required this.cons});
+  const MartItemFullPortrait({super.key, required this.cons, required this.item});
 
   @override
   Widget build(BuildContext context) {
-    final Service? item = Get.arguments;
+    //final Service? item = Get.arguments;
     final ServiceController service = Get.find();
     final AuthController auth = Get.find();
     final sb = StringBuffer();

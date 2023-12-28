@@ -1,9 +1,7 @@
 import 'package:astroverse/models/purchase.dart';
 import 'package:astroverse/res/colors/project_colors.dart';
+import 'package:astroverse/screens/orderedProductScreen/ordered_product_screen.dart';
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
-
-import '../routes/routes.dart';
 
 class PurchaseItem extends StatelessWidget {
   final Purchase purchase;
@@ -77,10 +75,14 @@ class PurchaseItem extends StatelessWidget {
                             "canceled", null, Colors.red.shade200, Colors.red),
                 MaterialButton(
                   onPressed: () {
-                    Get.toNamed(
-                      Routes.orderedProductScreen,
-                      arguments: purchase,
-                    );
+                    // Get.toNamed(
+                    //   Routes.orderedProductScreen,
+                    //   arguments: purchase,
+                    // );
+                    Navigator.of(context).push(MaterialPageRoute(
+                      builder: (context) =>
+                          OrderedProductScreen(purchase: purchase),
+                    ));
                   },
                   color: ProjectColors.lightBlack,
                   shape: const RoundedRectangleBorder(

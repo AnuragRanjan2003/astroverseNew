@@ -174,9 +174,13 @@ class AskLocationPortrait extends StatelessWidget {
                                     location.location.value!.longitude!,
                                     location.location.value!.latitude!);
 
-                                Get.toNamed(Routes.phoneAuth,
+                                // Get.toNamed(Routes.phoneAuth,
+                                //     arguments:
+                                //         Parcel(data: user, google: google));
+                                //TODO("nav")
+                                Get.offNamed(Routes.phoneAuth,
                                     arguments:
-                                        Parcel(data: user, google: google));
+                                    Parcel(data: user, google: google));
                               },
                               shape: ButtonDecors.filled,
                               color: Colors.blue,

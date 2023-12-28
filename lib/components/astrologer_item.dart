@@ -1,6 +1,7 @@
 import 'package:astroverse/models/user.dart';
 import 'package:astroverse/res/colors/project_colors.dart';
 import 'package:astroverse/routes/routes.dart';
+import 'package:astroverse/screens/public_profile/public_profile_screen.dart';
 import 'package:astroverse/utils/crypt.dart';
 import 'package:astroverse/utils/hero_tag.dart';
 import 'package:astroverse/utils/num_parser.dart';
@@ -17,7 +18,8 @@ class AstrologerItem extends StatelessWidget {
     final crypto = Crypt();
     return GestureDetector(
       onTap: () {
-        Get.toNamed(Routes.publicProfile, arguments: user);
+        //Get.toNamed(Routes.publicProfile, arguments: user);
+        Navigator.of(context).push(MaterialPageRoute(builder: (context) => PublicProfileScreen(user: user),));
       },
       child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 15),

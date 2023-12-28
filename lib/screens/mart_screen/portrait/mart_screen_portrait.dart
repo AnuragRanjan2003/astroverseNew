@@ -8,7 +8,8 @@ import 'package:astroverse/controllers/location_controller.dart';
 import 'package:astroverse/controllers/service_controller.dart';
 import 'package:astroverse/models/service.dart';
 import 'package:astroverse/res/colors/project_colors.dart';
-import 'package:astroverse/routes/routes.dart';
+import 'package:astroverse/screens/createService/create_service_screen.dart';
+import 'package:astroverse/screens/my_mart_item_full_screen/my_mart_item_full_screen.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -125,7 +126,8 @@ class MartScreenPortrait extends StatelessWidget {
                                 content: Text("bank details not available")));
                         return;
                       }
-                      return _postItemScreen();
+                      // TODO("nav")
+                      return _postItemScreen(context);
                     },
                     backgroundColor: Colors.lightBlue.shade300,
                     elevation: 0,
@@ -178,7 +180,8 @@ class MartScreenPortrait extends StatelessWidget {
                               : (list.length + 1) ~/ 2;
 
                           if (list.isEmpty) {
-                            return const MessageScreen(text: "No relevant services");
+                            return const MessageScreen(
+                                text: "No relevant services");
                           }
                           return ListView.separated(
                             itemCount: len + 2,
@@ -291,12 +294,21 @@ class MartScreenPortrait extends StatelessWidget {
                 children: [
                   const Padding(
                     padding: EdgeInsets.symmetric(horizontal: 20),
-                    child: Text("Your\nServices" , style: TextStyle(fontSize: 24 , fontWeight: FontWeight.bold ,color: ProjectColors.lightBlack),),
+                    child: Text(
+                      "Your\nServices",
+                      style: TextStyle(
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold,
+                          color: ProjectColors.lightBlack),
+                    ),
                   ),
                   Expanded(
                     child: Obx(() {
                       var list = service.myServices;
-                      if(list.isEmpty) return const MessageScreen(text: "You have not posted services");
+                      if (list.isEmpty) {
+                        return const MessageScreen(
+                            text: "You have not posted services");
+                      }
                       return ListView.separated(
                         itemCount: list.length,
                         itemBuilder: (context, index) {
@@ -305,10 +317,16 @@ class MartScreenPortrait extends StatelessWidget {
                               leading: const Icon(Icons.shopping_bag_outlined),
                               title: Text(s.name),
                               onTap: () {
-                                Get.toNamed(Routes.myMartItemScreen, arguments: s);
+                                //TODO(""nav")
+                                //Get.toNamed(Routes.myMartItemScreen, arguments: s);
+                                Navigator.of(context).push(MaterialPageRoute(
+                                  builder: (context) =>
+                                      MyMartItemFullScreen(ss: s),
+                                ));
                               },
                               subtitle: Text(
-                                DateFormat.yMMMd().format(DateTime.parse(s.date)),
+                                DateFormat.yMMMd()
+                                    .format(DateTime.parse(s.date)),
                               ));
                         },
                         separatorBuilder: (context, index) => const Divider(),
@@ -342,7 +360,11 @@ class MartScreenPortrait extends StatelessWidget {
     );
   }
 
-  void _postItemScreen() => Get.toNamed(Routes.createServiceScreen);
+  void _postItemScreen(BuildContext context) =>
+      //Get.toNamed(Routes.createServiceScreen);
+      Navigator.of(context).push(MaterialPageRoute(
+        builder: (context) => const CreateServiceScreen(),
+      ));
 }
 
 extension on LocationData {

@@ -7,6 +7,8 @@ import 'package:astroverse/res/decor/button_decor.dart';
 import 'package:astroverse/res/dims/global.dart';
 import 'package:astroverse/res/img/images.dart';
 import 'package:astroverse/res/textStyles/text_styles.dart';
+import 'package:astroverse/screens/emailverfication/email_verification_screen.dart';
+import 'package:astroverse/screens/main/main_screen.dart';
 import 'package:astroverse/utils/resource.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -232,12 +234,19 @@ class UserLoginScreenPortrait extends StatelessWidget {
                         MaterialButton(
                           onPressed: () {
                             auth.loading.value = true;
-                            auth.signInWithGoogle((p0) {
-                              auth.loading.value = false;
-                              if (p0.isSuccess) {
-                                log(" login successful", name: "GOOGLE");
-                              }
-                            });
+                            auth.signInWithGoogle(
+                              (p0) {
+                                auth.loading.value = false;
+                                if (p0.isSuccess) {
+                                  log(" login successful", name: "GOOGLE");
+                                }
+                              },
+                              () {
+                                Navigator.of(context).push(MaterialPageRoute(
+                                  builder: (context) => const MainScreen(),
+                                ));
+                              },
+                            );
                           },
                           shape: ButtonDecors.outlined,
                           padding: const EdgeInsets.symmetric(vertical: 12),
@@ -286,9 +295,12 @@ class UserLoginScreenPortrait extends StatelessWidget {
   void updateUI(Resource<dynamic> p, bool b, BuildContext context) {
     if (p.isSuccess) {
       if (b == false) {
-        Get.toNamed(Routes.emailVerify);
+        //Get.toNamed(Routes.emailVerify);
+        Navigator.push(context, MaterialPageRoute(builder: (context) => const EmailVerificationScreen(),));
+
       } else {
-        Get.offAllNamed(Routes.main);
+        Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (context) => const MainScreen(),));
+        //Get.offAllNamed(Routes.main);
       }
     } else {
       p = p as Failure<dynamic>;

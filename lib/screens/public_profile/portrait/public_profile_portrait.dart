@@ -23,15 +23,16 @@ import 'package:shimmer/shimmer.dart';
 
 class PublicProfilePortrait extends StatelessWidget {
   final BoxConstraints cons;
+  final User user;
   static const _imageRadius = 60.00;
 
-  const PublicProfilePortrait({super.key, required this.cons});
+  const PublicProfilePortrait({super.key, required this.cons , required this.user});
 
   @override
   Widget build(BuildContext context) {
     final crypto = Crypt();
-    User user = Get.arguments;
-    log("$user", name: "ASTRO USER");
+    //User user = Get.arguments;
+    //log("$user", name: "ASTRO USER");
     final AuthController auth = Get.find();
     log("${auth.user.value!.plan}", name: "USER PLAN");
     final decryptedUserName = crypto.decryptFromBase64String(user.name);

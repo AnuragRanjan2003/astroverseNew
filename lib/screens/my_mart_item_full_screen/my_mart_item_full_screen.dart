@@ -12,13 +12,14 @@ import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 
 class MyMartItemFullScreen extends StatelessWidget {
-  const MyMartItemFullScreen({super.key});
+  final SaveService ss;
+  const MyMartItemFullScreen({super.key, required this.ss});
 
   @override
   Widget build(BuildContext context) {
     final ServiceController service = Get.find();
     final AuthController auth = Get.find();
-    final SaveService ss = Get.arguments;
+    //final SaveService ss = Get.arguments;
 
     final crypto = Crypt();
 

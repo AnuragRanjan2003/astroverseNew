@@ -120,8 +120,14 @@ class OtpScreenPortrait extends StatelessWidget {
                                             auth.createUserWithEmailForAstro(
                                                 user, auth.pass.value, (p0) {
                                               if (p0.isSuccess) {
-                                                Get.toNamed(
+                                                //TODO("nav")
+                                                // Get.toNamed(
+                                                //   Routes.emailVerify,
+                                                // );
+                                                Get.offNamedUntil(
                                                   Routes.emailVerify,
+                                                  ModalRoute.withName(
+                                                      Routes.ask),
                                                 );
                                               } else {
                                                 log(
@@ -143,8 +149,10 @@ class OtpScreenPortrait extends StatelessWidget {
                                                 },
                                                 user.astro,
                                                 () {
-                                                  Get.offAndToNamed(
-                                                      Routes.main);
+                                                  //TODO("nav")
+                                                  // Get.toNamed(
+                                                  //     Routes.main);
+                                                  Get.offNamed(Routes.main);
                                                 });
                                           }
                                         }, () {

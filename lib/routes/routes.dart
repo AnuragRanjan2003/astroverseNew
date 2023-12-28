@@ -98,43 +98,43 @@ class AppRoutes {
         ),
         GetPage(
           name: Routes.upiScreen,
-          page: () => const EnterUpiScreen(),
+          page: () => const AskLocationScreen(),
         ),
-        GetPage(
-          name: Routes.postFullScreen,
-          page: () => const PostFullScreen(),
-        ),
+        // GetPage(
+        //   name: Routes.postFullScreen,
+        //   page: () => const PostFullScreen(),
+        // ),
         GetPage(
           name: Routes.createPostScreen,
           page: () => const CreatePostScreen(),
         ),
-        GetPage(
-          name: Routes.martItemFullScreen,
-          page: () => const MartItemFullScreen(),
-        ),
+        // GetPage(
+        //   name: Routes.martItemFullScreen,
+        //   page: () => const MartItemFullScreen(),
+        // ),
         GetPage(
           name: Routes.createServiceScreen,
           page: () => const CreateServiceScreen(),
         ),
-        GetPage(
-          name: Routes.publicProfile,
-          page: () => const PublicProfileScreen(),
-        ),
+        // GetPage(
+        //   name: Routes.publicProfile,
+        //   page: () => const PublicProfileScreen(),
+        // ),
         GetPage(
           name: Routes.purchasesScreen,
           page: () => const PurchasesScreen(),
         ),
-        GetPage(
-          name: Routes.purchaseFullScreen,
-          page: () => const PostFullScreen(),
-        ),
-        GetPage(
-          name: Routes.orderedProductScreen,
-          page: () => const OrderedProductScreen(),
-        ),
-    GetPage(
-      name: Routes.myMartItemScreen,
-      page: () => const MyMartItemFullScreen(),
-    ),
+        // GetPage(
+        //   name: Routes.purchaseFullScreen,
+        //   page: () => const PostFullScreen(),
+        // ),
+        // GetPage(
+        //   name: Routes.orderedProductScreen,
+        //   page: () => const OrderedProductScreen(),
+        // ),
+    // GetPage(
+    //   name: Routes.myMartItemScreen,
+    //   page: () => const MyMartItemFullScreen(),
+    // ),
       ];
 }

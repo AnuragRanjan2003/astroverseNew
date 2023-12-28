@@ -2,10 +2,9 @@ import 'package:astroverse/models/service.dart';
 import 'package:astroverse/res/colors/project_colors.dart';
 import 'package:astroverse/res/img/images.dart';
 import 'package:astroverse/res/textStyles/text_styles.dart';
-import 'package:astroverse/routes/routes.dart';
+import 'package:astroverse/screens/mart_item_full/mart_item_full_screen.dart';
 import 'package:astroverse/utils/crypt.dart';
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 
 class MartItem extends StatelessWidget {
   final Service item;
@@ -93,32 +92,32 @@ class MartItem extends StatelessWidget {
                       ],
                     ),
                   ),
-                  item.featured?Container(
-                    padding:
-                    const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
-                    decoration: BoxDecoration(
-                        borderRadius:
-                        const BorderRadius.all(Radius.circular(8)),
-                        border: Border.all(width: 1)),
-                    child: const Wrap(
-                      crossAxisAlignment: WrapCrossAlignment.center,
-                      spacing: 3,
-                      children: [
-                        Icon(
-                          Icons.star,
-                          color: Colors.orangeAccent,
-                          size: 10,
-                        ),
-                        Text(
-                          'featured',
-                          style: TextStyle(
-                            fontSize: 10,
-                            color: Colors.orangeAccent
+                  item.featured
+                      ? Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 5, vertical: 2),
+                          decoration: BoxDecoration(
+                              borderRadius:
+                                  const BorderRadius.all(Radius.circular(8)),
+                              border: Border.all(width: 1)),
+                          child: const Wrap(
+                            crossAxisAlignment: WrapCrossAlignment.center,
+                            spacing: 3,
+                            children: [
+                              Icon(
+                                Icons.star,
+                                color: Colors.orangeAccent,
+                                size: 10,
+                              ),
+                              Text(
+                                'featured',
+                                style: TextStyle(
+                                    fontSize: 10, color: Colors.orangeAccent),
+                              ),
+                            ],
                           ),
-                        ),
-                      ],
-                    ),
-                  ):const SizedBox.shrink(),
+                        )
+                      : const SizedBox.shrink(),
                   Text(
                     item.genre[0],
                     style: const TextStyle(
@@ -130,8 +129,12 @@ class MartItem extends StatelessWidget {
                     style: TextStylesLight().bodyBold,
                   ),
                   MaterialButton(
+                    // TODO("nav")
                     onPressed: () =>
-                        Get.toNamed(Routes.martItemFullScreen, arguments: item),
+                        //Get.toNamed(Routes.martItemFullScreen, arguments: item),
+                        Navigator.of(context).push(MaterialPageRoute(
+                      builder: (context) => MartItemFullScreen(item: item),
+                    )),
                     padding: const EdgeInsets.symmetric(horizontal: 40),
                     shape: const RoundedRectangleBorder(
                         borderRadius: BorderRadius.all(Radius.circular(30))),

@@ -9,7 +9,6 @@ import 'package:astroverse/models/user_bank_details.dart';
 import 'package:astroverse/repo/auth_repo.dart';
 import 'package:astroverse/res/strings/backend_strings.dart';
 import 'package:astroverse/routes/routes.dart';
-import 'package:astroverse/screens/main/main_screen.dart';
 import 'package:astroverse/utils/crypt.dart';
 import 'package:astroverse/utils/resource.dart';
 import 'package:astroverse/utils/zego_cloud_services.dart';
@@ -77,11 +76,7 @@ class AuthController extends GetxController {
             {"lastActive": FieldValue.serverTimestamp()}, fUser.uid);
         emailVerified.value = _repo.checkIfEmailVerified();
         if (emailVerified.value == true) {
-          Navigator.pushReplacement(
-              Get.context!,
-              MaterialPageRoute(
-                builder: (context) => const MainScreen(),
-              ));
+          Get.toNamed(Routes.main);
         }
       }
     }
@@ -349,7 +344,7 @@ class AuthController extends GetxController {
         timer.cancel();
         _timer?.cancel();
         onVerified();
-        Get.toNamed(Routes.main);
+        //Get.toNamed(Routes.main);
       }
     });
   }
@@ -384,7 +379,7 @@ class AuthController extends GetxController {
     await _bankSub?.cancel();
   }
 
-  signInWithGoogle(void Function(Resource<UserCredential>) updateUI) {
+  signInWithGoogle(void Function(Resource<UserCredential>) updateUI , Function() onLogin) {
     _repo.signInWithGoogle().then((value) {
       if (value.isSuccess) {
         _analytics.logLogin(loginMethod: "Google");
@@ -405,7 +400,8 @@ class AuthController extends GetxController {
               await startListeningToUser(
                 (value).data.user!.uid,
               );
-              Get.offAndToNamed(Routes.main);
+              //Get.offAndToNamed(Routes.main);
+              onLogin();
             } else {
               // TODO(implement alert)
             }
@@ -574,13 +570,12 @@ class AuthController extends GetxController {
     });
   }
 
-  void logOut() {
+  void logOut(Function() onLogout) {
     CometChatUIKit.logout(
         onSuccess: (p0) {
           _repo.logOut().then((value) {
             _zegoService.disposeCallInvitationService().then((value) {
-              Get.offAllNamed(Routes.ask);
-              _analytics.logEvent(name: "logout");
+              onLogout();
             });
           });
         },

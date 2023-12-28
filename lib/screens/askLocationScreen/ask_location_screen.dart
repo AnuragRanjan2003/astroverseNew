@@ -3,8 +3,8 @@ import 'package:flutter/material.dart';
 
 import '../../utils/responsive.dart';
 
-class EnterUpiScreen extends StatelessWidget {
-  const EnterUpiScreen({
+class AskLocationScreen extends StatelessWidget {
+  const AskLocationScreen({
     super.key,
   });
 

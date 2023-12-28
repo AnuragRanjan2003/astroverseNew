@@ -17,8 +17,9 @@ import '../../../models/post.dart';
 
 class PostFullPortrait extends StatelessWidget {
   final BoxConstraints cons;
+  final Post post;
 
-  const PostFullPortrait({super.key, required this.cons});
+  const PostFullPortrait({super.key, required this.cons, required this.post});
 
   @override
   Widget build(BuildContext context) {
@@ -26,7 +27,7 @@ class PostFullPortrait extends StatelessWidget {
     final MainController main = Get.find();
     final AuthController auth = Get.find();
     final FullPostPageController controller = Get.put(FullPostPageController());
-    final Post post = Get.arguments;
+    //final Post post = Get.arguments;
     log(post.authorId, name: "UID");
 
     if (auth.user.value != null && auth.user.value!.uid != post.authorId) {
