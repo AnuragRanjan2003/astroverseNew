@@ -1,15 +1,36 @@
 import 'package:astroverse/models/plan.dart';
+import 'package:astroverse/utils/geo.dart';
 
 class Plans {
   static const plans = [
-    Plan("Basic", 0.00, 0, "good plan.\nnice plan.\nmust take."),
-    Plan("Premium", 100.00, 1, "good plan.\nnice plan."),
+    Plan("Basic", 50, "good plan.nice plan.\nmust take.", 0),
+    Plan("Premium", 100, "good plan.nice plan.", 1),
   ];
 
-  static const astroPlans =[
-    Plan("Free",0.00,2,"good plan.\nnice plan.\nmust take."),
-    Plan("Astro Disha",299.0,3,"good plan.\nnice plan.\nmust take."),
-    Plan("Astro Kripa",499.0,4,"good plan.\nnice plan.\nmust take."),
-    Plan("Astro Mahima",999.0,5,"good plan.\nnice plan.\nmust take."),
+  static const astroPlans = [
+    Plan(
+      "Free",
+      0,
+      "good plan.nice plan.must take.",
+      VisibilityPlans.locality,
+    ),
+    Plan(
+      "Astro Disha",
+      100,
+      "good plan.nice plan.must take.",
+      VisibilityPlans.city,
+    ),
+    Plan(
+      "Astro Kripa",
+      300,
+      "good plan.nice plan.must take.",
+      VisibilityPlans.state,
+    ),
+    Plan(
+      "Astro Mahima",
+      500,
+      "good plan.nice plan.must take.",
+      VisibilityPlans.all,
+    ),
   ];
 }

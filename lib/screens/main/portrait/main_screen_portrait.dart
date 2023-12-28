@@ -6,10 +6,10 @@ import 'package:astroverse/res/colors/project_colors.dart';
 import 'package:astroverse/res/textStyles/text_styles.dart';
 import 'package:astroverse/routes/routes.dart';
 import 'package:astroverse/screens/mart_screen/mart_screen.dart';
-import 'package:astroverse/screens/messaging.dart';
 import 'package:astroverse/screens/peopleScreen/portrait/people_screen_portrait.dart';
 import 'package:astroverse/screens/profile/profile_screen.dart';
 import 'package:astroverse/screens/purchasesScreen/purchases_screen.dart';
+import 'package:astroverse/utils/crypt.dart';
 import 'package:astroverse/utils/env_vars.dart';
 import 'package:cometchat_chat_uikit/cometchat_chat_uikit.dart' as c;
 import 'package:firebase_analytics/firebase_analytics.dart';
@@ -38,6 +38,8 @@ class MainScreenPortrait extends StatelessWidget {
 
     final AuthController auth = Get.find();
 
+    final crypto = Crypt();
+
     c.UIKitSettings uiKitSettings = (c.UIKitSettingsBuilder()
           ..subscriptionType = c.CometChatSubscriptionType.allUsers
           ..autoEstablishSocketConnection = true
@@ -62,16 +64,29 @@ class MainScreenPortrait extends StatelessWidget {
     c.CometChatUIKit.login(auth.user.value!.uid, onSuccess: (e) {
       log("login completed successfully  ${e.toString()}", name: "CHAT");
     }, onError: (e) {
-      log("login failed with exception: ${e.message}", name: "CHAT");
-    });
+      if (e.code == "ERR_UID_NOT_FOUND") {
+        log("user not found , creating user!", name: "CHAT");
+        var user = auth.user.value!;
+        final authUser =
+            c.User(name: crypto.decryptFromBase64String(user.name), uid: user.uid, avatar: user.image);
+        c.CometChatUIKit.createUser(
+            c.User(
+                name: authUser.name,
+                uid: authUser.uid,
+                avatar: authUser.avatar), onSuccess: (e) {
+          log("created user successfully  ${e.toString()}", name: "CHAT");
 
-    /*c.CometChatUIKit.createUser(
-        c.User(name: authUser.name, uid: authUser.uid, avatar: authUser.image),
-        onSuccess: (e) {
-      log("sign up completed successfully  ${e.toString()}", name: "CHAT");
-    }, onError: (e) {
-      log("sign up failed with exception: ${e.message}", name: "CHAT");
-    });*/
+          c.CometChatUIKit.login(authUser.uid);
+        }, onError: (e) {
+          log("sign up failed with exception: ${e.message}", name: "CHAT");
+          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("could not connect to chat servers")));
+        });
+      } else {
+        log("login failed with exception: ${e.message} ; code : ${e.code}",
+            name: "CHAT");
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("could not connect to chat servers")));
+      }
+    });
 
     final tabs = [
       const GButton(

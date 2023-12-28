@@ -15,7 +15,7 @@ Service _$ServiceFromJson(Map json) => Service(
       title: json['title'] as String,
       range: (json['range'] as num).toInt(),
       geoHash: json['geoHash'] as String,
-      deliveryMethod: Service._intFromNullable(json['deliveryMethod']) ,
+      deliveryMethod: Service._intFromNullable(json['deliveryMethod']),
       description: json['description'] as String,
       genre: (json['genre'] as List<dynamic>).map((e) => e as String).toList(),
       date: Service._dateFromTimeStamp(json['date'] as Timestamp),
@@ -23,6 +23,9 @@ Service _$ServiceFromJson(Map json) => Service(
       authorName: json['authorName'] as String,
       authorId: json['authorId'] as String,
       place: json['place'] as String,
+      views: (json['views'] as num).toInt(),
+      active: (json['active'] as bool),
+      featured: (json['featured'] as bool),
     )
       ..id = json['id'] as String
       ..upVotes = json['upVotes'] as int;
@@ -45,5 +48,8 @@ Map<String, dynamic> _$ServiceToJson(Service instance) => <String, dynamic>{
       'date': Service._dateAsIs(instance.date),
       'geoHash': instance.geoHash,
       'range': instance.range,
-      'deliveryMethod':instance.deliveryMethod
+      'deliveryMethod': instance.deliveryMethod,
+      'views': instance.views,
+      'active': instance.active,
+      'featured': instance.featured,
     };

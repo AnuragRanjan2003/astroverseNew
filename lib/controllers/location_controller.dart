@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'dart:developer';
 
-import 'package:astroverse/repo/locarion_repo.dart';
+import 'package:astroverse/repo/location_repo.dart';
 import 'package:get/get.dart';
 import 'package:location/location.dart';
 

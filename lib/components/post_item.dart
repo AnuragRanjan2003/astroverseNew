@@ -3,6 +3,7 @@ import 'dart:developer';
 import 'package:astroverse/res/colors/project_colors.dart';
 import 'package:astroverse/res/textStyles/text_styles.dart';
 import 'package:astroverse/routes/routes.dart';
+import 'package:astroverse/utils/crypt.dart';
 import 'package:astroverse/utils/hero_tag.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
@@ -18,6 +19,7 @@ class PostItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final crypto  = Crypt();
     return GestureDetector(
       onTap: () {
         log("tapped", name: "POST ITEM");
@@ -46,7 +48,7 @@ class PostItem extends StatelessWidget {
                     const SizedBox(
                       height: 2,
                     ),
-                    Text("@${post.authorName}",
+                    Text("@${crypto.decryptFromBase64String(post.authorName)}",
                         style: const TextStyle(fontSize: 12)),
                     const SizedBox(
                       height: 5,

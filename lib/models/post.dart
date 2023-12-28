@@ -16,8 +16,9 @@ class Post {
   final double lng;
   final int comments;
   final int views;
-  final String authorName;
+  String authorName;
   final String authorId;
+  final bool featured;
 
   Post({
     required this.lat,
@@ -26,6 +27,7 @@ class Post {
     required this.title,
     required this.description,
     required this.genre,
+    required this.featured,
     @JsonKey(fromJson: _dateFromTimeStamp, toJson: _dateAsIs)
     required this.date,
     required this.imageUrl,

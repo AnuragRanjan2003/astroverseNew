@@ -21,6 +21,9 @@ class FullPostPageController extends GetxController {
   Rxn<QueryDocumentSnapshot<Comment>> lastComment = Rxn();
   RxBool moreCommentsToLoad = false.obs;
 
+  RxString commentId = "".obs;
+  RxList<Comment> replies = RxList();
+  RxBool repliesLoading = false.obs;
 
   void getAuthor(String uid) {
     if (author.value != null) return;
@@ -59,9 +62,9 @@ class FullPostPageController extends GetxController {
     }
   }
 
-void addPostView(String id){
-    _postRepo.addPostView(id);
-}
+  void addPostView(String id, String authorId) {
+    _postRepo.addPostView(id, authorId);
+  }
 
   void fetchComments(String postId) {
     _commentRepo.fetchComments(postId).then((value) {
@@ -72,7 +75,7 @@ void addPostView(String id){
         for (var element in value.data) {
           list.add(element.data());
         }
-        lastComment.value = value.data.last;
+        list.isNotEmpty ? lastComment.value = value.data.last : null;
         moreCommentsToLoad.value = list.isNotEmpty;
 
         commentList.value = list;
@@ -83,10 +86,10 @@ void addPostView(String id){
     });
   }
 
-  void postComment(Comment comment, postId) {
+  void postComment(Comment comment, postId ,String postAuthorId,) {
     final id = const Uuid().v4();
     comment.id = id;
-    _commentRepo.postComment(postId, comment).then((value) {
+    _commentRepo.postComment(postId, postAuthorId,comment).then((value) {
       if (value.isSuccess) {
         value = value as Success<Comment>;
         log('comment posted', name: "COMMENT");
@@ -96,4 +99,29 @@ void addPostView(String id){
       }
     });
   }
+
+  void getReplies(String postId , String commentId){
+    repliesLoading.value = true;
+    _commentRepo.fetchReplies(postId, commentId).then((value) {
+      repliesLoading.value = false;
+      if(value.isSuccess){
+        value as Success<List<Comment>>;
+        replies.value = value.data;
+      }else{
+        value as Failure<List<Comment>>;
+        log(value.error , name: "REPLIES");
+      }
+    });
+  }
+
+  void postReply(String postId ,String commentId , Comment c){
+    _commentRepo.postReply(c, postId, commentId).then((value){
+      if(value.isSuccess){
+        log("replied success" , name: "REPLIES");
+      }else{
+        log("replied failed" , name: "REPLIES");
+      }
+    });
+  }
+
 }

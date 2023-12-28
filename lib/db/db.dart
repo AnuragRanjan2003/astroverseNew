@@ -9,20 +9,25 @@ import 'package:astroverse/models/save_service.dart';
 import 'package:astroverse/models/service.dart';
 import 'package:astroverse/models/transaction.dart' as t;
 import 'package:astroverse/models/user.dart' as models;
+import 'package:astroverse/models/user_bank_details.dart';
 import 'package:astroverse/res/strings/backend_strings.dart';
 import 'package:astroverse/utils/comment_utils.dart';
+import 'package:astroverse/utils/crypt.dart';
 import 'package:astroverse/utils/geo.dart';
 import 'package:astroverse/utils/purchase_utils.dart';
+import 'package:astroverse/utils/reply_utils.dart';
 import 'package:astroverse/utils/resource.dart';
 import 'package:astroverse/utils/safe_call.dart';
 import 'package:astroverse/utils/service_utils.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 typedef SetInfo = String;
 typedef Json = Map<String, dynamic>;
 
 class Database {
   static const int _limit = 20;
+  final _crypt = Crypt();
   final _fireStore = FirebaseFirestore.instance;
   final _userCollection = FirebaseFirestore.instance
       .collection(BackEndStrings.userCollection)
@@ -55,6 +60,18 @@ class Database {
         fromFirestore: (snapshot, options) => Post.fromJson(snapshot.data()!),
         toFirestore: (value, options) => value.toJson(),
       );
+
+  DocumentReference<UserBankDetails> _userAccountDocument(String uid) =>
+      FirebaseFirestore.instance
+          .collection(BackEndStrings.userCollection)
+          .doc(uid)
+          .collection(BackEndStrings.metaDataCollection)
+          .doc(BackEndStrings.userBankAccountDocument)
+          .withConverter<UserBankDetails>(
+            fromFirestore: (snapshot, options) =>
+                UserBankDetails.fromJson(snapshot.data()),
+            toFirestore: (bankDetails, options) => bankDetails.toJson(),
+          );
 
   final _transactionCollection = FirebaseFirestore.instance
       .collection(BackEndStrings.transactionCollection)
@@ -109,17 +126,44 @@ class Database {
             toFirestore: (value, options) => value.toJson(),
           );
 
-  Future<Resource<void>> saveUserData(models.User user) async =>
-      await SafeCall().fireStoreCall<void>(
-          () async => await _userCollection.doc(user.uid).set(user));
+  Future<Resource<void>> saveUserData(models.User user) async {
+    return SafeCall().fireStoreCall<void>(
+        () async => await _userCollection.doc(user.uid).set(user));
+  }
+
+  Future<Resource<UserBankDetails>> saveBankDetails(
+      UserBankDetails data, String uid) async {
+    try {
+      await _userAccountDocument(uid).set(data, SetOptions(merge: true));
+      return Success<UserBankDetails>(data);
+    } on FirebaseException catch (e) {
+      return Failure<UserBankDetails>(e.message.toString());
+    } catch (e) {
+      return Failure<UserBankDetails>(e.toString());
+    }
+  }
+
+  Future<Resource<Json>> updateBankDetails(Json data, String uid) async {
+    try {
+      await _userAccountDocument(uid).update(data);
+      return Success<Json>(data);
+    } on FirebaseException catch (e) {
+      return Failure<Json>(e.message.toString());
+    } catch (e) {
+      return Failure<Json>(e.toString());
+    }
+  }
+
+  Stream<DocumentSnapshot<UserBankDetails>> getBankDetailsStream(String uid) =>
+      _userAccountDocument(uid).snapshots();
 
   Stream<DocumentSnapshot<models.User>> getUserStream(String id) =>
       _userCollection.doc(id).snapshots();
 
-  Future<Resource<DocumentSnapshot<models.User>>> getUserData(
-          String uid) async =>
-      await SafeCall().fireStoreCall<DocumentSnapshot<models.User>>(
-          () async => await _userCollection.doc(uid).get());
+  Future<Resource<DocumentSnapshot<models.User>>> getUserData(String uid) {
+    return SafeCall().fireStoreCall<DocumentSnapshot<models.User>>(
+        () async => await _userCollection.doc(uid).get());
+  }
 
   Future<bool> checkForUserData(String uid) async {
     final res = await _userCollection.where('uid', isEqualTo: uid).get();
@@ -141,8 +185,23 @@ class Database {
     }
   }
 
-  Future<Resource<Service>> saveService(Service s, String id) async =>
-      await ServiceUtils(id).savePost(s);
+  Future<Resource<User>> deleteUserData(User user) async {
+    try {
+      final batch = FirebaseFirestore.instance.batch();
+      batch.delete(_userCollection.doc(user.uid));
+      batch.delete(_extraInfoDocument(user.uid));
+      await batch.commit();
+      return Success<User>(user);
+    } on FirebaseException catch (e) {
+      return Failure<User>(e.message.toString());
+    } catch (e) {
+      return Failure<User>(e.toString());
+    }
+  }
+
+  Future<Resource<Service>> saveService(
+          Service s, String id, int coinsCost) async =>
+      await ServiceUtils(id).savePostWithCoinCost(s, coinsCost);
 
   Future<Resource<List<QueryDocumentSnapshot<Service>>>>
       fetchServiceByGenreAndPage(List<String> genre, String uid) async =>
@@ -163,13 +222,21 @@ class Database {
   Future<Resource<List<QueryDocumentSnapshot<Post>>>> fetchPostsByGenreAndPage(
       List<String> genre, String uid) async {
     try {
-      QuerySnapshot<Post> res = await _postCollection
+      Query<Post> q1 = _postCollection
           .limit(_limit)
-          .where("authorId", isNotEqualTo: uid)
-          .orderBy("authorId")
-          .orderBy("date", descending: true)
-          .get();
-      final data = res.docs;
+          .where("featured", isEqualTo: false)
+          .orderBy("date", descending: true);
+
+      Query<Post> q2 = _postCollection
+          .limit(_limit)
+          .where("featured", isEqualTo: true)
+          .orderBy("date", descending: true);
+      final res = await Future.wait([q1.get(), q2.get()]);
+      var data = <QueryDocumentSnapshot<Post>>[];
+
+      data.addOthersPost(uid, res[0].docs);
+      data.addOthersPost(uid, res[1].docs);
+
       return Success(data);
     } on FirebaseException catch (e) {
       return Failure<List<QueryDocumentSnapshot<Post>>>(e.message.toString());
@@ -178,25 +245,68 @@ class Database {
     }
   }
 
-  Future<Resource<List<QueryDocumentSnapshot<Post>>>> fetchMorePosts(
-      QueryDocumentSnapshot<Post> lastPost,
-      List<String> genre,
-      String uid) async {
+  Future<Resource<List<QueryDocumentSnapshot<Post>>>> fetchUserPosts(
+      String userId) async {
     try {
-      final res = await _postCollection
+      Query<Post> q = _userPostCollection(userId)
           .limit(_limit)
-          .where("authorId", isNotEqualTo: uid)
-          .orderBy("authorId")
-          .orderBy("date", descending: true)
-          .startAfterDocument(lastPost)
-          .get();
-      return Success(res.docs);
+          .orderBy("date", descending: true);
+
+      final data = await q.get();
+      return Success(data.docs);
     } on FirebaseException catch (e) {
       return Failure<List<QueryDocumentSnapshot<Post>>>(e.message.toString());
     } catch (e) {
       return Failure<List<QueryDocumentSnapshot<Post>>>(e.toString());
     }
   }
+
+  Future<Resource<List<QueryDocumentSnapshot<Post>>>> fetchMorePosts(
+      QueryDocumentSnapshot<Post>? lastPost,
+      QueryDocumentSnapshot<Post>? lastPostForFeatured,
+      List<String> genre,
+      String uid) async {
+    try {
+      Query<Post> q1 = _postCollection
+          .limit(_limit)
+          .where("featured", isEqualTo: false)
+          .orderBy("date", descending: true);
+
+      Query<Post> q2 = _postCollection
+          .limit(_limit)
+          .where("featured", isEqualTo: true)
+          .orderBy("date", descending: true);
+
+      if (lastPost != null) {
+        q1 = q1.startAfterDocument(lastPost);
+      }
+
+      if (lastPostForFeatured != null) {
+        q2 = q2.startAfterDocument(lastPostForFeatured);
+      }
+
+      final res = await Future.wait([q1.get(), q2.get()]);
+
+      var data = <QueryDocumentSnapshot<Post>>[];
+
+      data.addOthersPost(uid, res[0].docs);
+      data.addOthersPost(uid, res[1].docs);
+
+      return Success(data);
+    } on FirebaseException catch (e) {
+      return Failure<List<QueryDocumentSnapshot<Post>>>(e.message.toString());
+    } catch (e) {
+      return Failure<List<QueryDocumentSnapshot<Post>>>(e.toString());
+    }
+  }
+
+  Future<Resource<List<Comment>>> fetchReplies(
+          String postId, String commentId) =>
+      ReplyUtil().fetchReplies(postId, commentId);
+
+  Future<Resource<Comment>> postReply(
+          String postId, String commentId, Comment c) =>
+      ReplyUtil().postReply(c, postId, commentId);
 
   Future<Resource<int>> increaseVote(
       String id, String uid, String authorId) async {
@@ -235,6 +345,22 @@ class Database {
     }
   }
 
+  Future<Resource<Json>> upgradeRangeForUser(
+      String uid, int coins, int plan) async {
+    try {
+      final data = {
+        "plan": plan,
+        "coins": FieldValue.increment(-coins),
+      };
+      await _userCollection.doc(uid).update(data);
+      return Success<Json>(data);
+    } on FirebaseException catch (e) {
+      return Failure<Json>(e.message.toString());
+    } catch (e) {
+      return Failure<Json>(e.toString());
+    }
+  }
+
   Stream<QuerySnapshot<PostSave>> upVotedPostsStream(String uid) {
     return FirebaseFirestore.instance
         .collection(BackEndStrings.userCollection)
@@ -248,27 +374,33 @@ class Database {
         .snapshots();
   }
 
+  Future<Resource<List<QueryDocumentSnapshot<SaveService>>>> fetchMyServices(
+          String uid) =>
+      ServiceUtils(uid).fetchMyServices();
+
   Stream<QuerySnapshot<SaveService>> upVotedServicesStream(String uid) =>
       ServiceUtils(uid).likedStream(uid);
 
   Future<Resource<List<QueryDocumentSnapshot<Comment>>>> fetchComments(
           String postId) async =>
-      await CommentUtils(postId).fetchByGenreAndPage([], "");
+      await CommentUtils(postId, "").fetchByGenreAndPage([], "");
 
   Future<Resource<List<QueryDocumentSnapshot<Comment>>>> fetchMoreComments(
           String postId, QueryDocumentSnapshot<Comment> lastPost) async =>
-      await CommentUtils(postId).fetchMore(lastPost, [], "");
+      await CommentUtils(postId, "").fetchMore(lastPost, [], "");
 
-  Future<Resource<Comment>> postComment(String postId, Comment post) async {
-    await _postCollection
-        .doc(postId)
-        .update({"comments": FieldValue.increment(1)});
-    return await CommentUtils(postId).savePost(post);
+  Future<Resource<Comment>> postComment(
+      String postId, String postAuthorId, Comment post) async {
+    return await CommentUtils(postId, postAuthorId).savePost(post);
   }
 
-  Future<void> addPostView(String id) async {
+  Future<void> addPostView(String id, String authorId) async {
     try {
-      await _postCollection.doc(id).update({'views': FieldValue.increment(1)});
+      final batch = FirebaseFirestore.instance.batch();
+      batch.update(_postCollection.doc(id), {'views': FieldValue.increment(1)});
+      batch.update(_userPostCollection(authorId).doc(id),
+          {'views': FieldValue.increment(1)});
+      await batch.commit();
     } catch (e) {
       log(e.toString(), name: "VIEWS");
     }
@@ -319,12 +451,21 @@ class Database {
           .where('plan', isEqualTo: VisibilityPlans.city)
           .limit(_limit);
 
+      final Query<models.User> queryState = Geo()
+          .createGeoQuery(
+              _userCollection, VisibilityPlans.stateRadius, userLocation)
+          .where('astro', isEqualTo: true)
+          .where('plan', isEqualTo: VisibilityPlans.state)
+          .limit(_limit);
+
       final resLocality = await queryLocality.get();
       final resCity = await queryCity.get();
+      final resState = await queryState.get();
 
       final List<QueryDocumentSnapshot<models.User>> data = [];
       data.addOtherPeople(currentUid, resLocality.docs);
       data.addOtherPeople(currentUid, resCity.docs);
+      data.addOtherPeople(currentUid, resState.docs);
       return Success(data);
     } on FirebaseException catch (e) {
       return Failure<List<QueryDocumentSnapshot<models.User>>>(
@@ -338,6 +479,8 @@ class Database {
       fetchMoreAstrologersByLocation(
           QueryDocumentSnapshot<models.User>? lastForLocality,
           QueryDocumentSnapshot<models.User>? lastForCity,
+          QueryDocumentSnapshot<models.User>? lastForState,
+          QueryDocumentSnapshot<models.User>? lastForAll,
           String currentUid,
           GeoPoint userLocation) async {
     try {
@@ -364,6 +507,26 @@ class Database {
             .limit(_limit);
         final resCity = await queryCity.get();
         data.addOtherPeople(currentUid, resCity.docs);
+      }
+      if (lastForState != null) {
+        final Query<models.User> queryState = Geo()
+            .createGeoQuery(
+                _userCollection, VisibilityPlans.stateRadius, userLocation)
+            .where('astro', isEqualTo: true)
+            .where('plan', isEqualTo: VisibilityPlans.state)
+            .startAfterDocument(lastForState)
+            .limit(_limit);
+        final resState = await queryState.get();
+        data.addOtherPeople(currentUid, resState.docs);
+      }
+      if (lastForAll != null) {
+        final Query<models.User> queryAll = _userCollection
+            .where('astro', isEqualTo: true)
+            .where('plan', isEqualTo: VisibilityPlans.all)
+            .startAfterDocument(lastForAll)
+            .limit(_limit);
+        final resAll = await queryAll.get();
+        data.addOtherPeople(currentUid, resAll.docs);
       }
 
       return Success(data);
@@ -482,6 +645,12 @@ class Database {
       await PurchaseUtils(_purchasesCollection(uid), null, null, null)
           .fetchMore(lastPost, [], uid);
 
+  Future<Resource<Json>> cancelPurchase(
+          String id, String buyerId, String sellerId) =>
+      PurchaseUtils(_purchasesCollection(buyerId),
+              _purchasesCollection(sellerId), null, null)
+          .cancelPurchaseByUser(id);
+
   Future<Resource<Json>> updateService(
           Json data, String serviceId, String uid) async =>
       await ServiceUtils(uid).update(data, serviceId);
@@ -493,16 +662,25 @@ class Database {
   Future<Resource<Service>> fetchService(String uid, String serviceId) =>
       ServiceUtils(uid).fetchService(serviceId);
 
+  Future<Resource<String>> deleteService(SaveService ss, String userId) =>
+      ServiceUtils(userId).deleteService(ss);
+
   Future<Resource<List<QueryDocumentSnapshot<Service>>>>
       fetchMoreServicesByLocation(
     String uid,
     GeoPoint userLocation,
     QueryDocumentSnapshot<Service>? lastForLocality,
     QueryDocumentSnapshot<Service>? lastForCity,
+    QueryDocumentSnapshot<Service>? lastForState,
+    QueryDocumentSnapshot<Service>? lastForAll,
+    QueryDocumentSnapshot<Service>? lastForFeatured,
   ) =>
           ServiceUtils(uid).fetchMoreByLocation(
             lastForLocality,
             lastForCity,
+            lastForState,
+            lastForAll,
+            lastForFeatured,
             userLocation,
             uid,
           );
@@ -513,6 +691,14 @@ extension on List<QueryDocumentSnapshot<models.User>> {
       String userId, Iterable<QueryDocumentSnapshot<models.User>> itr) {
     for (var it in itr) {
       if (it.data().uid != userId) add(it);
+    }
+  }
+}
+
+extension on List<QueryDocumentSnapshot<Post>> {
+  addOthersPost(String userId, Iterable<QueryDocumentSnapshot<Post>> itr) {
+    for (var it in itr) {
+      if (it.data().authorId != userId) add(it);
     }
   }
 }

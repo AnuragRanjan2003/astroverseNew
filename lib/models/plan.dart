@@ -1,9 +1,9 @@
 class Plan {
   final String name;
-  final double price;
-  final int type;
+  final int price;
   final String content;
+  final int value;
 
-  const Plan(this.name, this.price, this.type, this.content);
+  const Plan(this.name, this.price, this.content, this.value);
 
 }

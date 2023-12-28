@@ -9,12 +9,12 @@ class Geo {
   final _geoHasher = GeoHasher();
 
   String getHash(GeoPoint point) {
-    return _geoHasher.encode(point.latitude, point.longitude);
+    return _geoHasher.encode(point.longitude, point.latitude);
   }
 
   GeoPoint getGeoPoint(String geoHash) {
     final res = _geoHasher.decode(geoHash);
-    return GeoPoint(res[0], res[1]);
+    return GeoPoint(res[1], res[0]);
   }
 
   GeoRange computeBoundingHashes(GeoPoint center, double radius) {
@@ -41,16 +41,21 @@ class Ranges {
   static const localityRadius = 5000.00; // in meters
   static const city = 1;
   static const cityRadius = 20000.00;
-  static const all = 2;
-
+  static const state = 2;
+  static const stateRadius = 200000.00;
+  static const all = 3;
+  static const featured = -1;
 }
 
-class VisibilityPlans{
+class VisibilityPlans {
   static const locality = 0;
   static const localityRadius = 5000.00; // in meters
   static const city = 1;
   static const cityRadius = 20000.00;
-  static const all = 2;
+  static const state = 2;
+  static const stateRadius = 200000.00;
+  static const all = 3;
+  static const featured = -1;
 }
 
 class GeoRange {

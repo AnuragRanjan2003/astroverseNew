@@ -14,6 +14,15 @@ class CommentRepo {
           String postId, QueryDocumentSnapshot<Comment> lastPost) async =>
       await _db.fetchMoreComments(postId, lastPost);
 
-  Future<Resource<Comment>> postComment(String postId, Comment comment) async =>
-      await _db.postComment(postId, comment);
+  Future<Resource<Comment>> postComment(
+          String postId, String postAuthorId, Comment comment) async =>
+      await _db.postComment(postId, postAuthorId, comment);
+
+  Future<Resource<Comment>> postReply(
+          Comment c, String postId, String commentId) =>
+      _db.postReply(postId, commentId, c);
+
+  Future<Resource<List<Comment>>> fetchReplies(
+          String postId, String commentId) =>
+      _db.fetchReplies(postId, commentId);
 }

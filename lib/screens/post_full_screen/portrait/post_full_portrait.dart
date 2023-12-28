@@ -3,10 +3,10 @@ import 'dart:developer';
 import 'package:astroverse/components/comments_bottom_sheet.dart';
 import 'package:astroverse/controllers/full_post_page_controller.dart';
 import 'package:astroverse/controllers/main_controller.dart';
-import 'package:astroverse/models/comment.dart';
 import 'package:astroverse/models/post_save.dart';
 import 'package:astroverse/res/dims/global.dart';
 import 'package:astroverse/res/textStyles/text_styles.dart';
+import 'package:astroverse/utils/crypt.dart';
 import 'package:astroverse/utils/hero_tag.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -22,24 +22,20 @@ class PostFullPortrait extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final crypto = Crypt();
     final MainController main = Get.find();
     final AuthController auth = Get.find();
     final FullPostPageController controller = Get.put(FullPostPageController());
     final Post post = Get.arguments;
     log(post.authorId, name: "UID");
-    controller.addPostView(post.id);
-    final dummy = Comment(
-      'xyz',
-      '12345',
-      'nice',
-      '123456',
-      '320ff7bd-5664-4be6-b06b-347d82261a51',
-      false,
-      DateTime.now(),
-    );
+
+    if (auth.user.value != null && auth.user.value!.uid != post.authorId) {
+      controller.addPostView(post.id, post.authorId);
+    }
+
     controller.getAuthor(post.authorId);
-    //controller.postComment(dummy, post.id);
     controller.fetchComments(post.id);
+
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.grey.shade200,
@@ -71,7 +67,7 @@ class PostFullPortrait extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  '@${post.authorName}',
+                  '@${crypto.decryptFromBase64String(post.authorName)}',
                   style: TextStylesLight().coloredSmallThick(Colors.black),
                 ),
                 const SizedBox(
@@ -143,25 +139,27 @@ class PostFullPortrait extends StatelessWidget {
                     children: [
                       Obx(
                         () => IconButton(
-                          onPressed: () {
-                            if (!isUpVoted(main.upVotedPosts, post.id)) {
-                              main.postList.firstWhere(
-                                  (element) => element.id == post.id);
-                              main.increaseVote(
-                                post.id,
-                                auth.user.value!.uid,
-                                post.authorId,
-                                () {},
-                              );
-                            } else {
-                              main.decrementVote(
-                                post.id,
-                                auth.user.value!.uid,
-                                post.authorId,
-                                () {},
-                              );
-                            }
-                          },
+                          onPressed: post.authorId != auth.user.value!.uid
+                              ? () {
+                                  if (!isUpVoted(main.upVotedPosts, post.id)) {
+                                    main.postList.firstWhere(
+                                        (element) => element.id == post.id);
+                                    main.increaseVote(
+                                      post.id,
+                                      auth.user.value!.uid,
+                                      post.authorId,
+                                      () {},
+                                    );
+                                  } else {
+                                    main.decrementVote(
+                                      post.id,
+                                      auth.user.value!.uid,
+                                      post.authorId,
+                                      () {},
+                                    );
+                                  }
+                                }
+                              : null,
                           icon: isUpVoted(main.upVotedPosts, post.id)
                               ? const FaIcon(
                                   FontAwesomeIcons.solidHeart,
@@ -174,13 +172,8 @@ class PostFullPortrait extends StatelessWidget {
                                 ),
                         ),
                       ),
-                      Obx(() {
-                        final i = main.postList
-                            .indexWhere((element) => element.id == post.id);
-                        log('$i', name: 'UI UPVOTE');
-                        return Text(main.postList[i].upVotes.toString(),
-                            style: TextStylesLight().small);
-                      })
+                      Text(post.upVotes.toString(),
+                          style: TextStylesLight().small),
                     ],
                   ),
                   Column(

@@ -2,12 +2,16 @@ import 'dart:developer';
 
 import 'package:astroverse/components/person_items.dart';
 import 'package:astroverse/components/person_posts.dart';
+import 'package:astroverse/controllers/auth_controller.dart';
 import 'package:astroverse/controllers/public_profile_controller.dart';
+import 'package:astroverse/db/plans_db.dart';
 import 'package:astroverse/models/extra_info.dart';
 import 'package:astroverse/models/user.dart';
 import 'package:astroverse/res/img/images.dart';
 import 'package:astroverse/res/textStyles/text_styles.dart';
 import 'package:astroverse/screens/messaging.dart';
+import 'package:astroverse/utils/crypt.dart';
+import 'package:astroverse/utils/geo.dart';
 import 'package:astroverse/utils/hero_tag.dart';
 import 'package:astroverse/utils/num_parser.dart';
 import 'package:astroverse/utils/zego_cloud_services.dart';
@@ -25,62 +29,84 @@ class PublicProfilePortrait extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final User user = Get.arguments;
+    final crypto = Crypt();
+    User user = Get.arguments;
     log("$user", name: "ASTRO USER");
+    final AuthController auth = Get.find();
+    log("${auth.user.value!.plan}", name: "USER PLAN");
+    final decryptedUserName = crypto.decryptFromBase64String(user.name);
+
     final PublicProfileController public = Get.find();
     final zegoService = ZegoCloudServices();
     final ht = cons.maxHeight;
 
     public.getExtraInfo(user.uid);
     public.updateProfileViews(user.uid);
+    public.fetchUserPosts(user.uid);
 
     return DefaultTabController(
       length: 2,
       child: Scaffold(
-        bottomNavigationBar: BottomAppBar(
-          surfaceTintColor: Colors.white,
-          padding: const EdgeInsets.symmetric(horizontal: 10),
-          child: Row(
-            children: [
-              Expanded(
-                  flex: 7, child: zegoService.callButton(user.uid, user.name)),
-              const Spacer(
-                flex: 1,
-              ),
-              Expanded(
-                flex: 7,
-                child: Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: InkWell(
-                    onTap: () {
-                      comet.User receiver = comet.User(
-                          uid: user.uid, name: user.name, avatar: user.image);
-                      Navigator.of(context).push(
-                        MaterialPageRoute(
-                          builder: (context) => Messaging(receiver: receiver),
-                        ),
-                      );
-                    },
-                    child: Container(
-                      width: 80, // Set the width of the button
-                      height: 80, // Set the height of the button
-                      decoration: const BoxDecoration(
-                        shape: BoxShape.circle, // Makes the container circular
-                        color: Colors
-                            .lightBlue, // Set the background color of the button
-                      ),
-                      child: const Center(
-                          child: Icon(
-                        Icons.messenger_outlined,
-                        color: Colors.white,
-                      )),
+        bottomNavigationBar: auth.user.value!.astro == false
+            ? BottomAppBar(
+                surfaceTintColor: Colors.white,
+                padding: const EdgeInsets.symmetric(horizontal: 10),
+                child: Row(
+                  children: [
+                    Visibility(
+                      visible: auth.user.value!.plan  >=
+                          Plans.plans[1].value + VisibilityPlans.all + 1,
+                      child: Expanded(
+                          flex: 7,
+                          child: zegoService.callButton(
+                              user.uid, decryptedUserName)),
                     ),
-                  ),
+                    const Spacer(
+                      flex: 1,
+                    ),
+                    Visibility(
+                      visible: auth.user.value!.plan >=
+                          Plans.plans[0].value + VisibilityPlans.all + 1,
+                      child: Expanded(
+                        flex: 7,
+                        child: Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: InkWell(
+                            onTap: () {
+                              comet.User receiver = comet.User(
+                                  uid: user.uid,
+                                  name: decryptedUserName,
+                                  avatar: user.image);
+                              Navigator.of(context).push(
+                                MaterialPageRoute(
+                                  builder: (context) =>
+                                      Messaging(receiver: receiver),
+                                ),
+                              );
+                            },
+                            child: Container(
+                              width: 80, // Set the width of the button
+                              height: 80, // Set the height of the button
+                              decoration: const BoxDecoration(
+                                shape: BoxShape
+                                    .circle, // Makes the container circular
+                                color: Colors
+                                    .lightBlue, // Set the background color of the button
+                              ),
+                              child: const Center(
+                                  child: Icon(
+                                Icons.messenger_outlined,
+                                color: Colors.white,
+                              )),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
-              ),
-            ],
-          ),
-        ),
+              )
+            : const SizedBox.shrink(),
         body: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
@@ -91,13 +117,13 @@ class PublicProfilePortrait extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   Text(
-                    user.name,
+                    decryptedUserName,
                     style: TextStylesLight().bodyBold,
                   ),
                   const SizedBox(
                     height: 15,
                   ),
-                  Text(user.email),
+                  Text(crypto.decryptFromBase64String(user.email)),
                   const SizedBox(
                     height: 25,
                   ),
@@ -115,11 +141,21 @@ class PublicProfilePortrait extends StatelessWidget {
                 Tab(text: 'items'),
               ],
             ),
-            const Expanded(
+            Expanded(
                 child: TabBarView(
               children: [
-                Center(child: PersonPosts()),
-                Center(child: PersonItems()),
+                Center(child: Obx(() {
+                  if (public.postsLoading.isTrue) {
+                    return const SizedBox(
+                      height: 30,
+                      width: 20,
+                      child: CircularProgressIndicator(),
+                    );
+                  } else {
+                    return PersonPosts(list: public.posts);
+                  }
+                })),
+                const Center(child: PersonItems()),
               ],
             ))
           ],

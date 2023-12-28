@@ -22,10 +22,11 @@ class PostRepo {
       await _db.fetchPostsByGenreAndPage(genre, uid);
 
   Future<Resource<List<QueryDocumentSnapshot<Post>>>> fetchMorePost(
-          QueryDocumentSnapshot<Post> lastPost,
+          QueryDocumentSnapshot<Post>? lastPost,
+          QueryDocumentSnapshot<Post>? lastPostForFeatured,
           List<String> genre,
           String uid) async =>
-      await _db.fetchMorePosts(lastPost, genre, uid);
+      await _db.fetchMorePosts(lastPost,lastPostForFeatured, genre, uid);
 
   Future<Resource<int>> increaseVote(
           String id, String uid, String authorId) async =>
@@ -38,9 +39,13 @@ class PostRepo {
   Stream<QuerySnapshot<PostSave>> upVotedPostStream(String uid) =>
       _db.upVotedPostsStream(uid);
 
-  Future<void> addPostView(String id) async => await _db.addPostView(id);
+  Future<void> addPostView(String id , String authorId) async => await _db.addPostView(id ,authorId);
 
   Future<Resource<SetInfo>> updateExtraInfo(
           Map<String, dynamic> data, String uid) async =>
       await _db.updateExtraInfo(uid, data);
+
+  Future<Resource<List<QueryDocumentSnapshot<Post>>>> fetchUserPost(
+          String userId) =>
+      _db.fetchUserPosts(userId);
 }

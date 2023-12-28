@@ -3,6 +3,7 @@ import 'dart:developer';
 import 'package:astroverse/utils/phone_auth_callbacks.dart';
 import 'package:astroverse/utils/resource.dart';
 import 'package:astroverse/utils/safe_call.dart';
+import 'package:cometchat_chat_uikit/cometchat_chat_uikit.dart' as c;
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
@@ -20,8 +21,6 @@ class Auth {
       await SafeCall().authCall<UserCredential>(() async =>
           await mAuth.createUserWithEmailAndPassword(
               email: user.email, password: password));
-
-
 
   Future<Resource<String>> sendVerificationEmail() async =>
       await SafeCall().authCall<String>(() async {
@@ -79,6 +78,28 @@ class Auth {
     } catch (e) {
       log(e.toString(), name: "PHONE AUTH");
       return false;
+    }
+  }
+
+  Future<Resource<String>> sentForgotPasswordEmail(String email) async {
+    try {
+      await mAuth.sendPasswordResetEmail(email: email);
+      return Success("email sent");
+    } on FirebaseAuthException catch (e) {
+      return Failure(e.message.toString());
+    } catch (e) {
+      return Failure(e.toString());
+    }
+  }
+
+  Future<Resource<User>> deleteAccount(User user) async {
+    try {
+      await user.delete();
+      return Success<User>(user);
+    } on FirebaseAuthException catch (e) {
+      return Failure<User>(e.message.toString());
+    } catch (e) {
+      return Failure<User>(e.toString());
     }
   }
 

@@ -2,6 +2,7 @@ import 'dart:developer';
 import 'dart:io';
 
 import 'package:astroverse/models/purchase.dart';
+import 'package:astroverse/models/save_service.dart';
 import 'package:astroverse/models/service.dart';
 import 'package:astroverse/models/transaction.dart' as t;
 import 'package:astroverse/models/user.dart';
@@ -30,6 +31,9 @@ class ServiceController extends GetxController {
   Rx<bool> morePostsToLoad = true.obs;
   Rxn<QueryDocumentSnapshot<Service>> lastPostForLocality = Rxn();
   Rxn<QueryDocumentSnapshot<Service>> lastPostForCity = Rxn();
+  Rxn<QueryDocumentSnapshot<Service>> lastPostForState = Rxn();
+  Rxn<QueryDocumentSnapshot<Service>> lastPostForAll = Rxn();
+  Rxn<QueryDocumentSnapshot<Service>> lastPostForFeatured = Rxn();
   static const _maxPostLimit = 50;
   Rx<bool> nothingToShow = false.obs;
   Rx<bool> loadingMorePosts = false.obs;
@@ -45,6 +49,10 @@ class ServiceController extends GetxController {
   RxDouble imageSize = 0.45.obs;
   RxInt selectedMode = 0.obs;
   Rxn<String> serviceProvider = Rxn();
+  RxDouble selectedRange = 0.0.obs;
+  RxList<SaveService> myServices = RxList();
+  RxInt currPage = 0.obs;
+  RxBool deletingService = false.obs;
 
   final searchController = TextEditingController(text: "");
 
@@ -73,9 +81,11 @@ class ServiceController extends GetxController {
         buyerName: user.name,
         sellerId: item.authorId,
         sellerName: item.authorName,
+        deliveryMethod: item.deliveryMethod,
         boughtOn: DateTime.now(),
         delivered: false,
         review: null,
+        active: true,
         deliveredOn: null);
     final res1 = await _repo.postPurchase(purchase);
     final res2 = await _repo.updateService(
@@ -122,6 +132,18 @@ class ServiceController extends GetxController {
     _razorPay.clear();
   }
 
+  Future<Resource<Service>> fetchService(String serviceId) =>
+      _repo.fetchService(serviceId);
+
+  void deleteService(
+      SaveService ss, String userId, Function(Resource<String>) updateUI) {
+    deletingService.value = true;
+    _repo.deleteService(ss, userId).then((value) {
+      deletingService.value = false;
+      updateUI(value);
+    });
+  }
+
   attachPaymentEventListeners(User user, Service item) {
     log(item.toString(), name: "ITEM GOT");
     _razorPay.on(Razorpay.EVENT_PAYMENT_SUCCESS,
@@ -159,38 +181,38 @@ class ServiceController extends GetxController {
     }
   }
 
-  selectImage() async {
+  selectImage(void Function(XFile? file) onSelect) async {
     final img = await _imagePicker.pickImage(
         source: ImageSource.gallery, imageQuality: 25);
     image.value = img;
   }
 
   fetchProviderDetails(String providerUid) {
-    log("fetching provider" , name:"PROVIDER");
+    log("fetching provider", name: "PROVIDER");
     serviceProvider.value = null;
     _repo.fetchProviderData(providerUid).then((value) {
       if (value.isSuccess) {
         value = value as Success<DocumentSnapshot<User>>;
-        log("${value.data.data()}" , name:"PROVIDER INFO");
-        if(value.data.data()!=null) {
+        log("${value.data.data()}", name: "PROVIDER INFO");
+        if (value.data.data() != null) {
           serviceProvider.value = BackEndStrings.providerFound;
-        }else{
+        } else {
           serviceProvider.value = BackEndStrings.providerNotFound;
         }
       }
-      log(serviceProvider.value.toString() , name:"PROVIDER");
+      log(serviceProvider.value.toString(), name: "PROVIDER");
     });
   }
 
-  postService(Service s, Function() updateUI) {
+  postService(Service s, int coinCost, Function(Resource<Service>) updateUI) {
     final id = const Uuid().v4();
     s.id = id;
     loading.value = 1;
     if (image.value == null) {
       s.imageUrl = BackEndStrings.defaultServiceImage;
-      _repo.saveService(s, id).then((value) {
+      _repo.saveService(s, id, coinCost).then((value) {
         loading.value = 0;
-        updateUI();
+        updateUI(value);
         if (value.isSuccess) {
           log('service posted', name: tag);
         } else {
@@ -205,22 +227,41 @@ class ServiceController extends GetxController {
       log(image.value!.path, name: 'FILE');
       if (value.isSuccess) {
         s.imageUrl = (value as Success<String>).data;
-        _repo.saveService(s, id).then((value) {
+        _repo.saveService(s, id, coinCost).then((value) {
+          updateUI(value);
           loading.value = 0;
-          updateUI();
           if (value.isSuccess) {
             log('service posted', name: tag);
-            updateUI();
           } else {
             value = value as Failure<Service>;
             log('failed ${value.error}', name: tag);
-            updateUI();
           }
         });
       } else {
         loading.value = 0;
         Get.snackbar('Error', (value as Failure<String>).error);
       }
+    });
+  }
+
+  fetchMyServices(String uid) {
+    _repo.fetchMyServices(uid).then((value) {
+      if (value.isSuccess) {
+        value as Success<List<QueryDocumentSnapshot<SaveService>>>;
+        log("got services ${value.data}", name: "MY SERVICES");
+        myServices.value = value.data.map((e) => e.data()).toList();
+      } else {
+        value as Failure<List<QueryDocumentSnapshot<SaveService>>>;
+        log("error  ${value.error}", name: "MY SERVICES");
+      }
+    });
+  }
+
+  deactivateService(
+      String serviceId, String uid, Function(Resource<Json>) updateUi) {
+    final data = {'active': false};
+    _repo.updateService(data, serviceId, uid).then((value) {
+      updateUi(value);
     });
   }
 
@@ -251,8 +292,9 @@ class ServiceController extends GetxController {
           for (var s in value.data) {
             if (s.exists) {
               list.add(s.data());
-              if (s.data().range == Ranges.locality)
+              if (s.data().range == Ranges.locality) {
                 lastPostForLocality.value = s;
+              }
               if (s.data().range == Ranges.city) lastPostForCity.value = s;
             }
           }
@@ -278,7 +320,11 @@ class ServiceController extends GetxController {
       return;
     }
     loadingMorePosts.value = true;
-    if (lastPostForLocality.value == null && lastPostForCity.value == null) {
+    if (lastPostForLocality.value == null &&
+        lastPostForCity.value == null &&
+        lastPostForState.value != null &&
+        lastPostForAll.value != null &&
+        lastPostForFeatured.value != null) {
       fetchServiceByLocation(uid, (p0) {
         onFetch(p0);
       }, userLocation);
@@ -289,6 +335,9 @@ class ServiceController extends GetxController {
         userLocation,
         lastPostForLocality.value,
         lastPostForCity.value,
+        lastPostForState.value,
+        lastPostForAll.value,
+        lastPostForFeatured.value,
       )
           .then((value) {
         loadingMorePosts.value = false;
@@ -298,8 +347,9 @@ class ServiceController extends GetxController {
           for (var s in value.data) {
             if (s.exists) {
               list.add(s.data());
-              if (s.data().range == Ranges.locality)
+              if (s.data().range == Ranges.locality) {
                 lastPostForLocality.value = s;
+              }
               if (s.data().range == Ranges.city) lastPostForCity.value = s;
             }
           }
@@ -339,8 +389,9 @@ class ServiceController extends GetxController {
             if (element.data().range == Ranges.locality) {
               lastPostForLocality.value = element;
             }
-            if (element.data().range == Ranges.city)
+            if (element.data().range == Ranges.city) {
               lastPostForCity.value = element;
+            }
           }
         }
         //log("${lastPost.value!.data()}", name: "IS NULL");
@@ -425,7 +476,28 @@ class ServiceController extends GetxController {
     }
   }
 
+  void updateServiceView(String serviceId) {
+    final data = {"views": FieldValue.increment(1)};
+    _repo.updateService(data, serviceId, 'x').then((value) {
+      if (value.isSuccess) {
+        log("views updated", name: "SERVICE");
+      } else {
+        value as Failure<Json>;
+        log("views updated failed : ${value.error}", name: "SERVICE");
+      }
+    });
+  }
+
   static double _computeFinalPrice(double price) {
     return price;
+  }
+
+  void resetServiceCreationValues() {
+    price.value = 0.00;
+    formValid.value = false;
+    image.value = null;
+    selectedItem.value = 0;
+    selectedRange.value = 0.0;
+    selectedMode.value = 0;
   }
 }

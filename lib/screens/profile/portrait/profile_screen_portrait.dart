@@ -3,6 +3,8 @@ import 'package:astroverse/components/name_plate.dart';
 import 'package:astroverse/controllers/auth_controller.dart';
 import 'package:astroverse/models/user.dart';
 import 'package:astroverse/res/colors/project_colors.dart';
+import 'package:astroverse/res/img/images.dart';
+import 'package:astroverse/utils/num_parser.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:shimmer/shimmer.dart';
@@ -21,59 +23,91 @@ class ProfileScreenPortrait extends StatelessWidget {
 
     auth.getExtraInfo(auth.user.value!.uid);
 
-    return Scaffold(
-      backgroundColor: ProjectColors.greyBackground,
-      body: Stack(
-        children: [
-          SingleChildScrollView(
-            child: Obx(() {
-              if (auth.user.value != null && auth.info.value != null) {
-                return NamePlate(
-                  user: auth.user.value!,
-                  info: auth.info.value!,
-                  onEdit: () {},
-                  onLogOut: () {
-                    auth.logOut();
-                  },
-                );
-              } else {
-                return loadingShimmer(Center(
-                  child: Container(
-                    color: Colors.white,
-                    width: wd,
-                    height: ht * 0.95,
-                  ),
-                ));
-              }
-            }),
-          ),
-          Align(
-            alignment: Alignment.topRight,
-            child: GestureDetector(
-              onTap: (){
-                Scaffold.of(context).showBottomSheet((context) => const BuyCoinsSheet(),constraints: BoxConstraints(maxHeight: Get.height*0.7) ,enableDrag: false);
-              },
-              child: Container(
-                margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 5),
-                decoration: BoxDecoration(
-                    borderRadius: const BorderRadius.all(Radius.circular(20)),
-                    border: Border.all(width: 1.2, color: Colors.black)),
-                child: const Wrap(
-                  spacing: 8,
-                  crossAxisAlignment: WrapCrossAlignment.center,
-                  children: [
-                    Icon(
-                      Icons.currency_bitcoin,
-                      size: 17,
+    if (auth.bankDetails.value == null) {
+      auth.startBankDetailsStream(auth.user.value!.uid);
+    }
+
+    return PopScope(
+      onPopInvoked: (e) async {
+        auth.endBankDetailsStream();
+      },
+      canPop: true,
+      child: Scaffold(
+        backgroundColor: ProjectColors.greyBackground,
+        body: Stack(
+          children: [
+            SingleChildScrollView(
+              child: Obx(() {
+                if (auth.user.value != null && auth.info.value != null) {
+                  return NamePlate(
+                    user: auth.user.value!,
+                    info: auth.info.value!,
+                    bankDetails: auth.bankDetails.value,
+                    onEdit: () {},
+                    onLogOut: () {
+                      auth.logOut();
+                    },
+                  );
+                } else {
+                  return loadingShimmer(Center(
+                    child: Container(
+                      color: Colors.white,
+                      width: wd,
+                      height: ht * 0.95,
                     ),
-                    Text("100")
-                  ],
+                  ));
+                }
+              }),
+            ),
+            Align(
+              alignment: Alignment.topRight,
+              child: GestureDetector(
+                onTap: () {
+                  Scaffold.of(context).showBottomSheet(
+                      (context) => const BuyCoinsSheet(),
+                      constraints: BoxConstraints(maxHeight: Get.height * 0.8),
+                      enableDrag: false);
+                },
+                child: Container(
+                  margin:
+                      const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 20, vertical: 5),
+                  decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: const BorderRadius.all(Radius.circular(10)),
+                      border: Border.all(
+                          width: 1.2, color: ProjectColors.disabled)),
+                  child: Wrap(
+                    spacing: 8,
+                    crossAxisAlignment: WrapCrossAlignment.center,
+                    children: [
+                      const CircleAvatar(
+                        radius: 14,
+                        backgroundColor: Colors.transparent,
+                        child: Image(
+                          image: ProjectImages.singleCoin,
+                          fit: BoxFit.fill,
+                        ),
+                      ),
+                      Obx(() {
+                        return Text(
+                          auth.user.value == null
+                              ? "XX"
+                              : NumberParser()
+                                  .toSocialMediaString(auth.user.value!.coins),
+                          style: const TextStyle(
+                              fontWeight: FontWeight.w600,
+                              color: ProjectColors.disabled),
+                        );
+                      })
+                    ],
+                  ),
                 ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

@@ -9,10 +9,12 @@ part of 'save_service.dart';
 SaveService _$SaveServiceFromJson(Map<String, dynamic> json) => SaveService(
       json['id'] as String,
       json['date'] as String,
+      json['name'] as String,
     );
 
 Map<String, dynamic> _$SaveServiceToJson(SaveService instance) =>
     <String, dynamic>{
       'id': instance.id,
       'date': instance.date,
+      'name': instance.name,
     };

@@ -7,7 +7,7 @@ import '../models/plan.dart';
 class PlanItem extends StatelessWidget {
   final Plan plan;
   final int selected;
-  final void Function(int) onChange;
+  final void Function(Plan) onChange;
 
   const PlanItem(
       {super.key,
@@ -17,14 +17,15 @@ class PlanItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final Color color = getColor(selected!=plan.type);
+    final Color color = getColor(selected!=plan.value);
     return InkWell(
       onTap: () {
-        onChange(plan.type);
+        onChange(plan);
       },
       child: Container(
           padding:
               const EdgeInsets.only(top: 20, bottom: 20, left: 25, right: 25),
+          margin: const EdgeInsets.symmetric(vertical: 5),
           constraints: const BoxConstraints(minWidth: 140),
           decoration: BoxDecoration(
             borderRadius: const BorderRadius.all(Radius.circular(5)),
@@ -41,7 +42,7 @@ class PlanItem extends StatelessWidget {
                 height: 10,
               ),
               Text(
-                "₹ ${plan.price.floor()}",
+                "${plan.price} coins",
                 style: TextStylesLight().coloredBody(color),
               ),
               const SizedBox(

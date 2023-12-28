@@ -3,6 +3,7 @@ import 'package:astroverse/res/colors/project_colors.dart';
 import 'package:astroverse/res/img/images.dart';
 import 'package:astroverse/res/textStyles/text_styles.dart';
 import 'package:astroverse/routes/routes.dart';
+import 'package:astroverse/utils/crypt.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -14,6 +15,7 @@ class MartItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final crypto = Crypt();
     return Card(
       surfaceTintColor: Colors.white,
       elevation: 8,
@@ -55,21 +57,47 @@ class MartItem extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
                   Text(
-                    '@${item.authorName}',
+                    '@${crypto.decryptFromBase64String(item.authorName)}',
                     style: const TextStyle(fontSize: 11),
                   ),
                   Text(
                     item.title,
                     overflow: TextOverflow.ellipsis,
                     textAlign: TextAlign.left,
-                    style: const TextStyle(fontSize: 12),
-                  ),
-                  Text(
-                    item.genre[0],
                     style: const TextStyle(
                         fontSize: 10,
                         color: Color(0xff444040),
                         fontWeight: FontWeight.bold),
+                  ),
+                  Container(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
+                    decoration: BoxDecoration(
+                        borderRadius:
+                            const BorderRadius.all(Radius.circular(8)),
+                        border: Border.all(width: 1)),
+                    child: Wrap(
+                      crossAxisAlignment: WrapCrossAlignment.center,
+                      spacing: 3,
+                      children: [
+                        Icon(
+                          methodToIcon(item.deliveryMethod),
+                          size: 10,
+                        ),
+                        Text(
+                          methodToString(item.deliveryMethod),
+                          style: const TextStyle(
+                            fontSize: 10,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Text(
+                    item.genre[0],
+                    style: const TextStyle(
+                      fontSize: 10,
+                    ),
                   ),
                   Text(
                     '₹${item.price.toInt()}',
@@ -94,5 +122,20 @@ class MartItem extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  String methodToString(int e) {
+    if (e == 0) return "in-person";
+    if (e == 1) {
+      return "chat";
+    } else {
+      return "call";
+    }
+  }
+
+  IconData methodToIcon(int m) {
+    if (m == 0) return Icons.people_outline;
+    if (m == 1) return Icons.messenger_outline_outlined;
+    return Icons.call_outlined;
   }
 }

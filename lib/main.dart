@@ -1,5 +1,6 @@
 import 'dart:developer';
 
+import 'package:astroverse/controllers/in_app_purchase_controller.dart';
 import 'package:astroverse/controllers/location_controller.dart';
 import 'package:astroverse/firebase_options.dart';
 import 'package:astroverse/res/colors/project_colors.dart';
@@ -19,12 +20,7 @@ void main() async {
       options: DefaultFirebaseOptions.currentPlatform);
   await dotenv.load(fileName: '.env');
 
-  // await FirebaseAppCheck.instance
-  //     .activate(
-  //   webProvider: ReCaptchaV3Provider('recaptcha-v3-site-key'),
-  //   androidProvider: AndroidProvider.playIntegrity,
-  //   appleProvider: AppleProvider.appAttest,
-  // );
+
   final analytics = FirebaseAnalytics.instanceFor(app: app);
   analytics.logEvent(name: "login");
   ZegoUIKitPrebuiltCallInvitationService().setNavigatorKey(navigatorKey);
@@ -48,6 +44,7 @@ class MyApp extends StatelessWidget {
     observer.analytics.logLogin(loginMethod: "gmail");
     analytics.logLogin(loginMethod: "Email");
     Get.put(LocationController());
+
     return GetMaterialApp(
       title: 'Flutter Demo',
       navigatorKey: navigatorKey,

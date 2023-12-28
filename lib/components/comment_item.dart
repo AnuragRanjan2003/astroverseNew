@@ -1,13 +1,17 @@
 import 'package:astroverse/models/comment.dart';
+import 'package:astroverse/utils/crypt.dart';
 import 'package:flutter/material.dart';
 
 class CommentItem extends StatelessWidget {
   final Comment item;
+  final void Function() onClick;
+  final bool replyButton;
 
-  const CommentItem({super.key, required this.item});
+  const CommentItem({super.key, required this.item, required this.onClick, this.replyButton = true});
 
   @override
   Widget build(BuildContext context) {
+    final crypto  = Crypt();
     return IntrinsicHeight(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -16,23 +20,44 @@ class CommentItem extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                "@${item.userName}",
+                "@${crypto.decryptFromBase64String(item.userName)}",
                 textAlign: TextAlign.start,
                 style: const TextStyle(
                     color: Colors.black, fontWeight: FontWeight.bold),
               ),
-              Container(
-                padding:
-                const EdgeInsets.symmetric(horizontal: 20, vertical: 2),
-                decoration: const BoxDecoration(
-                    color: Color(0x64dad9d9),
-                    borderRadius: BorderRadius.all(Radius.circular(20))),
-                child: Text(
-                  toTimeDelay(item.date),
-                  style: const TextStyle(
-                    fontSize: 10,
-                      color: Colors.black, fontWeight: FontWeight.w500),
-                ),
+              Column(
+                children: [
+                  Container(
+                    padding:
+                    const EdgeInsets.symmetric(horizontal: 20, vertical: 2),
+                    decoration: const BoxDecoration(
+                        color: Color(0x64dad9d9),
+                        borderRadius: BorderRadius.all(Radius.circular(20))),
+                    child: Text(
+                      toTimeDelay(item.date),
+                      style: const TextStyle(
+                        fontSize: 10,
+                          color: Colors.black, fontWeight: FontWeight.w500),
+                    ),
+                  ),
+                  Visibility(
+                    visible: item.astro,
+                    child: Container(
+                      margin: const EdgeInsets.symmetric(vertical: 5),
+                      padding:
+                      const EdgeInsets.symmetric(horizontal: 20, vertical: 2),
+                      decoration: const BoxDecoration(
+                          color: Color(0x64dad9d9),
+                          borderRadius: BorderRadius.all(Radius.circular(20))),
+                      child: const Text(
+                        "astro",
+                        style: TextStyle(
+                            fontSize: 10,
+                            color: Colors.black, fontWeight: FontWeight.w500),
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ],
           ),
@@ -42,22 +67,27 @@ class CommentItem extends StatelessWidget {
             textAlign: TextAlign.start,
             overflow: TextOverflow.ellipsis,
           ),
-          MaterialButton(
-            onPressed: () {},
-            child: const Wrap(
-              crossAxisAlignment: WrapCrossAlignment.center,
-              spacing: 5,
-              children: [
-                Icon(
-                  Icons.comment,
-                  size: 17,
-                  color: Colors.blue,
-                ),
-                Text(
-                  "replies",
-                  style: TextStyle(color: Colors.blue),
-                )
-              ],
+          Visibility(
+            visible: replyButton,
+            child: MaterialButton(
+              onPressed: () {
+                onClick();
+              },
+              child: const Wrap(
+                crossAxisAlignment: WrapCrossAlignment.center,
+                spacing: 5,
+                children: [
+                  Icon(
+                    Icons.comment,
+                    size: 17,
+                    color: Colors.blue,
+                  ),
+                  Text(
+                    "replies",
+                    style: TextStyle(color: Colors.blue),
+                  )
+                ],
+              ),
             ),
           )
         ],

@@ -20,10 +20,19 @@ class AstrologerRepo {
 
   Future<Resource<List<QueryDocumentSnapshot<User>>>>
       fetchMoreAstrologersByLocation(
-              String currentUid,
-              GeoPoint userLocation,
-              QueryDocumentSnapshot<User>? lastForLocality,
-              QueryDocumentSnapshot<User>? lastForCity) =>
+    String currentUid,
+    GeoPoint userLocation,
+    QueryDocumentSnapshot<User>? lastForLocality,
+    QueryDocumentSnapshot<User>? lastForCity,
+    QueryDocumentSnapshot<User>? lastForState,
+    QueryDocumentSnapshot<User>? lastForAll,
+  ) =>
           _db.fetchMoreAstrologersByLocation(
-              lastForLocality, lastForCity, currentUid, userLocation);
+            lastForLocality,
+            lastForCity,
+            lastForState,
+            lastForAll,
+            currentUid,
+            userLocation,
+          );
 }

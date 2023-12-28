@@ -12,17 +12,19 @@ class Purchase {
   final String itemPrice;
   final String totalPrice;
   final String buyerId;
-  final String buyerName;
+  String buyerName;
   final String sellerId;
-  final String sellerName;
+  String sellerName;
   final String itemImage;
   final String itemName;
   @JsonKey(fromJson: _getNullableString)
-  final String secretCode;
+  String secretCode;
   @JsonKey(fromJson: _dateFromTimeStamp, toJson: _dateAsIs)
   DateTime boughtOn;
   final bool delivered;
+  final bool active;
   final int? review;
+  final int deliveryMethod;
   @JsonKey(fromJson: _nullableDateFromTimeStamp, toJson: _nullableDateAsIs)
   final DateTime? deliveredOn;
   final String paymentId;
@@ -43,6 +45,8 @@ class Purchase {
       required this.boughtOn,
       required this.delivered,
       required this.review,
+      required this.active,
+      required this.deliveryMethod,
       required this.deliveredOn});
 
   static DateTime _dateFromTimeStamp(Timestamp timestamp) =>
@@ -81,6 +85,8 @@ class Purchase {
       paymentId: '1',
       review: 0,
       secretCode: "000",
+      deliveryMethod: 0,
+      active: true,
       itemImage:
           "https://firebasestorage.googleapis.com/v0/b/astroverse-5f2ae.appspot.com/o/serviceImage%2Fplanet.png?alt=media&token=7587f430-3ff2-41d4-8c47-6899db4b2db0",
       sellerId: '2dbSVMhJgjaUUqXxD6ryXjOBzOl2',

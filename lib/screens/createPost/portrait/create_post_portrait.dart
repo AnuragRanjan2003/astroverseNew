@@ -9,7 +9,6 @@ import 'package:astroverse/res/img/images.dart';
 import 'package:astroverse/utils/resource.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:image_picker/image_picker.dart';
 
 import '../../../models/post.dart';
 
@@ -36,9 +35,15 @@ class CreatePostPortrait extends StatelessWidget {
     final title = TextEditingController();
     final ScrollController scrollController = ScrollController();
 
+    body.addListener(() {
+      controller.formValid.value =
+          body.value.text.isNotEmpty && title.value.text.isNotEmpty;
+    });
 
-
-
+    title.addListener(() {
+      controller.formValid.value =
+          body.value.text.isNotEmpty && title.value.text.isNotEmpty;
+    });
 
     return Scaffold(
       body: SafeArea(
@@ -163,7 +168,6 @@ class CreatePostPortrait extends StatelessWidget {
                             labelText: 'body', border: OutlineInputBorder()),
                         maxLines: 4,
                       ),
-
                     ],
                   ),
                 ),
@@ -181,15 +185,18 @@ class CreatePostPortrait extends StatelessWidget {
                                 BorderRadius.all(Radius.circular(20))),
                         padding: const EdgeInsets.symmetric(
                             horizontal: 60, vertical: 12),
-                        onPressed: controller.formValid.isTrue
+                        onPressed: controller.formValid.isTrue &&
+                                controller.loading.isFalse
                             ? () {
                                 var location = loc.location.value!;
                                 var user = auth.user.value!;
-                                log(' post is valid : ${validate(title, body,)}',
+                                log(
+                                    ' post is valid : ${validate(
+                                      title,
+                                      body,
+                                    )}',
                                     name: "SERVICE");
-                                if (!validate(
-                                    title,
-                                    body)) return;
+                                if (!validate(title, body)) return;
                                 final post = Post(
                                     authorId: user.uid,
                                     authorName: user.name,
@@ -200,6 +207,7 @@ class CreatePostPortrait extends StatelessWidget {
                                     lng: location.longitude!,
                                     title: title.value.text,
                                     comments: 0,
+                                    featured: user.featured,
                                     upVotes: 0,
                                     views: 0,
                                     id: "",
@@ -208,15 +216,25 @@ class CreatePostPortrait extends StatelessWidget {
                                           controller.selectedItem.value]
                                     ]);
                                 controller.savePost(post, (p0) {
-                                  _updateUI(p0);
+                                  _updateUI(p0, body, title);
                                 }, user.uid);
                               }
                             : null,
                         color: ProjectColors.lightBlack,
-                        child: const Text(
-                          'Post',
-                          style: TextStyle(fontSize: 14, color: Colors.white),
-                        ),
+                        child: controller.loading.isFalse
+                            ? const Text(
+                                'Post',
+                                style: TextStyle(
+                                    fontSize: 14, color: Colors.white),
+                              )
+                            : const SizedBox(
+                                height: 20,
+                                width: 20,
+                                child: CircularProgressIndicator(
+                                  color: Colors.white,
+                                  strokeWidth: 2,
+                                ),
+                              ),
                       )),
                 ],
               )
@@ -228,8 +246,11 @@ class CreatePostPortrait extends StatelessWidget {
   }
 }
 
-_updateUI(Resource<Post> p0) {
+_updateUI(Resource<Post> p0, TextEditingController body,
+    TextEditingController title) {
   if (p0.isSuccess) {
+    body.clear();
+    title.clear();
     log("posted", name: "POST");
     Get.snackbar(
       '',
@@ -252,7 +273,10 @@ _updateUI(Resource<Post> p0) {
   }
 }
 
-bool validate(TextEditingController title, TextEditingController body,) {
+bool validate(
+  TextEditingController title,
+  TextEditingController body,
+) {
   final t = title.value.text;
   final b = body.value.text;
   if (t.isEmpty || b.isEmpty) return false;

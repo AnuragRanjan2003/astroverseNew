@@ -112,7 +112,7 @@ class MoreProfilePortrait extends StatelessWidget {
                                     plan: Plans.plans[index],
                                     selected: auth.selectedPlan.value,
                                     onChange: (e) {
-                                      auth.selectedPlan.value = e;
+                                      auth.selectedPlan.value = e.value;
                                     }),
                           ))),
                 ),

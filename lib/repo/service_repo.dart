@@ -16,8 +16,9 @@ class ServiceRepo {
   final _db = Database();
   final _storage = Storage();
 
-  Future<Resource<Service>> saveService(Service post, String uid) async =>
-      await _db.saveService(post, uid);
+  Future<Resource<Service>> saveService(
+          Service post, String uid, int coinsCost) async =>
+      await _db.saveService(post, uid, coinsCost);
 
   Future<Resource<Json>> updateService(
           Json data, String serviceId, String uid) async =>
@@ -59,11 +60,37 @@ class ServiceRepo {
           String uid, GeoPoint userLocation) async =>
       await _db.fetchServiceByLocation(uid, userLocation);
 
+  Future<Resource<Json>> giveUserCoins(int coins, String uid) =>
+      _db.updateUser({"coins": FieldValue.increment(coins)}, uid);
+
+  Future<Resource<Json>> deductCoinsFromUser(int coins, String uid) =>
+      _db.updateUser({"coins": FieldValue.increment(-coins)}, uid);
+
+  Future<Resource<List<QueryDocumentSnapshot<SaveService>>>> fetchMyServices(
+          String uid) =>
+      _db.fetchMyServices(uid);
+
+  Future<Resource<Service>> fetchService(String serviceId) =>
+      _db.fetchService('abc', serviceId);
+
+  Future<Resource<String>> deleteService(SaveService ss, String userId) =>
+      _db.deleteService(ss, userId);
+
   fetchMoreByLocation(
-          String uid,
-          GeoPoint userLocation,
-          QueryDocumentSnapshot<Service>? lastPostForLocality,
-          QueryDocumentSnapshot<Service>? lastPostForCity) =>
+    String uid,
+    GeoPoint userLocation,
+    QueryDocumentSnapshot<Service>? lastPostForLocality,
+    QueryDocumentSnapshot<Service>? lastPostForCity,
+    QueryDocumentSnapshot<Service>? lastPostForState,
+    QueryDocumentSnapshot<Service>? lastPostForAll,
+    QueryDocumentSnapshot<Service>? lastPostForFeatured,
+  ) =>
       _db.fetchMoreServicesByLocation(
-          uid, userLocation, lastPostForLocality, lastPostForCity);
+          uid,
+          userLocation,
+          lastPostForLocality,
+          lastPostForCity,
+          lastPostForState,
+          lastPostForAll,
+          lastPostForFeatured);
 }

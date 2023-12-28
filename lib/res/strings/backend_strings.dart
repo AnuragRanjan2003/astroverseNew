@@ -5,11 +5,14 @@ class BackEndStrings {
   static const serviceCollection = "services";
   static const postCollection = "post";
   static const upvoteCollection = "upVoted";
-  static const usedServiceCollection = "used";
+  static const userServiceCollection = "services";
   static const comments = "comments";
   static const followingCollection = "comments";
   static const metaDataCollection = "metaData";
   static const purchasesCollection = "purchases";
+  static const userBankAccountDocument = "bankAccount";
+  static const replyCollection = "replies";
+  static const deletedCollection = "deletedServices";
 
   static const profileImage = "profileImage";
   static const serviceImage = "serviceImage";
@@ -23,4 +26,8 @@ class BackEndStrings {
 
   static const String providerNotFound = "provider_not_found";
   static const String providerFound = "provider_found";
+}
+
+class Errors{
+  static const docNotFound = "could not find this item";
 }

@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:astroverse/db/storage.dart';
 import 'package:astroverse/models/extra_info.dart';
 import 'package:astroverse/models/user.dart' as models;
+import 'package:astroverse/models/user_bank_details.dart';
 import 'package:astroverse/utils/phone_auth_callbacks.dart';
 import 'package:astroverse/utils/resource.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -64,9 +65,32 @@ class AuthRepo {
           Map<String, dynamic> data, String uid) async =>
       await _db.updateExtraInfo(uid, data);
 
-  Future<Resource<Json>> updateUserInfo(Map<String,dynamic> data , String uid) async => await _db.updateUser(data, uid);
+  Future<Resource<Json>> updateUserInfo(
+          Map<String, dynamic> data, String uid) async =>
+      await _db.updateUser(data, uid);
 
+  Future<Resource<Json>> addCoinsInDatabase(int coinsToGive, String uid) =>
+      _db.updateUser({"coins": FieldValue.increment(coinsToGive)}, uid);
 
+  Future<Resource<UserBankDetails>> saveUserBankDetails(
+          UserBankDetails data, String uid) =>
+      _db.saveBankDetails(data, uid);
+
+  Future<Resource<Json>> updateUserBankDetails(Json data, String uid) =>
+      _db.updateBankDetails(data, uid);
+
+  Stream<DocumentSnapshot<UserBankDetails>> userBankDetailsStream(String uid) =>
+      _db.getBankDetailsStream(uid);
+
+  Future<Resource<Json>> updateRangeForUser(String uid, int range, int cost) =>
+      _db.upgradeRangeForUser(uid, cost, range);
+
+  Future<Resource<User>> deleteAccount(User user) => _auth.deleteAccount(user);
+
+  Future<Resource<User>> deleteUserData(User user) => _db.deleteUserData(user);
+
+  Future<Resource<String>> sendPasswordResetEmail(String email) =>
+      _auth.sentForgotPasswordEmail(email);
 
   Future<void> logOut() async => await _auth.logOut();
 }

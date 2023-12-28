@@ -1,3 +1,4 @@
+import 'package:astroverse/utils/crypt.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:json_annotation/json_annotation.dart';
 
@@ -5,8 +6,8 @@ part 'user.g.dart';
 
 @JsonSerializable(anyMap: true)
 class User {
-  final String name;
-  final String email;
+  String name;
+  String email;
   String image;
   String uid;
   int plan;
@@ -17,11 +18,22 @@ class User {
   int coins;
   int profileViews;
   String phNo;
-  String upiID;
+  bool featured;
 
-  User(this.name, this.email, this.image, this.plan, this.uid, this.astro,
-      this.phNo, this.upiID,this.geoHash,
-      {this.location, this.coins = 0, this.profileViews = 0});
+  User(
+    this.name,
+    this.email,
+    this.image,
+    this.plan,
+    this.uid,
+    this.astro,
+    this.phNo,
+    this.geoHash,
+    this.featured, {
+    this.location,
+    this.coins = 0,
+    this.profileViews = 0,
+  });
 
   factory User.fromJson(json) => _$UserFromJson(json);
 
@@ -31,12 +43,16 @@ class User {
     return geoPoint;
   }
 
+  static _decrypt(String encoded) {
+    return Crypt().decryptFromBase64String(encoded);
+  }
+
   static GeoPoint? _toJsonGeoPoint(GeoPoint? geoPoint) {
     return geoPoint;
   }
 
   @override
   String toString() {
-    return "User(name :$name , email :$email , image : $image ,uid : $uid ,plan: $plan ,astro: $astro ,phno: $phNo , upi : $upiID)";
+    return "User(name :$name , email :$email , image : $image ,uid : $uid ,plan: $plan ,astro: $astro ,phno: $phNo ,coins: $coins )";
   }
 }

@@ -6,8 +6,9 @@ part 'save_service.g.dart';
 class SaveService {
   String id;
   String date;
+  String name;
 
-  SaveService(this.id, this.date);
+  SaveService(this.id, this.date , this.name);
 
   Map<String, dynamic> toJson() => _$SaveServiceToJson(this);
 

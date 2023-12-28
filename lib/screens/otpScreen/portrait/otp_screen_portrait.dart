@@ -10,6 +10,7 @@ import 'package:astroverse/res/img/images.dart';
 import 'package:astroverse/res/textStyles/text_styles.dart';
 import 'package:astroverse/routes/routes.dart';
 import 'package:astroverse/screens/phoneAuth/portrait/phone_auth_portrait.dart';
+import 'package:astroverse/utils/crypt.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -104,8 +105,8 @@ class OtpScreenPortrait extends StatelessWidget {
                                                     .otpEntered.value
                                                     .toString());
                                         controller.checkOtp(cred, () {
-                                          user!.phNo = number;
-                                          Get.dialog(const Text("using current location as your business location"));
+                                          controller.verifyOtpLoading.value = false;
+                                          user!.phNo = Crypt().encryptToBase64String(number);
                                           final loc = location.location.value;
                                           GeoPoint? geo;
                                           if (loc != null) {

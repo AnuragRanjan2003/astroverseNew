@@ -2,17 +2,21 @@ import 'dart:async';
 import 'dart:developer';
 import 'dart:io';
 
+import 'package:astroverse/controllers/service_controller.dart';
 import 'package:astroverse/models/extra_info.dart';
 import 'package:astroverse/models/user.dart' as models;
+import 'package:astroverse/models/user_bank_details.dart';
 import 'package:astroverse/repo/auth_repo.dart';
 import 'package:astroverse/res/strings/backend_strings.dart';
 import 'package:astroverse/routes/routes.dart';
-import 'package:astroverse/utils/geo.dart';
+import 'package:astroverse/utils/crypt.dart';
 import 'package:astroverse/utils/resource.dart';
 import 'package:astroverse/utils/zego_cloud_services.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:cometchat_chat_uikit/cometchat_chat_uikit.dart';
+import 'package:dart_geohash/dart_geohash.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
+import 'package:firebase_auth/firebase_auth.dart' as fb;
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -29,11 +33,14 @@ class AuthController extends GetxController {
 
   final _analytics = FirebaseAnalytics.instance;
 
+  final _crypto = Crypt();
+
   Rxn<models.User> user = Rxn<models.User>();
   Rx<bool> loading = false.obs;
   Rx<bool> userLoading = false.obs;
   Rxn<String> error = Rxn<String>();
   StreamSubscription<DocumentSnapshot<models.User>>? _sub;
+  StreamSubscription<DocumentSnapshot<UserBankDetails>>? _bankSub;
   Rx<String> pass = "".obs;
   final _repo = AuthRepo();
   Rxn<XFile> image = Rxn();
@@ -45,7 +52,18 @@ class AuthController extends GetxController {
   Rx<int> astroPlanSelected = Rx(0);
   Rx<int> page = 0.obs;
   Rxn<ExtraInfo> info = Rxn();
+  RxBool disableAccountUpdate = true.obs;
+  RxnString upiError = RxnString();
+  RxnString accError = RxnString();
+  RxnString ifscError = RxnString();
+  RxnString branchError = RxnString();
+  Rxn<UserBankDetails> bankDetails = Rxn();
   final MainController _main = Get.put(MainController());
+  RxInt selectedUpgradePlan = 0.obs;
+  RxBool upgradingPlan = false.obs;
+  RxInt selectedUpgradeFeatures = 0.obs;
+  RxBool upgradingFeatures = false.obs;
+  RxBool resetEmailLoading = false.obs;
 
   @override
   void onInit() async {
@@ -65,6 +83,13 @@ class AuthController extends GetxController {
     }
 
     super.onInit();
+  }
+
+  void clearError() {
+    upiError.value = null;
+    accError.value = null;
+    ifscError.value = null;
+    branchError.value = null;
   }
 
   loginUser(String email, String password,
@@ -88,11 +113,9 @@ class AuthController extends GetxController {
             await startListeningToUser(
               value.data.user!.uid,
             );
-          }else{
+          } else {
             // TODO(implement error dialog)
-
           }
-
         }
         error.value = null;
       } else {
@@ -138,6 +161,10 @@ class AuthController extends GetxController {
       debugPrint(event.toString());
       if (event.isSuccess) {
         event = event as Success<UserCredential>;
+
+        user.name = _crypto.encryptToBase64String(user.name.trim());
+        user.email = _crypto.encryptToBase64String(user.email.trim());
+
         user.uid = event.data.user!.uid;
         if (image.value != null) {
           _repo
@@ -189,6 +216,7 @@ class AuthController extends GetxController {
   @override
   void onClose() {
     _sub?.cancel();
+    _bankSub?.cancel();
     _timer?.cancel();
     _resendTimerInstance?.cancel();
     super.onClose();
@@ -203,6 +231,8 @@ class AuthController extends GetxController {
     _repo.createUser(user, password).then((event) {
       debugPrint(event.toString());
       if (event.isSuccess) {
+        user.name = _crypto.encryptToBase64String(user.name);
+        user.email = _crypto.encryptToBase64String(user.email);
         event = event as Success<UserCredential>;
         user.uid = event.data.user!.uid;
         if (image.value != null) {
@@ -254,23 +284,25 @@ class AuthController extends GetxController {
     });
   }
 
+  updateUser(Json data, String uid) {
+    _repo.updateUserInfo(data, uid).then((value) {});
+  }
+
   void saveData(models.User user, void Function(Resource<void>) updateUI,
       UserCredential event) {
     _repo.saveUserData(user).then((value) async {
       loading.value = false;
       if (value is Success) {
         if (event.user != null) {
-          var res=  await _repo.getUserData(event.user!.uid);
-          if(res.isSuccess){
-            res= res as Success<DocumentSnapshot<models.User>>;
+          var res = await _repo.getUserData(event.user!.uid);
+          if (res.isSuccess) {
+            res = res as Success<DocumentSnapshot<models.User>>;
             this.user.value = res.data.data()!;
             await startListeningToUser(event.user!.uid);
             updateUI(value);
-          }else{
+          } else {
             // TODO( implement error dialog )
-
           }
-
         }
 
         error.value = null;
@@ -328,6 +360,23 @@ class AuthController extends GetxController {
     });
   }
 
+  startBankDetailsStream(String uid) {
+    _bankSub = _repo.userBankDetailsStream(uid).listen((event) {
+      bankDetails.value = event.data();
+    });
+  }
+
+  giveCoinsToUser(
+      int coinsToGive, String uid, void Function(Resource<Json>) updateUi) {
+    _repo.addCoinsInDatabase(coinsToGive, uid).then((value) {
+      updateUi(value);
+    });
+  }
+
+  endBankDetailsStream() async {
+    await _bankSub?.cancel();
+  }
+
   signInWithGoogle(void Function(Resource<UserCredential>) updateUI) {
     _repo.signInWithGoogle().then((value) {
       if (value.isSuccess) {
@@ -341,15 +390,16 @@ class AuthController extends GetxController {
             );
             GoogleSignIn().signOut();
           } else {
-
-            var res = await _repo.getUserData((value as Success<UserCredential>).data.user!.uid);
-            if(res.isSuccess){
-              user.value = (res as Success<DocumentSnapshot<models.User>>).data.data();
+            var res = await _repo
+                .getUserData((value as Success<UserCredential>).data.user!.uid);
+            if (res.isSuccess) {
+              user.value =
+                  (res as Success<DocumentSnapshot<models.User>>).data.data();
               await startListeningToUser(
                 (value).data.user!.uid,
               );
               Get.offAndToNamed(Routes.main);
-            }else{
+            } else {
               // TODO(implement alert)
             }
           }
@@ -357,6 +407,25 @@ class AuthController extends GetxController {
       } else {
         _showError("Error", (value as Failure<UserCredential>).error);
       }
+    });
+  }
+
+  void updateRangeForUser(
+      String uid, int range, int cost, Function(Resource<Json>) updateUI) {
+    upgradingPlan.value = true;
+    _repo.updateRangeForUser(uid, range, cost).then((value) {
+      upgradingPlan.value = false;
+      updateUI(value);
+    });
+  }
+
+  deleteAccount(fb.User user, Function(Resource<fb.User>) updateUI) {
+    _repo.deleteUserData(user).then((value) {
+      if (value.isSuccess) {
+        _repo.deleteAccount(user).then((value) {
+          updateUI(value);
+        });
+      } else {}
     });
   }
 
@@ -370,8 +439,9 @@ class AuthController extends GetxController {
             final cred = (value as Success<UserCredential>).data.user!;
             _analytics.logSignUp(signUpMethod: "Google");
             final user = models.User(
-              _parseValueForModel(cred.displayName),
-              _parseValueForModel(cred.email),
+              _crypto
+                  .encryptToBase64String(_parseValueForModel(cred.displayName)),
+              _crypto.encryptToBase64String(_parseValueForModel(cred.email)),
               _parseValueForModel(cred.photoURL),
               0,
               location: loc,
@@ -380,8 +450,10 @@ class AuthController extends GetxController {
               _parseValueForModel(cred.uid),
               astro,
               _parseValueForModel(cred.phoneNumber),
-              "",
-              Geo().getHash(loc!),
+              loc == null
+                  ? ""
+                  : GeoHasher().encode(loc.longitude, loc.latitude),
+              false,
             );
             final info = ExtraInfo(
                 joiningDate: DateTime.now(),
@@ -392,14 +464,17 @@ class AuthController extends GetxController {
               if (value.isSuccess) {
                 onComplete(user);
               } else {
+                loading.value = false;
                 _showError("Error", (value as Failure<String>).error);
               }
             });
           } else {
+            loading.value = false;
             _showError("Error", "user already exists");
           }
         });
       } else {
+        loading.value = false;
         _showError("Error", (value as Failure<UserCredential>).error);
       }
     });
@@ -450,6 +525,45 @@ class AuthController extends GetxController {
         value = value as Failure;
         error.value = value.error;
       }
+    });
+  }
+
+  addUserBankDetails(
+      UserBankDetails data,
+      String uid,
+      Function(Success<UserBankDetails>) onSuccess,
+      Function(String) onFailure) {
+    _repo.saveUserBankDetails(data, uid).then((value) {
+      if (value.isSuccess) {
+        value = value as Success<UserBankDetails>;
+        log("bank details updated : ${data.toString()}", name: "BANK DETAILS");
+        onSuccess(value);
+      } else {
+        value = value as Failure<UserBankDetails>;
+        log("bank details not updated : ${value.error}", name: "BANK DETAILS");
+        onFailure(value.error);
+      }
+    });
+  }
+
+  updateUserBankDetails(Json data, String uid,
+      Function(Success<Json>) onSuccess, Function(String) onFailure) {
+    _repo.updateUserBankDetails(data, uid).then((value) {
+      if (value.isSuccess) {
+        value = value as Success<Json>;
+        log("bank details updated : ${data.toString()}", name: "BANK DETAILS");
+        onSuccess(value);
+      } else {
+        value = value as Failure<Json>;
+        log("bank details not updated : ${value.error}", name: "BANK DETAILS");
+        onFailure(value.error);
+      }
+    });
+  }
+
+  sendResetPasswordEmail(String email, Function(Resource<String>) updateUI) {
+    _repo.sendPasswordResetEmail(email).then((value) {
+      updateUI(value);
     });
   }
 
