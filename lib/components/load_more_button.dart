@@ -15,7 +15,7 @@ class LoadMoreButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return Padding(
       padding:
-      EdgeInsets.symmetric(horizontal: cons.maxWidth * 0.2),
+      EdgeInsets.only(left: cons.maxWidth * 0.2, right: cons.maxWidth*0.2, bottom: 200),
       child: MaterialButton(
           color: Colors.white,
           padding: const EdgeInsets.symmetric(vertical: 10),
@@ -34,7 +34,7 @@ class LoadMoreButton extends StatelessWidget {
                 ),
                 Icon(
                   Icons.refresh,
-                  color: Colors.lightBlue,
+                  color: ProjectColors.primary,
                   size: 18,
                 )
               ])),

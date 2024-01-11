@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:astroverse/db/storage.dart';
 import 'package:astroverse/models/extra_info.dart';
+import 'package:astroverse/models/qualifications.dart';
 import 'package:astroverse/models/user.dart' as models;
 import 'package:astroverse/models/user_bank_details.dart';
 import 'package:astroverse/utils/phone_auth_callbacks.dart';
@@ -55,8 +56,8 @@ class AuthRepo {
   Future<bool> checkOTP(PhoneAuthCredential cred) async =>
       await _auth.checkOtp(cred);
 
-  Future<Resource<SetInfo>> setExtraInfo(ExtraInfo info, String uid) async =>
-      await _db.setExtraInfo(info, uid);
+  Future<Resource<SetInfo>> setExtraInfo(ExtraInfo info,Qualification q, String uid) async =>
+      await _db.setExtraInfo(info,q, uid);
 
   Future<Resource<ExtraInfo>> getExtraInfo(String uid) async =>
       await _db.getExtraInfo(uid);

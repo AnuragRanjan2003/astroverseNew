@@ -7,6 +7,8 @@ import 'package:astroverse/controllers/service_controller.dart';
 import 'package:astroverse/models/service.dart';
 import 'package:astroverse/res/colors/project_colors.dart';
 import 'package:astroverse/res/img/images.dart';
+import 'package:astroverse/utils/constants.dart';
+import 'package:astroverse/utils/geo.dart';
 import 'package:astroverse/utils/resource.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -16,16 +18,28 @@ import 'package:toggle_switch/toggle_switch.dart';
 class CreateServicePortrait extends StatelessWidget {
   final BoxConstraints cons;
   static const _list = {
-    'palm reading': 0,
-    'item': 1,
-    'job prediction': 2,
-    'marriage prediction': 3
+    'vedic astrology': 0,
+    'palm reading': 1,
+    'online puja': 2,
+    'marriage kundli matching': 3,
+    'vashikaran': 4,
+    'tantra': 5,
+    'vastu': 6,
+    'Career': 7,
+    'lal kitab': 8,
+    'item': 9,
   };
   static const _listIcons = {
+    'vedic astrology': Icon(Icons.star_border),
     'palm reading': Icon(Icons.back_hand_outlined),
+    'online puja': Icon(Icons.star_border),
+    'marriage kundli matching': Icon(Icons.people_outline),
+    'vashikaran': Icon(Icons.star_border),
+    'tantra': Icon(Icons.star_border),
+    'vastu': Icon(Icons.star_border),
+    'Career': Icon(Icons.work_history_outlined),
+    'lal kitab': Icon(Icons.book_outlined),
     'item': Icon(Icons.card_giftcard),
-    'job prediction': Icon(Icons.work_history_outlined),
-    'marriage prediction': Icon(Icons.people_outline)
   };
 
   const CreateServicePortrait({super.key, required this.cons});
@@ -38,8 +52,10 @@ class CreateServicePortrait extends StatelessWidget {
     final body = TextEditingController();
     final title = TextEditingController();
     final place = TextEditingController();
-    final price =
-        TextEditingController(text: service.price.value.toInt().toString());
+    final price = TextEditingController(
+        text: auth.user.value!.plan == VisibilityPlans.locality
+            ? service.price.value.toInt().toString()
+            : "0");
 
     price.addListener(() {
       service.price.value =
@@ -151,7 +167,7 @@ class CreateServicePortrait extends StatelessWidget {
                                   ),
                                   style: const ButtonStyle(
                                       backgroundColor: MaterialStatePropertyAll(
-                                          Colors.blue)),
+                                          ProjectColors.primary)),
                                 ),
                               )
                             ],
@@ -243,7 +259,7 @@ class CreateServicePortrait extends StatelessWidget {
                             Icons.messenger_outline,
                             Icons.call_outlined
                           ],
-                          activeBgColor: const [Colors.lightBlue],
+                          activeBgColor: const [ProjectColors.primary],
                           borderWidth: 5,
                           onToggle: (e) {
                             if (e == null) {
@@ -266,7 +282,7 @@ class CreateServicePortrait extends StatelessWidget {
                         ),
                         Obx(() {
                           return Visibility(
-                            visible: service.selectedItem.value == 1 &&
+                            visible: service.selectedItem.value == _list["item"] &&
                                 service.selectedMode.value != 0,
                             child: const Text(
                               "in-person requires",
@@ -306,9 +322,11 @@ class CreateServicePortrait extends StatelessWidget {
                               ),
                             )),
                         Obx(() => Visibility(
-                          visible: service.selectedItem.value == 1,
-                          child: const SizedBox(height: 10,),
-                        )),
+                              visible: service.selectedItem.value == 1,
+                              child: const SizedBox(
+                                height: 10,
+                              ),
+                            )),
                         Obx(() => Visibility(
                             visible: service.selectedItem.value == 1,
                             child: TextField(
@@ -331,25 +349,37 @@ class CreateServicePortrait extends StatelessWidget {
                                 mainAxisAlignment:
                                     MainAxisAlignment.spaceBetween,
                                 children: [
-                                  Text(
-                                    "local",
-                                    style:
-                                        TextStyle(fontWeight: FontWeight.w600),
+                                  Expanded(
+                                    child: Text(
+                                      "free",
+                                      textAlign: TextAlign.start,
+                                      style:
+                                          TextStyle(fontSize: 10,fontWeight: FontWeight.w400),
+                                    ),
                                   ),
-                                  Text(
-                                    "city",
-                                    style:
-                                        TextStyle(fontWeight: FontWeight.w600),
+                                  Expanded(
+                                    child: Text(
+                                      "astro disha\nlite",
+                                      textAlign: TextAlign.start,
+                                      style:
+                                          TextStyle(fontSize: 10,fontWeight: FontWeight.w400),
+                                    ),
                                   ),
-                                  Text(
-                                    "state",
-                                    style:
-                                        TextStyle(fontWeight: FontWeight.w600),
+                                  Expanded(
+                                    child: Text(
+                                      textAlign: TextAlign.end,
+                                      "astro kripa\nlite",
+                                      style:
+                                          TextStyle(fontSize: 10,fontWeight: FontWeight.w400),
+                                    ),
                                   ),
-                                  Text(
-                                    "all",
-                                    style:
-                                        TextStyle(fontWeight: FontWeight.w600),
+                                  Expanded(
+                                    child: Text(
+                                      "astro mahima\nlite",
+                                      textAlign: TextAlign.end,
+                                      style:
+                                          TextStyle(fontSize: 10,fontWeight: FontWeight.w400),
+                                    ),
                                   ),
                                 ],
                               ),
@@ -357,9 +387,11 @@ class CreateServicePortrait extends StatelessWidget {
                             Obx(() {
                               return Slider(
                                 divisions: 3,
-                                value: service.selectedItem.value == 1
-                                    ? 0
-                                    : service.selectedRange.value,
+                                value: auth.user.value!.featured
+                                    ? 3
+                                    : service.selectedItem.value == 1
+                                        ? 0
+                                        : service.selectedRange.value,
                                 onChanged: service.selectedItem.value == 1
                                     ? null
                                     : (e) {
@@ -376,7 +408,7 @@ class CreateServicePortrait extends StatelessWidget {
                                 min: 0,
                                 max: 3,
                                 label: "range",
-                                thumbColor: Colors.blue,
+                                thumbColor: ProjectColors.primary,
                               );
                             }),
                             Wrap(
@@ -419,20 +451,44 @@ class CreateServicePortrait extends StatelessWidget {
                         const SizedBox(
                           height: 10,
                         ),
-                        TextField(
-                          controller: price,
-                          decoration: const InputDecoration(
-                            labelText: 'price',
-                            border: OutlineInputBorder(),
-                            prefixText: '  ₹  ',
-                            prefixStyle: TextStyle(
-                                fontSize: 16, fontWeight: FontWeight.bold),
-                          ),
-                          maxLines: 1,
-                          style: const TextStyle(
-                              fontWeight: FontWeight.bold, wordSpacing: 10),
-                          keyboardType: TextInputType.number,
+                        Obx(() => TextField(
+                              controller: price,
+                              readOnly: auth.user.value!.plan ==
+                                  VisibilityPlans.locality,
+                              decoration: InputDecoration(
+                                labelText: 'price',
+                                filled: auth.user.value!.plan ==
+                                    VisibilityPlans.locality,
+                                border: const OutlineInputBorder(),
+                                prefixText: '  ₹  ',
+                                prefixStyle: const TextStyle(
+                                    fontSize: 16, fontWeight: FontWeight.bold),
+                              ),
+                              maxLines: 1,
+                              style: const TextStyle(
+                                  fontWeight: FontWeight.bold, wordSpacing: 10),
+                              keyboardType: TextInputType.number,
+                            )),
+                        const SizedBox(
+                          height: 10,
                         ),
+                        const Row(
+                          children: [
+                            Icon(
+                              Icons.question_mark,
+                              size: 18,
+                              color: ProjectColors.disabled,
+                            ),
+                            SizedBox(
+                              width: 8,
+                            ),
+                            Text(
+                              "we have a ₹${Constants.appConvenienceFee} convenience fee",
+                              style: TextStyle(color: ProjectColors.lightBlack),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 10,),
                       ],
                     ),
                   ),
@@ -449,7 +505,7 @@ class CreateServicePortrait extends StatelessWidget {
                               borderRadius:
                                   BorderRadius.all(Radius.circular(20))),
                           padding: const EdgeInsets.symmetric(
-                              horizontal: 60, vertical: 12),
+                              horizontal: 50, vertical: 12),
                           onPressed: service.formValid.isTrue
                               ? () {
                                   var location = loc.location.value!;
@@ -536,6 +592,11 @@ class CreateServicePortrait extends StatelessWidget {
                                       fontSize: 14, color: Colors.white),
                                 ),
                         )),
+                    const Text(
+                      "₹${Constants.appConvenienceFee}\napp fee",
+                      style: TextStyle(
+                          fontSize: 10, color: ProjectColors.lightBlack),
+                    ),
                     Container(
                       decoration: BoxDecoration(
                           color: Colors.grey.shade300,
@@ -543,7 +604,7 @@ class CreateServicePortrait extends StatelessWidget {
                               const BorderRadius.all(Radius.circular(10))),
                       padding: const EdgeInsets.symmetric(
                           horizontal: 35, vertical: 12),
-                      child: Obx(() => Text("₹ ${service.price.value.toInt()}",
+                      child: Obx(() => Text("₹ ${service.price.value.toInt() + Constants.appConvenienceFee }",
                           style: const TextStyle(
                               color: Colors.black,
                               fontWeight: FontWeight.w700,
@@ -560,24 +621,26 @@ class CreateServicePortrait extends StatelessWidget {
   }
 
   int _getPriceForRange(double range) => ((range) * 15).toInt();
+
+  bool validate(
+      TextEditingController title,
+      TextEditingController body,
+      TextEditingController price,
+      TextEditingController address,
+      XFile? image,
+      int productType,
+      int mode,
+      ) {
+    final t = title.value.text;
+    final b = body.value.text;
+    final add = address.value.text;
+
+    if (t.isEmpty || b.isEmpty) return false;
+    if (productType ==  _list["item"] && add.isEmpty) return false;
+    if (productType == _list["item"] && image == null) return false;
+    if (productType == _list["item"] && mode != 0) return false;
+    return true;
+  }
 }
 
-bool validate(
-  TextEditingController title,
-  TextEditingController body,
-  TextEditingController price,
-  TextEditingController address,
-  XFile? image,
-  int productType,
-  int mode,
-) {
-  final t = title.value.text;
-  final b = body.value.text;
-  final add = address.value.text;
 
-  if (t.isEmpty || b.isEmpty) return false;
-  if (productType == 1 && add.isEmpty) return false;
-  if (productType == 1 && image == null) return false;
-  if (productType == 1 && mode != 0) return false;
-  return true;
-}

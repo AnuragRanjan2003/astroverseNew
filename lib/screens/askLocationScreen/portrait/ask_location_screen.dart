@@ -5,6 +5,7 @@ import 'package:astroverse/controllers/location_controller.dart';
 import 'package:astroverse/res/strings/other_strings.dart';
 import 'package:astroverse/res/textStyles/text_styles.dart';
 import 'package:astroverse/screens/astroSignUp/portrait/astro_signup_portrait.dart';
+import 'package:astroverse/screens/phoneAuth/phone_auth_screen.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:dart_geohash/dart_geohash.dart';
 import 'package:flutter/material.dart';
@@ -20,31 +21,31 @@ import '../../../routes/routes.dart';
 
 class AskLocationPortrait extends StatelessWidget {
   final BoxConstraints cons;
+  final Parcel parcel;
 
-  const AskLocationPortrait({super.key, required this.cons});
+  const AskLocationPortrait(
+      {super.key, required this.cons, required this.parcel});
 
   @override
   Widget build(BuildContext context) {
-    final Parcel parcel = Get.arguments;
     final User? user = parcel.data;
     final google = parcel.google;
     final LocationController location = Get.find();
 
     if (location.location.value == null) {
-      return  Center(
+      return Center(
         child: RichText(
           textAlign: TextAlign.center,
           maxLines: 2,
           textDirection: TextDirection.rtl,
           text: const TextSpan(
-            text: "Unable to access location\n",
-            style: TextStyle(fontSize: 20 , fontWeight: FontWeight.bold),
-            children: [
-              TextSpan(text:"Please check location permission in settings" , ),
-
-            ]
-          ),
-
+              text: "Unable to access location\n",
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              children: [
+                TextSpan(
+                  text: "Please check location permission in settings",
+                ),
+              ]),
         ),
       );
     }
@@ -55,7 +56,7 @@ class AskLocationPortrait extends StatelessWidget {
     log(user.toString(), name: "USER");
     if (user == null) Get.snackbar("Error", "unexpected error");
     return Scaffold(
-        backgroundColor: Colors.blue.shade100,
+        backgroundColor: ProjectColors.primary,
         body: SingleChildScrollView(
           child: Container(
             padding: const EdgeInsets.only(top: 10),
@@ -120,7 +121,7 @@ class AskLocationPortrait extends StatelessWidget {
                                   backgroundColor: Colors.white,
                                   child: Icon(
                                     Icons.refresh_sharp,
-                                    color: Colors.blue,
+                                    color: ProjectColors.primary,
                                   ),
                                 )),
                             const SizedBox(
@@ -143,7 +144,7 @@ class AskLocationPortrait extends StatelessWidget {
                                 children: [
                                   const Icon(
                                     Icons.my_location_outlined,
-                                    color: Colors.blue,
+                                    color: ProjectColors.primary,
                                   ),
                                   Obx(
                                     () => Text(
@@ -157,7 +158,6 @@ class AskLocationPortrait extends StatelessWidget {
                             const SizedBox(
                               height: 20,
                             ),
-
                             MaterialButton(
                               onPressed: () {
                                 if (location.location.value == null) {
@@ -178,12 +178,20 @@ class AskLocationPortrait extends StatelessWidget {
                                 //     arguments:
                                 //         Parcel(data: user, google: google));
                                 //TODO("nav")
-                                Get.offNamed(Routes.phoneAuth,
-                                    arguments:
-                                    Parcel(data: user, google: google));
+                                //
+                                // Get.offNamed(Routes.phoneAuth,
+                                //     arguments:
+                                //         Parcel(data: user, google: google));
+
+                                Navigator.of(context)
+                                    .pushReplacement(MaterialPageRoute(
+                                  builder: (context) => PhoneAuthScreen(
+                                      parcel:
+                                          Parcel(data: user, google: google)),
+                                ));
                               },
                               shape: ButtonDecors.filled,
-                              color: Colors.blue,
+                              color: ProjectColors.primary,
                               disabledColor: ProjectColors.disabled,
                               padding: const EdgeInsets.symmetric(vertical: 14),
                               child: const Wrap(

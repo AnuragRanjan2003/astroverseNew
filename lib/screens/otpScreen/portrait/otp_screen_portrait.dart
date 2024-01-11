@@ -8,7 +8,8 @@ import 'package:astroverse/res/decor/button_decor.dart';
 import 'package:astroverse/res/dims/global.dart';
 import 'package:astroverse/res/img/images.dart';
 import 'package:astroverse/res/textStyles/text_styles.dart';
-import 'package:astroverse/routes/routes.dart';
+import 'package:astroverse/screens/emailverfication/email_verification_screen.dart';
+import 'package:astroverse/screens/main/main_screen.dart';
 import 'package:astroverse/screens/phoneAuth/portrait/phone_auth_portrait.dart';
 import 'package:astroverse/utils/crypt.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -22,8 +23,10 @@ import '../../../utils/resource.dart';
 
 class OtpScreenPortrait extends StatelessWidget {
   final BoxConstraints cons;
+  final PhoneDataParcel dataParcel;
 
-  const OtpScreenPortrait({super.key, required this.cons});
+  const OtpScreenPortrait(
+      {super.key, required this.cons, required this.dataParcel});
 
   @override
   Widget build(BuildContext context) {
@@ -32,7 +35,7 @@ class OtpScreenPortrait extends StatelessWidget {
     final LocationController location = Get.find();
     final wd = cons.maxWidth;
     final ht = cons.maxHeight;
-    final PhoneDataParcel dataParcel = Get.arguments;
+
     final models.User? user = dataParcel.parcel.data;
     final bool google = dataParcel.parcel.google;
     final String code = dataParcel.code;
@@ -42,7 +45,7 @@ class OtpScreenPortrait extends StatelessWidget {
     log(code.toString(), name: "CODE");
     if (user == null) Get.snackbar("Error", "unexpected error");
     return Scaffold(
-        backgroundColor: Colors.blue.shade50,
+        backgroundColor: ProjectColors.primary,
         body: SingleChildScrollView(
           child: Container(
             width: wd,
@@ -124,11 +127,12 @@ class OtpScreenPortrait extends StatelessWidget {
                                                 // Get.toNamed(
                                                 //   Routes.emailVerify,
                                                 // );
-                                                Get.offNamedUntil(
-                                                  Routes.emailVerify,
-                                                  ModalRoute.withName(
-                                                      Routes.ask),
-                                                );
+                                                Navigator.of(context)
+                                                    .pushReplacement(
+                                                        MaterialPageRoute(
+                                                  builder: (context) =>
+                                                      const EmailVerificationScreen(),
+                                                ));
                                               } else {
                                                 log(
                                                     (p0 as Failure<String>)
@@ -152,7 +156,14 @@ class OtpScreenPortrait extends StatelessWidget {
                                                   //TODO("nav")
                                                   // Get.toNamed(
                                                   //     Routes.main);
-                                                  Get.offNamed(Routes.main);
+                                                  Navigator.of(context)
+                                                      .pushAndRemoveUntil(
+                                                    MaterialPageRoute(
+                                                      builder: (context) =>
+                                                          const MainScreen(),
+                                                    ),
+                                                    (route) => false,
+                                                  );
                                                 });
                                           }
                                         }, () {

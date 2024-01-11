@@ -1,16 +1,19 @@
 import 'package:astroverse/components/buy_coins.dart';
 import 'package:astroverse/components/delete_account_bottom_sheet.dart';
 import 'package:astroverse/components/update_bank_bottomsheet.dart';
+import 'package:astroverse/components/update_qualifications_bottom_sheet.dart';
 import 'package:astroverse/components/upgrade_features_bottom_sheet.dart';
 import 'package:astroverse/components/upgrade_range_bottomsheet.dart';
 import 'package:astroverse/db/plans_db.dart';
 import 'package:astroverse/models/extra_info.dart';
+import 'package:astroverse/models/qualifications.dart';
 import 'package:astroverse/models/user_bank_details.dart';
 import 'package:astroverse/res/colors/project_colors.dart';
 import 'package:astroverse/res/dims/global.dart';
 import 'package:astroverse/utils/crypt.dart';
 import 'package:astroverse/utils/geo.dart';
 import 'package:astroverse/utils/num_parser.dart';
+import 'package:astroverse/utils/resource.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
@@ -23,6 +26,7 @@ class NamePlate extends StatelessWidget {
   final UserBankDetails? bankDetails;
   final void Function() onLogOut;
   final void Function() onEdit;
+  final void Function(Qualification) onQualificationUpdate;
   static const _sizeIcon = 22.0;
 
   const NamePlate({
@@ -32,6 +36,7 @@ class NamePlate extends StatelessWidget {
     required this.onEdit,
     required this.info,
     this.bankDetails,
+    required this.onQualificationUpdate,
   });
 
   @override
@@ -89,6 +94,73 @@ class NamePlate extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Wrap(
+                          crossAxisAlignment: WrapCrossAlignment.center,
+                          spacing: 8,
+                          children: [
+                            Visibility(
+                              visible: user.qualifications.isEmpty,
+                              child: const Tooltip(
+                                  triggerMode: TooltipTriggerMode.tap,
+                                  message:
+                                      "Add your qualifications for a better engagement.",
+                                  child: Icon(
+                                    Icons.warning_rounded,
+                                    size: 20,
+                                    color: Colors.orangeAccent,
+                                  )),
+                            ),
+                            const Text(
+                              "Qualifications",
+                              textAlign: TextAlign.start,
+                              style: TextStyle(
+                                  fontSize: 16, fontWeight: FontWeight.w600),
+                            ),
+                          ],
+                        ),
+                        IconButton(
+                          onPressed: () {
+                            Scaffold.of(context).showBottomSheet((context) =>
+                                UpdateQualificationsBottomSheet(
+                                  previousQualifications: user.qualifications,
+                                  onUpdate: onQualificationUpdate,
+                                ),constraints: const BoxConstraints(maxHeight: 570));
+                          },
+                          icon: const Icon(
+                            Icons.edit,
+                            size: 22,
+                          ),
+                        )
+                      ],
+                    ),
+                    Container(
+                      decoration: const BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.all(Radius.circular(10))),
+                      padding: const EdgeInsets.all(12),
+                      child: Text(
+                        user.qualifications.isNotEmpty
+                            ? user.qualifications
+                            : "empty",
+                        style: const TextStyle(
+                          color: ProjectColors.disabled,
+                          fontSize: 13,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    )
+                  ],
+                ),
+                const SizedBox(
+                  height: 20,
+                ),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
                     const Text(
                       "Personal Information",
                       textAlign: TextAlign.start,
@@ -107,7 +179,7 @@ class NamePlate extends StatelessWidget {
                           nameItem(
                               const Icon(
                                 Icons.email_outlined,
-                                color: Colors.blue,
+                                color: ProjectColors.primary,
                                 size: _sizeIcon,
                               ),
                               'Email',
@@ -116,7 +188,7 @@ class NamePlate extends StatelessWidget {
                           nameItem(
                               const Icon(
                                 Icons.phone_android_outlined,
-                                color: Colors.blue,
+                                color: ProjectColors.primary,
                                 size: _sizeIcon,
                               ),
                               'Phone',
@@ -125,16 +197,17 @@ class NamePlate extends StatelessWidget {
                           nameItem(
                               const Icon(
                                 Icons.wallet,
-                                color: Colors.blue,
+                                color: ProjectColors.primary,
                                 size: _sizeIcon,
                               ),
                               'Plan',
-                              _planToName(user.plan, user.astro)),
+                              _planToName(
+                                  user.plan, user.astro, user.featured)),
                           divider,
                           nameItem(
                               const Icon(
                                 Icons.account_box_outlined,
-                                color: Colors.blue,
+                                color: ProjectColors.primary,
                                 size: _sizeIcon,
                               ),
                               'Role',
@@ -165,7 +238,7 @@ class NamePlate extends StatelessWidget {
                           nameItem(
                               const Icon(
                                 Icons.remove_red_eye,
-                                color: Colors.blue,
+                                color: ProjectColors.primary,
                                 size: _sizeIcon,
                               ),
                               'Profile Views',
@@ -175,28 +248,49 @@ class NamePlate extends StatelessWidget {
                           nameItem(
                               const Icon(
                                 Icons.chat_bubble_outline,
-                                color: Colors.blue,
+                                color: ProjectColors.primary,
                                 size: _sizeIcon,
                               ),
                               'Posts',
                               NumberParser().toSocialMediaString(info.posts)),
-                          if (user.astro == true) divider,
-                          if (user.astro == true)
+                          if (user.astro == true) ...[
+                            divider,
                             nameItem(
                                 const Icon(
                                   Icons.data_thresholding_outlined,
-                                  color: Colors.blue,
+                                  color: ProjectColors.primary,
                                   size: _sizeIcon,
                                 ),
                                 'Sales',
                                 NumberParser()
                                     .toSocialMediaString(info.servicesSold)),
+                            divider,
+                            nameItem(
+                                const Icon(
+                                  Icons.monetization_on_outlined,
+                                  color: ProjectColors.primary,
+                                  size: _sizeIcon,
+                                ),
+                                'money generated',
+                                NumberParser()
+                                    .toSocialMediaString(info.moneyGenerated)),
+                            divider,
+                            nameItem(
+                                const Icon(
+                                  Icons.monetization_on_outlined,
+                                  color: ProjectColors.primary,
+                                  size: _sizeIcon,
+                                ),
+                                'money withdrawn',
+                                NumberParser()
+                                    .toSocialMediaString(info.moneyWithdrawn)),
+                          ],
                           divider,
                           nameItem(
                               const Icon(
                                 Icons.calendar_month,
                                 size: _sizeIcon,
-                                color: Colors.blue,
+                                color: ProjectColors.primary,
                               ),
                               'joined',
                               DateFormat('dd MMM yyyy')
@@ -206,7 +300,7 @@ class NamePlate extends StatelessWidget {
                               const Icon(
                                 Icons.calendar_today_sharp,
                                 size: _sizeIcon,
-                                color: Colors.blue,
+                                color: ProjectColors.primary,
                               ),
                               'last',
                               DateFormat('dd MMM yyyy')
@@ -262,7 +356,6 @@ class NamePlate extends StatelessWidget {
                             },
                             icon: const Icon(
                               Icons.mode_edit_outline,
-                              color: Colors.blue,
                             ))
                       ],
                     ),
@@ -278,7 +371,7 @@ class NamePlate extends StatelessWidget {
                           nameItem(
                               const Icon(
                                 Icons.account_balance_wallet,
-                                color: Colors.blue,
+                                color: ProjectColors.primary,
                                 size: _sizeIcon,
                               ),
                               'UPI',
@@ -290,7 +383,7 @@ class NamePlate extends StatelessWidget {
                           nameItem(
                               const Icon(
                                 Icons.numbers_sharp,
-                                color: Colors.blue,
+                                color: ProjectColors.primary,
                                 size: _sizeIcon,
                               ),
                               'Account No.',
@@ -302,7 +395,7 @@ class NamePlate extends StatelessWidget {
                           nameItem(
                               const Icon(
                                 Icons.numbers,
-                                color: Colors.blue,
+                                color: ProjectColors.primary,
                                 size: _sizeIcon,
                               ),
                               'IFSC Code',
@@ -315,7 +408,7 @@ class NamePlate extends StatelessWidget {
                               const Icon(
                                 Icons.alt_route,
                                 size: _sizeIcon,
-                                color: Colors.blue,
+                                color: ProjectColors.primary,
                               ),
                               'branch',
                               bankDetails == null
@@ -348,7 +441,7 @@ class NamePlate extends StatelessWidget {
                           nameItemWithButton(
                             const Icon(
                               Icons.logout,
-                              color: Colors.blue,
+                              color: ProjectColors.primary,
                               size: _sizeIcon,
                             ),
                             'logout',
@@ -358,7 +451,7 @@ class NamePlate extends StatelessWidget {
                           nameItemWithButton(
                               const Icon(
                                 Icons.request_page_outlined,
-                                color: Colors.blue,
+                                color: ProjectColors.primary,
                                 size: _sizeIcon,
                               ),
                               'terms of service',
@@ -367,10 +460,18 @@ class NamePlate extends StatelessWidget {
                           nameItemWithButton(
                               const Icon(
                                 Icons.upgrade_rounded,
-                                color: Colors.blue,
+                                color: ProjectColors.primary,
                                 size: _sizeIcon,
                               ),
                               'upgrade', () {
+                            if (user.featured) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                      content: Text(
+                                          "featured users can't upgrade")));
+                              return;
+                            }
+
                             Scaffold.of(context).showBottomSheet((context) {
                               if (user.astro == false) {
                                 return UpgradeFeaturesBottomSheet(user: user);
@@ -384,7 +485,7 @@ class NamePlate extends StatelessWidget {
                           nameItemWithButton(
                               const Icon(
                                 Icons.add_circle,
-                                color: Colors.blue,
+                                color: ProjectColors.primary,
                               ),
                               "buy coins", () {
                             Scaffold.of(context).showBottomSheet(
@@ -431,7 +532,7 @@ class NamePlate extends StatelessWidget {
                           nameItem(
                               const Icon(
                                 Icons.call_outlined,
-                                color: Colors.blue,
+                                color: ProjectColors.primary,
                                 size: _sizeIcon,
                               ),
                               'Ph.no',
@@ -440,7 +541,7 @@ class NamePlate extends StatelessWidget {
                           nameItem(
                               const Icon(
                                 Icons.mail_outline,
-                                color: Colors.blue,
+                                color: ProjectColors.primary,
                                 size: _sizeIcon,
                               ),
                               'Email',
@@ -536,7 +637,7 @@ class NamePlate extends StatelessWidget {
                 onPressed: onTap,
                 icon: const Icon(
                   Icons.keyboard_arrow_right,
-                  color: Colors.blue,
+                  color: ProjectColors.primary,
                 )),
           )
         ],
@@ -544,7 +645,9 @@ class NamePlate extends StatelessWidget {
     );
   }
 
-  String? _planToName(int plan, bool astro) {
+  String? _planToName(int plan, bool astro, bool featured) {
+    if (featured) return "featured";
+
     if (astro) {
       return Plans.astroPlans
           .firstWhere((element) => element.value == plan)

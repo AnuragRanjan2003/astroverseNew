@@ -9,13 +9,12 @@ import 'package:astroverse/res/img/images.dart';
 import 'package:astroverse/res/textStyles/text_styles.dart';
 import 'package:astroverse/screens/emailverfication/email_verification_screen.dart';
 import 'package:astroverse/screens/main/main_screen.dart';
+import 'package:astroverse/screens/userSignUp/user_sign_up_screen.dart';
 import 'package:astroverse/utils/resource.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_sign_in/google_sign_in.dart';
-
-import '../../../routes/routes.dart';
 
 class UserLoginScreenPortrait extends StatelessWidget {
   final BoxConstraints cons;
@@ -195,7 +194,7 @@ class UserLoginScreenPortrait extends StatelessWidget {
                                                                     }
                                                                   }
                                                                 : null,
-                                                        color: Colors.blue,
+                                                        color: ProjectColors.primary,
                                                         disabledColor:
                                                             ProjectColors
                                                                 .disabled,
@@ -242,9 +241,11 @@ class UserLoginScreenPortrait extends StatelessWidget {
                                 }
                               },
                               () {
-                                Navigator.of(context).push(MaterialPageRoute(
-                                  builder: (context) => const MainScreen(),
-                                ));
+                                Navigator.of(context).pushAndRemoveUntil(
+                                    MaterialPageRoute(
+                                      builder: (context) => const MainScreen(),
+                                    ),
+                                    (route) => false);
                               },
                             );
                           },
@@ -273,7 +274,9 @@ class UserLoginScreenPortrait extends StatelessWidget {
                     )),
                 TextButton(
                   onPressed: () {
-                    Get.toNamed(Routes.userSignup);
+                    Navigator.of(context).push(MaterialPageRoute(
+                      builder: (context) => const UserSignUpScreen(),
+                    ));
                   },
                   child: Text(
                     "Sign Up",
@@ -296,10 +299,15 @@ class UserLoginScreenPortrait extends StatelessWidget {
     if (p.isSuccess) {
       if (b == false) {
         //Get.toNamed(Routes.emailVerify);
-        Navigator.push(context, MaterialPageRoute(builder: (context) => const EmailVerificationScreen(),));
-
+        Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => const EmailVerificationScreen(),
+            ));
       } else {
-        Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (context) => const MainScreen(),));
+        Navigator.of(context).pushReplacement(MaterialPageRoute(
+          builder: (context) => const MainScreen(),
+        ));
         //Get.offAllNamed(Routes.main);
       }
     } else {

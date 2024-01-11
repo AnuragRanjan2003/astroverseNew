@@ -4,6 +4,7 @@ import 'dart:io';
 
 import 'package:astroverse/controllers/service_controller.dart';
 import 'package:astroverse/models/extra_info.dart';
+import 'package:astroverse/models/qualifications.dart';
 import 'package:astroverse/models/user.dart' as models;
 import 'package:astroverse/models/user_bank_details.dart';
 import 'package:astroverse/repo/auth_repo.dart';
@@ -33,6 +34,8 @@ class AuthController extends GetxController {
   final _analytics = FirebaseAnalytics.instance;
 
   final _crypto = Crypt();
+
+  final _emptyQualification = Qualification("");
 
   Rxn<models.User> user = Rxn<models.User>();
   Rx<bool> loading = false.obs;
@@ -180,8 +183,12 @@ class AuthController extends GetxController {
                     posts: 0,
                     joiningDate: DateTime.now(),
                     lastActive: DateTime.now(),
+                    moneyGenerated: 0,
+                    moneyWithdrawn: 0,
                     servicesSold: 0);
-                _repo.setExtraInfo(info, user.uid).then((value) {
+                _repo
+                    .setExtraInfo(info, _emptyQualification, user.uid)
+                    .then((value) {
                   _analytics.logSignUp(signUpMethod: "Email");
                   loading.value = false;
                   updateUI(p0);
@@ -198,8 +205,12 @@ class AuthController extends GetxController {
                 posts: 0,
                 joiningDate: DateTime.now(),
                 lastActive: DateTime.now(),
+                moneyGenerated: 0,
+                moneyWithdrawn: 0,
                 servicesSold: 0);
-            _repo.setExtraInfo(info, user.uid).then((value) {
+            _repo
+                .setExtraInfo(info, _emptyQualification, user.uid)
+                .then((value) {
               _analytics.logSignUp(signUpMethod: "Email");
               loading.value = false;
               updateUI(p0);
@@ -250,8 +261,12 @@ class AuthController extends GetxController {
                     posts: 0,
                     joiningDate: DateTime.now(),
                     lastActive: DateTime.now(),
+                    moneyGenerated: 0,
+                    moneyWithdrawn: 0,
                     servicesSold: 0);
-                _repo.setExtraInfo(info, user.uid).then((value) {
+                _repo
+                    .setExtraInfo(info, _emptyQualification, user.uid)
+                    .then((value) {
                   _analytics.logSignUp(signUpMethod: "Email");
                   loading.value = false;
                   updateUI(value);
@@ -269,8 +284,12 @@ class AuthController extends GetxController {
                 posts: 0,
                 joiningDate: DateTime.now(),
                 lastActive: DateTime.now(),
+                moneyGenerated: 0,
+                moneyWithdrawn: 0,
                 servicesSold: 0);
-            _repo.setExtraInfo(info, user.uid).then((value) {
+            _repo
+                .setExtraInfo(info, _emptyQualification, user.uid)
+                .then((value) {
               _analytics.logSignUp(signUpMethod: "Email");
               loading.value = false;
               updateUI(value);
@@ -286,8 +305,10 @@ class AuthController extends GetxController {
     });
   }
 
-  updateUser(Json data, String uid) {
-    _repo.updateUserInfo(data, uid).then((value) {});
+  updateUser(Json data, String uid, Function(Resource) onUpdate) {
+    _repo.updateUserInfo(data, uid).then((value) {
+      onUpdate(value);
+    });
   }
 
   void saveData(models.User user, void Function(Resource<void>) updateUI,
@@ -379,7 +400,8 @@ class AuthController extends GetxController {
     await _bankSub?.cancel();
   }
 
-  signInWithGoogle(void Function(Resource<UserCredential>) updateUI , Function() onLogin) {
+  signInWithGoogle(
+      void Function(Resource<UserCredential>) updateUI, Function() onLogin) {
     _repo.signInWithGoogle().then((value) {
       if (value.isSuccess) {
         _analytics.logLogin(loginMethod: "Google");
@@ -456,14 +478,23 @@ class AuthController extends GetxController {
               loc == null
                   ? ""
                   : GeoHasher().encode(loc.longitude, loc.latitude),
+              "",
+              0,
+              DateTime(1900),
+              0,
+              DateTime(1900),
               false,
             );
             final info = ExtraInfo(
                 joiningDate: DateTime.now(),
                 lastActive: DateTime.now(),
+                moneyGenerated: 0,
+                moneyWithdrawn: 0,
                 servicesSold: 0,
                 posts: 0);
-            _repo.setExtraInfo(info, cred.uid).then((value) {
+            _repo
+                .setExtraInfo(info, _emptyQualification, cred.uid)
+                .then((value) {
               if (value.isSuccess) {
                 onComplete(user);
               } else {
@@ -571,15 +602,26 @@ class AuthController extends GetxController {
   }
 
   void logOut(Function() onLogout) {
-    CometChatUIKit.logout(
-        onSuccess: (p0) {
-          _repo.logOut().then((value) {
-            _zegoService.disposeCallInvitationService().then((value) {
-              onLogout();
-            });
-          });
-        },
-        onError: (_) {});
+    CometChatUIKit.logout(onSuccess: (p0) {
+      log("comet chat log out", name: "LOG OUT");
+      _repo.logOut().then((value) {
+        log("log out", name: "LOG OUT");
+        _zegoService.disposeCallInvitationService().then((value) {
+          log("zego log out", name: "LOG OUT");
+          onLogout();
+        });
+      });
+    }, onError: (_) {
+      _repo.logOut().then((value) {
+        log("log out", name: "LOG OUT");
+        _zegoService.disposeCallInvitationService().then((value) {
+          log("zego log out", name: "LOG OUT");
+          onLogout();
+        }).onError((error, stackTrace) {
+          onLogout();
+        });
+      });
+    });
   }
 
   _onNoUserEmailLogin() {}

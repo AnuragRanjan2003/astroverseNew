@@ -5,6 +5,8 @@ import 'package:astroverse/utils/responsive.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
+import '../../models/user.dart';
+
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
 

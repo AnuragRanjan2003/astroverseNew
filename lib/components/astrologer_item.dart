@@ -59,9 +59,11 @@ class AstrologerItem extends StatelessWidget {
                   Row(
                     children: [
                       _dataWidget(
-                          Icons.remove_red_eye,
+                          Icons.remove_red_eye_outlined,
                           NumberParser().toSocialMediaString(user.profileViews),
                           Colors.orange),
+                      const SizedBox(width: 8,),
+                      user.featured?_featuredChip():const SizedBox(),
                       const SizedBox(
                         width: 20,
                       ),
@@ -105,9 +107,14 @@ class AstrologerItem extends StatelessWidget {
       decoration: BoxDecoration(
           border: Border.all(color: Colors.black),
           borderRadius: const BorderRadius.all(Radius.circular(30))),
-      child: const Text(
-        'featured',
-        style: TextStyle(fontSize: 12),
+      child: const Row(
+        children: [
+          Icon(Icons.star_border,color: Colors.pink,size: 20,),
+          Text(
+            'feat',
+            style: TextStyle(fontSize: 12 ,fontStyle: FontStyle.italic),
+          ),
+        ],
       ),
     );
   }

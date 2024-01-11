@@ -5,6 +5,7 @@ import 'package:astroverse/components/post_item.dart';
 import 'package:astroverse/controllers/auth_controller.dart';
 import 'package:astroverse/controllers/main_controller.dart';
 import 'package:astroverse/models/post.dart';
+import 'package:astroverse/res/colors/project_colors.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get_core/get_core.dart';
@@ -29,7 +30,7 @@ class MyPostPage extends StatelessWidget {
     }
 
     return RefreshIndicator(
-      color: Colors.lightBlue,
+      color: ProjectColors.primary,
       onRefresh: () async {
         log('refreshing', name: "REFRESH");
         mainController.fetchUserPosts(auth.user.value!.uid);

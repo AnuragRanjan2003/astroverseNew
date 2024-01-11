@@ -15,10 +15,15 @@ class ExtraInfo {
 
   final int posts;
 
+  final int moneyGenerated;
+  final int moneyWithdrawn;
+
   ExtraInfo(
       {required this.posts,
       required this.joiningDate,
       required this.lastActive,
+      required this.moneyGenerated,
+      required this.moneyWithdrawn,
       required this.servicesSold});
 
   Map<String, dynamic> toJson() => _$ExtraInfoToJson(this);

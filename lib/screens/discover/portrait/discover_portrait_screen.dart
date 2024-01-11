@@ -28,7 +28,7 @@ class DiscoverScreenPortrait extends StatelessWidget {
       auth.updateUser({
         "geoHash": GeoHasher().encode(
             loc.location.value!.longitude!, loc.location.value!.latitude!)
-      }, auth.user.value!.uid);
+      }, auth.user.value!.uid,(_){});
     }
 
     return DefaultTabController(
@@ -45,7 +45,7 @@ class DiscoverScreenPortrait extends StatelessWidget {
                 builder: (context) => const CreatePostScreen(),
               ));
             },
-            backgroundColor: Colors.lightBlue,
+            backgroundColor: ProjectColors.primary,
             elevation: 0,
             shape: const RoundedRectangleBorder(
                 borderRadius: BorderRadius.all(Radius.circular(20))),
@@ -99,16 +99,16 @@ class DiscoverScreenPortrait extends StatelessWidget {
                   EdgeInsets.symmetric(horizontal: 0, vertical: 2),
               indicator: BoxDecoration(
                   borderRadius: BorderRadius.all(Radius.circular(15)),
-                  color: Colors.blue),
+                  color: ProjectColors.primary),
               indicatorColor: Colors.transparent,
               indicatorSize: TabBarIndicatorSize.tab,
               labelColor: Colors.white,
               tabs: [
                 Tab(
-                  text: 'new',
+                  text: 'discover',
                 ),
                 Tab(
-                  text: 'my',
+                  text: 'my Posts',
                 ),
               ]),
         ),

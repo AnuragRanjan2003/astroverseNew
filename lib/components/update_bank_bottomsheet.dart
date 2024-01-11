@@ -122,7 +122,7 @@ class _UpdateBankBottomSheetState extends State<UpdateBankBottomSheet> {
                               branch.value.text,
                               auth.user.value!.uid);
                         },
-                  color: Colors.blue,
+                  color: ProjectColors.primary,
                   disabledColor: ProjectColors.disabled,
                   shape: const RoundedRectangleBorder(
                       borderRadius: BorderRadius.all(Radius.circular(20))),
@@ -200,7 +200,7 @@ class _UpdateBankBottomSheetState extends State<UpdateBankBottomSheet> {
             padding: const EdgeInsets.only(left: 10, right: 5),
             child: Icon(
               icon,
-              color: Colors.blue,
+              color: ProjectColors.primary,
             ),
           ),
           Padding(
@@ -214,7 +214,7 @@ class _UpdateBankBottomSheetState extends State<UpdateBankBottomSheet> {
             ),
           ),
           const Divider(
-            color: Colors.blue,
+            color: ProjectColors.primary,
             thickness: 10,
           ),
           Expanded(

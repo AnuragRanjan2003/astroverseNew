@@ -8,6 +8,7 @@ import 'package:astroverse/models/transaction.dart' as t;
 import 'package:astroverse/models/user.dart';
 import 'package:astroverse/repo/service_repo.dart';
 import 'package:astroverse/res/strings/backend_strings.dart';
+import 'package:astroverse/utils/constants.dart';
 import 'package:astroverse/utils/env_vars.dart';
 import 'package:astroverse/utils/geo.dart';
 import 'package:astroverse/utils/razor_pay_utils.dart';
@@ -296,6 +297,7 @@ class ServiceController extends GetxController {
                 lastPostForLocality.value = s;
               }
               if (s.data().range == Ranges.city) lastPostForCity.value = s;
+              if (s.data().range == Ranges.state) lastPostForState.value = s;
             }
           }
           log("${lastPostForLocality.value!.data()}", name: "IS NULL");
@@ -346,11 +348,14 @@ class ServiceController extends GetxController {
           List<Service> list = [];
           for (var s in value.data) {
             if (s.exists) {
-              list.add(s.data());
+              if (s.data().authorId != uid) list.add(s.data());
               if (s.data().range == Ranges.locality) {
                 lastPostForLocality.value = s;
               }
               if (s.data().range == Ranges.city) lastPostForCity.value = s;
+              if (s.data().range == Ranges.state) lastPostForState.value = s;
+              if (s.data().range == Ranges.all) lastPostForAll.value = s;
+              if (s.data().featured) lastPostForFeatured.value = s;
             }
           }
           log("${lastPostForLocality.value!.data()}", name: "IS NULL");
@@ -383,15 +388,16 @@ class ServiceController extends GetxController {
       if (value.isSuccess) {
         value = value as Success<List<QueryDocumentSnapshot<Service>>>;
         List<Service> list = [];
-        for (var element in value.data) {
-          if (element.exists) {
-            if (element.data().authorId != uid) list.add(element.data());
-            if (element.data().range == Ranges.locality) {
-              lastPostForLocality.value = element;
+        for (var s in value.data) {
+          if (s.exists) {
+            if (s.data().authorId != uid) list.add(s.data());
+            if (s.data().range == Ranges.locality) {
+              lastPostForLocality.value = s;
             }
-            if (element.data().range == Ranges.city) {
-              lastPostForCity.value = element;
-            }
+            if (s.data().range == Ranges.city) lastPostForCity.value = s;
+            if (s.data().range == Ranges.state) lastPostForState.value = s;
+            if (s.data().range == Ranges.all) lastPostForAll.value = s;
+            if (s.data().featured) lastPostForFeatured.value = s;
           }
         }
         //log("${lastPost.value!.data()}", name: "IS NULL");
@@ -489,7 +495,7 @@ class ServiceController extends GetxController {
   }
 
   static double _computeFinalPrice(double price) {
-    return price;
+    return price+Constants.appConvenienceFee;
   }
 
   void resetServiceCreationValues() {

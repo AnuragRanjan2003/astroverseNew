@@ -69,10 +69,6 @@ class PeopleScreenPortrait extends StatelessWidget {
                         return const SizedBox(
                           height: 70,
                         );
-                      } else if (index == list.length + 2) {
-                        return const SizedBox(
-                          height: 100,
-                        );
                       } else {
                         return AstrologerItem(user: list[index - 1]);
                       }
@@ -80,7 +76,7 @@ class PeopleScreenPortrait extends StatelessWidget {
                     separatorBuilder: (context, index) => const SizedBox(
                           height: 20,
                         ),
-                    itemCount: list.length + 3);
+                    itemCount: list.length + 2);
               },
             ),
             SearchBox(

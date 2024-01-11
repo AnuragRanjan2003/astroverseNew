@@ -1,6 +1,8 @@
 import 'dart:developer';
 
 import 'package:astroverse/res/dims/global.dart';
+import 'package:astroverse/screens/astroSignUp/astro_signup_screen.dart';
+import 'package:astroverse/screens/emailverfication/email_verification_screen.dart';
 import 'package:astroverse/screens/main/main_screen.dart';
 import 'package:astroverse/utils/resource.dart';
 import 'package:flutter/material.dart';
@@ -12,7 +14,6 @@ import '../../../res/colors/project_colors.dart';
 import '../../../res/decor/button_decor.dart';
 import '../../../res/img/images.dart';
 import '../../../res/textStyles/text_styles.dart';
-import '../../../routes/routes.dart';
 
 class AstroLogInPortrait extends StatelessWidget {
   final BoxConstraints cons;
@@ -178,7 +179,7 @@ class AstroLogInPortrait extends StatelessWidget {
                                                       }
                                                     }
                                                   : null,
-                                              color: Colors.blue,
+                                              color: ProjectColors.primary,
                                               disabledColor:
                                                   ProjectColors.disabled,
                                               disabledTextColor: Colors.white,
@@ -215,9 +216,12 @@ class AstroLogInPortrait extends StatelessWidget {
                               log("login successful", name: "GOOGLE");
                             },
                             () {
-                              Navigator.of(context).push(MaterialPageRoute(
-                                builder: (context) => const MainScreen(),
-                              ));
+                              Navigator.of(context).pushAndRemoveUntil(
+                                MaterialPageRoute(
+                                  builder: (context) => const MainScreen(),
+                                ),
+                                (route) => false,
+                              );
                             },
                           );
                         },
@@ -246,7 +250,9 @@ class AstroLogInPortrait extends StatelessWidget {
                   )),
               TextButton(
                 onPressed: () {
-                  Get.toNamed(Routes.astroSignUp);
+                  Navigator.of(context).push(MaterialPageRoute(
+                    builder: (context) => const AstroSignUpScreen(),
+                  ));
                 },
                 child: Text(
                   "Sign Up",
@@ -265,9 +271,17 @@ class AstroLogInPortrait extends StatelessWidget {
 updateUI(Resource<dynamic> p, bool b, BuildContext context) {
   if (p.isSuccess) {
     if (b == false) {
-      Get.toNamed(Routes.emailVerify);
+      Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => const EmailVerificationScreen(),
+          ));
+      //Get.toNamed(Routes.emailVerify);
     } else {
-      Get.offAllNamed(Routes.main);
+      Navigator.of(context).pushReplacement(MaterialPageRoute(
+        builder: (context) => const MainScreen(),
+      ));
+      //Get.offAllNamed(Routes.main);
     }
   } else {
     p = p as Failure<dynamic>;

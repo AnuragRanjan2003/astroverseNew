@@ -12,12 +12,21 @@ import 'package:get/get.dart';
 
 import '../../../models/post.dart';
 
+const _limit = 5;
+
 class CreatePostPortrait extends StatelessWidget {
   final BoxConstraints cons;
   static const _list = {
-    'event prediction': 0,
-    'entertainment': 1,
-    'promotion': 2,
+    'advanced horoscope': 0,
+    'event prediction': 1,
+    'astro challenge': 2,
+    'self promotion': 3,
+    'planetary change': 4,
+    'vastu': 5,
+    'lal kitab': 6,
+    'Tantra/Mantra': 7,
+    'remedy': 8,
+    'Astro  upaay': 9,
   };
 
   const CreatePostPortrait({
@@ -106,7 +115,7 @@ class CreatePostPortrait extends StatelessWidget {
                                     style: const ButtonStyle(
                                         backgroundColor:
                                             MaterialStatePropertyAll(
-                                                Colors.blue)),
+                                                ProjectColors.primary)),
                                     icon: const Icon(
                                       Icons.link,
                                       color: Colors.white,
@@ -214,6 +223,17 @@ class CreatePostPortrait extends StatelessWidget {
                                     )}',
                                     name: "SERVICE");
                                 if (!validate(title, body)) return;
+
+                                if (areDatesSame(user.lastPosted)) {
+                                  if (user.postedToday >= _limit) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                        const SnackBar(
+                                            content: Text(
+                                                "Post limit reached for today")));
+                                    return;
+                                  }
+                                }
+
                                 final post = Post(
                                     authorId: user.uid,
                                     authorName: user.name,
@@ -234,7 +254,7 @@ class CreatePostPortrait extends StatelessWidget {
                                           controller.selectedItem.value]
                                     ]);
                                 controller.savePost(post, (p0) {
-                                  _updateUI(p0, body, title);
+                                  _updateUI(p0, body, title, context);
                                 }, user.uid);
                               }
                             : null,
@@ -265,29 +285,18 @@ class CreatePostPortrait extends StatelessWidget {
 }
 
 _updateUI(Resource<Post> p0, TextEditingController body,
-    TextEditingController title) {
+    TextEditingController title, BuildContext context) {
   if (p0.isSuccess) {
     body.clear();
     title.clear();
     log("posted", name: "POST");
-    Get.snackbar(
-      '',
-      '',
-      titleText: const Text(
-        'posted successfully',
-        style: TextStyle(color: Colors.lightBlue),
-      ),
-      messageText: const Text(
-        'posted successfully',
-        style: TextStyle(color: Colors.lightBlue),
-      ),
-      snackPosition: SnackPosition.BOTTOM,
-      duration: const Duration(seconds: 3),
-      backgroundColor: Colors.white,
-      colorText: Colors.white,
-    );
+    Navigator.of(context).pop();
+    ScaffoldMessenger.of(context)
+        .showSnackBar(const SnackBar(content: Text("Posted Successfully")));
   } else {
     log((p0 as Failure<Post>).error, name: "POST");
+    ScaffoldMessenger.of(context)
+        .showSnackBar(const SnackBar(content: Text("Post Failed")));
   }
 }
 

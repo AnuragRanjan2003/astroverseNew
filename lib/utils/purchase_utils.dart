@@ -1,3 +1,4 @@
+import 'package:astroverse/models/extra_info.dart';
 import 'package:astroverse/models/purchase.dart';
 import 'package:astroverse/utils/crypt.dart';
 import 'package:astroverse/utils/postable.dart';
@@ -9,7 +10,7 @@ typedef Json = Map<String, dynamic>;
 class PurchaseUtils extends Postable<Purchase, Purchase> {
   final _db = FirebaseFirestore.instance;
   final CollectionReference? servicesCollection;
-  final DocumentReference? extraInfoDocument;
+  final DocumentReference<ExtraInfo>? extraInfoDocument;
   static const int _limit = 20;
 
   final _crypto = Crypt();
@@ -141,6 +142,22 @@ class PurchaseUtils extends Postable<Purchase, Purchase> {
       final batch = _db.batch();
       batch.update(ref.doc(id), data);
       batch.update(likeRef!.doc(id), data);
+      await batch.commit();
+      return Success<Json>(data);
+    } on FirebaseException catch (e) {
+      return Failure<Json>(e.message.toString());
+    } catch (e) {
+      return Failure<Json>(e.toString());
+    }
+  }
+
+  Future<Resource<Json>> confirmPurchase(
+      Json data, String id, double amount) async {
+    try {
+      final batch = _db.batch();
+      batch.update(ref.doc(id), data);
+      batch.update(likeRef!.doc(id), data);
+      batch.update(extraInfoDocument!, {"moneyGenerate": FieldValue.increment(amount)});
       await batch.commit();
       return Success<Json>(data);
     } on FirebaseException catch (e) {

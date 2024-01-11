@@ -1,5 +1,4 @@
 import 'dart:developer' as dev;
-import 'dart:developer';
 
 import 'package:astroverse/components/underlined_box.dart';
 import 'package:astroverse/controllers/phone_auth_controller.dart';
@@ -8,8 +7,8 @@ import 'package:astroverse/res/colors/project_colors.dart';
 import 'package:astroverse/res/decor/button_decor.dart';
 import 'package:astroverse/res/dims/global.dart';
 import 'package:astroverse/res/img/images.dart';
-import 'package:astroverse/routes/routes.dart';
 import 'package:astroverse/screens/astroSignUp/portrait/astro_signup_portrait.dart';
+import 'package:astroverse/screens/otpScreen/otp_screen.dart';
 import 'package:astroverse/utils/otp_phone_callbacks.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -18,8 +17,10 @@ import '../../../res/textStyles/text_styles.dart';
 
 class PhoneAuthPortrait extends StatelessWidget {
   final BoxConstraints cons;
+  final Parcel parcel;
 
-  const PhoneAuthPortrait({super.key, required this.cons});
+  const PhoneAuthPortrait(
+      {super.key, required this.cons, required this.parcel});
 
   @override
   Widget build(BuildContext context) {
@@ -27,8 +28,6 @@ class PhoneAuthPortrait extends StatelessWidget {
     final wd = cons.maxWidth;
     final ht = cons.maxHeight;
     final PhoneAuthController controller = Get.find();
-    log("${Get.arguments}" ,name: "PARCEL");
-    final Parcel parcel = Get.arguments;
 
     final models.User? user;
     user = parcel.data;
@@ -38,7 +37,7 @@ class PhoneAuthPortrait extends StatelessWidget {
     if (user == null) Get.snackbar("Error", "unexpected error");
     late OTPPhoneCallbacks callbacks;
     return Scaffold(
-      backgroundColor: Colors.blue.shade50,
+      backgroundColor: ProjectColors.primary,
       body: SingleChildScrollView(
         child: SizedBox(
           width: wd,
@@ -93,14 +92,16 @@ class PhoneAuthPortrait extends StatelessWidget {
                                     callbacks = OTPPhoneCallbacks(
                                       (code) {
                                         controller.sendOtpLoading.value = false;
-
-                                        Get.toNamed(Routes.otpScreen,
-                                            arguments: PhoneDataParcel(
-                                                code,
-                                                Parcel(
-                                                    data: user, google: google),
-                                                number,
-                                                callbacks));
+                                        final parcel = PhoneDataParcel(
+                                            code,
+                                            Parcel(data: user, google: google),
+                                            number,
+                                            callbacks);
+                                        Navigator.of(context)
+                                            .push(MaterialPageRoute(
+                                          builder: (context) =>
+                                              OtpScreen(parcel: parcel),
+                                        ));
                                       },
                                       (error) {
                                         controller.sendOtpLoading.value = false;

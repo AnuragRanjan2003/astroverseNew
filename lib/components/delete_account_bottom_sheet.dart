@@ -7,7 +7,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-import '../routes/routes.dart';
+import '../screens/ask/ask_screen.dart';
 
 class DeleteAccountBottomSheet extends StatelessWidget {
   const DeleteAccountBottomSheet({super.key});
@@ -65,7 +65,10 @@ class DeleteAccountBottomSheet extends StatelessWidget {
                   if (res.user != null) {
                     auth.deleteAccount(res.user!, (p) {
                       if (p.isSuccess) {
-                        Navigator.of(context)..pop()..pop();
+                        Navigator.of(context)
+                          ..pop()
+                          ..pop()
+                          ..pop();
                       } else {
                         ScaffoldMessenger.of(context).showSnackBar(
                             const SnackBar(
@@ -74,7 +77,7 @@ class DeleteAccountBottomSheet extends StatelessWidget {
                     });
                   }
                 },
-                color: Colors.blue,
+                color: ProjectColors.primary,
                 padding: const EdgeInsets.symmetric(vertical: 15),
                 shape: const RoundedRectangleBorder(
                     borderRadius: BorderRadius.all(Radius.circular(15))),
@@ -110,7 +113,11 @@ class DeleteAccountBottomSheet extends StatelessWidget {
                       if (res.data.user != null) {
                         auth.deleteAccount(res.data.user!, (p) {
                           if (p.isSuccess) {
-                            Get.offAllNamed(Routes.ask);
+                            Navigator.of(context).pushAndRemoveUntil(
+                                MaterialPageRoute(
+                                  builder: (context) => const AskScreen(),
+                                ),
+                                (route) => false);
                           } else {
                             ScaffoldMessenger.of(context).showSnackBar(
                                 const SnackBar(

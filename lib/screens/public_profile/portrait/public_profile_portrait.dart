@@ -2,11 +2,13 @@ import 'dart:developer';
 
 import 'package:astroverse/components/person_items.dart';
 import 'package:astroverse/components/person_posts.dart';
+import 'package:astroverse/components/see_more_profile_bottom_sheet.dart';
 import 'package:astroverse/controllers/auth_controller.dart';
 import 'package:astroverse/controllers/public_profile_controller.dart';
 import 'package:astroverse/db/plans_db.dart';
 import 'package:astroverse/models/extra_info.dart';
 import 'package:astroverse/models/user.dart';
+import 'package:astroverse/res/colors/project_colors.dart';
 import 'package:astroverse/res/img/images.dart';
 import 'package:astroverse/res/textStyles/text_styles.dart';
 import 'package:astroverse/screens/messaging.dart';
@@ -26,7 +28,8 @@ class PublicProfilePortrait extends StatelessWidget {
   final User user;
   static const _imageRadius = 60.00;
 
-  const PublicProfilePortrait({super.key, required this.cons , required this.user});
+  const PublicProfilePortrait(
+      {super.key, required this.cons, required this.user});
 
   @override
   Widget build(BuildContext context) {
@@ -44,6 +47,7 @@ class PublicProfilePortrait extends StatelessWidget {
     public.getExtraInfo(user.uid);
     public.updateProfileViews(user.uid);
     public.fetchUserPosts(user.uid);
+    public.fetchUserServices(user.uid);
 
     return DefaultTabController(
       length: 2,
@@ -55,7 +59,7 @@ class PublicProfilePortrait extends StatelessWidget {
                 child: Row(
                   children: [
                     Visibility(
-                      visible: auth.user.value!.plan  >=
+                      visible: auth.user.value!.plan >=
                           Plans.plans[1].value + VisibilityPlans.all + 1,
                       child: Expanded(
                           flex: 7,
@@ -109,7 +113,7 @@ class PublicProfilePortrait extends StatelessWidget {
               )
             : const SizedBox.shrink(),
         body: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             _buildTopBanner(ht, user),
             Padding(
@@ -119,28 +123,59 @@ class PublicProfilePortrait extends StatelessWidget {
                 children: [
                   Text(
                     decryptedUserName,
+                    textAlign: TextAlign.center,
                     style: TextStylesLight().bodyBold,
                   ),
                   const SizedBox(
                     height: 15,
                   ),
-                  Text(crypto.decryptFromBase64String(user.email)),
+
+                  Builder(builder: (context) {
+                    return Obx(() => OutlinedButton(
+                        onPressed: public.info.value == null
+                            ? null
+                            : () {
+                                Navigator.of(context).push(MaterialPageRoute(
+                                  builder: (context) => SeemMoreBottomSheet(
+                                      user: user,
+                                      extraInfo: public.info.value!),
+                                ));
+                              },
+                        child: Text(
+                          "See more",
+                          style: TextStyle(
+                              fontSize: 12,
+                              color: public.info.value != null
+                                  ? Colors.black
+                                  : ProjectColors.disabled,
+                              fontWeight: FontWeight.w500),
+                        )));
+                  }),
                   const SizedBox(
-                    height: 25,
+                    height: 15,
                   ),
                   Obx(() {
                     final info = public.info.value;
                     if (info == null) return _buildDatesColumnShimmer();
-                    return _buildDatesColumn(info.joiningDate, info.lastActive);
+                   return Row(
+                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                     children: [
+                       _buildChip(Icons.shopping_bag_outlined, info.servicesSold.toString(),Colors.green ),
+                       _buildChip(Icons.data_exploration_outlined, info.posts.toString(),Colors.blue ),
+                       _buildChip(Icons.remove_red_eye_outlined, user.profileViews.toString(),Colors.grey ),
+                       _buildChip(Icons.star_border, user.featured?"Yes":"No",Colors.pink ),
+                     ],
+                   );
                   }),
                 ],
               ),
             ),
             const TabBar(
               tabs: [
-                Tab(text: 'posts'),
-                Tab(text: 'items'),
+                Tab(text: 'posts',),
+                Tab(text: 'services'),
               ],
+              indicatorColor: ProjectColors.primary,labelColor: ProjectColors.primary,
             ),
             Expanded(
                 child: TabBarView(
@@ -156,7 +191,17 @@ class PublicProfilePortrait extends StatelessWidget {
                     return PersonPosts(list: public.posts);
                   }
                 })),
-                const Center(child: PersonItems()),
+                Center(child: Obx(() {
+                  if (public.serviceLoading.isTrue) {
+                    return const SizedBox(
+                      height: 30,
+                      width: 20,
+                      child: CircularProgressIndicator(),
+                    );
+                  } else {
+                    return PersonItems(list: public.service);
+                  }
+                })),
               ],
             ))
           ],
@@ -312,8 +357,10 @@ class PublicProfilePortrait extends StatelessWidget {
             Icons.shopping_bag,
             NumberParser().toSocialMediaString(info.servicesSold),
             Colors.green),
-        _buildChip(Icons.data_exploration,
-            NumberParser().toSocialMediaString(info.posts), Colors.blue),
+        _buildChip(
+            Icons.data_exploration,
+            NumberParser().toSocialMediaString(info.posts),
+            ProjectColors.primary),
         _buildChip(Icons.remove_red_eye,
             NumberParser().toSocialMediaString(views), Colors.blueGrey),
         _buildChip(Icons.monetization_on_outlined,
@@ -329,7 +376,7 @@ class PublicProfilePortrait extends StatelessWidget {
       runSpacing: 8.0,
       children: [
         _buildChipShimmer(Icons.shopping_bag, Colors.green),
-        _buildChipShimmer(Icons.data_exploration, Colors.blue),
+        _buildChipShimmer(Icons.data_exploration, ProjectColors.primary),
         _buildChipShimmer(Icons.remove_red_eye, Colors.blueGrey),
         _buildChipShimmer(Icons.monetization_on_outlined, Colors.orange),
       ],

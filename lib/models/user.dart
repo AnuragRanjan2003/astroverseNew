@@ -19,6 +19,11 @@ class User {
   int profileViews;
   String phNo;
   bool featured;
+  String qualifications;
+  final int postedToday;
+  final DateTime lastPosted;
+  final int servicesPostedToday;
+  final DateTime lastServicePosted;
 
   User(
     this.name,
@@ -29,6 +34,11 @@ class User {
     this.astro,
     this.phNo,
     this.geoHash,
+    this.qualifications,
+    this.postedToday,
+    this.lastPosted,
+    this.servicesPostedToday,
+    this.lastServicePosted,
     this.featured, {
     this.location,
     this.coins = 0,

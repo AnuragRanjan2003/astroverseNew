@@ -36,7 +36,7 @@ class SearchBox extends StatelessWidget {
               decoration: InputDecoration(
                   prefixIcon: const Icon(
                     Icons.search,
-                    color: Colors.blue,
+                    color: ProjectColors.primary,
                   ),
                   border: InputBorder.none,
                   hintText: hint,

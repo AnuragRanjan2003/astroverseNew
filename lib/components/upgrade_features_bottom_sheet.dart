@@ -105,7 +105,7 @@ class _UpgradeFeaturesBottomSheetState
                               },
                         disabledColor: ProjectColors.disabled,
                         disabledTextColor: Colors.white,
-                        color: Colors.blue,
+                        color: ProjectColors.primary,
                         padding: const EdgeInsets.symmetric(
                           vertical: 15,
                         ),

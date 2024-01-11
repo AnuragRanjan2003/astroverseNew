@@ -5,6 +5,7 @@ import 'package:astroverse/models/extra_info.dart';
 import 'package:astroverse/models/post.dart';
 import 'package:astroverse/models/post_save.dart';
 import 'package:astroverse/models/purchase.dart';
+import 'package:astroverse/models/qualifications.dart';
 import 'package:astroverse/models/save_service.dart';
 import 'package:astroverse/models/service.dart';
 import 'package:astroverse/models/transaction.dart' as t;
@@ -12,7 +13,6 @@ import 'package:astroverse/models/user.dart' as models;
 import 'package:astroverse/models/user_bank_details.dart';
 import 'package:astroverse/res/strings/backend_strings.dart';
 import 'package:astroverse/utils/comment_utils.dart';
-import 'package:astroverse/utils/crypt.dart';
 import 'package:astroverse/utils/geo.dart';
 import 'package:astroverse/utils/purchase_utils.dart';
 import 'package:astroverse/utils/reply_utils.dart';
@@ -125,6 +125,18 @@ class Database {
             toFirestore: (value, options) => value.toJson(),
           );
 
+  DocumentReference<Qualification> _qualificationDocument(String uid) =>
+      FirebaseFirestore.instance
+          .collection(BackEndStrings.userCollection)
+          .doc(uid)
+          .collection(BackEndStrings.metaDataCollection)
+          .doc('qualification')
+          .withConverter<Qualification>(
+            fromFirestore: (snapshot, options) =>
+                Qualification.fromJson(snapshot.data()),
+            toFirestore: (value, options) => value.toJson(),
+          );
+
   Future<Resource<void>> saveUserData(models.User user) async {
     return SafeCall().fireStoreCall<void>(
         () async => await _userCollection.doc(user.uid).set(user));
@@ -175,6 +187,12 @@ class Database {
       final batch = _fireStore.batch();
       batch.set(_postCollection.doc(post.id), post);
       batch.set(_userPostCollection(post.authorId).doc(post.id), post);
+      
+      batch.update(_userCollection.doc(post.authorId), {
+        "postedToday": FieldValue.increment(1),
+        "lastPosted": FieldValue.serverTimestamp(),
+      });
+      
       await batch.commit();
       return Success(post);
     } on FirebaseException catch (e) {
@@ -189,6 +207,7 @@ class Database {
       final batch = FirebaseFirestore.instance.batch();
       batch.delete(_userCollection.doc(user.uid));
       batch.delete(_extraInfoDocument(user.uid));
+      batch.delete(_qualificationDocument(user.uid));
       await batch.commit();
       return Success<User>(user);
     } on FirebaseException catch (e) {
@@ -568,9 +587,25 @@ class Database {
     }
   }
 
-  Future<Resource<SetInfo>> setExtraInfo(ExtraInfo info, String uid) async {
+  Future<Resource<Qualification>> getQualification(String uid) async {
     try {
-      await _extraInfoDocument(uid).set(info, SetOptions(merge: true));
+      final res = await _qualificationDocument(uid).get();
+      if (res.data() != null) return Success<Qualification>(res.data()!);
+      return Failure<Qualification>("null returned");
+    } on FirebaseException catch (e) {
+      return Failure<Qualification>(e.message.toString());
+    } catch (e) {
+      return Failure<Qualification>(e.toString());
+    }
+  }
+
+  Future<Resource<SetInfo>> setExtraInfo(
+      ExtraInfo info, Qualification q, String uid) async {
+    try {
+      final batch = FirebaseFirestore.instance.batch();
+      batch.set(_extraInfoDocument(uid), info);
+      batch.set(_qualificationDocument(uid), q);
+      await batch.commit();
       return Success<SetInfo>("set data");
     } on FirebaseException catch (e) {
       return Failure<SetInfo>(e.message.toString());
@@ -615,6 +650,12 @@ class Database {
       await PurchaseUtils(_purchasesCollection(sellerId),
               _purchasesCollection(buyerId), null, null)
           .update(data, id);
+
+  Future<Resource<Json>> confirmPurchase(Json data, String id, String buyerId,
+          String sellerId, double amount) async =>
+      await PurchaseUtils(_purchasesCollection(sellerId),
+              _purchasesCollection(buyerId), null, _extraInfoDocument(sellerId))
+          .confirmPurchase(data, id, amount);
 
   Stream<DocumentSnapshot<Purchase>> purchaseStream(
           String currentUid, String purchaseId) =>
@@ -683,6 +724,10 @@ class Database {
             userLocation,
             uid,
           );
+
+  Future<Resource<List<QueryDocumentSnapshot<SaveService>>>> fetchUserServices(
+          String authorId) =>
+      ServiceUtils(authorId).fetchMyServices();
 }
 
 extension on List<QueryDocumentSnapshot<models.User>> {

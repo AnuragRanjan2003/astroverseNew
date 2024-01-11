@@ -10,6 +10,9 @@ SaveService _$SaveServiceFromJson(Map<String, dynamic> json) => SaveService(
       json['id'] as String,
       json['date'] as String,
       json['name'] as String,
+      json['imageUrl'] == null
+          ? BackEndStrings.defaultServiceImage
+          : json["imageUrl"] as String,
     );
 
 Map<String, dynamic> _$SaveServiceToJson(SaveService instance) =>
@@ -17,4 +20,5 @@ Map<String, dynamic> _$SaveServiceToJson(SaveService instance) =>
       'id': instance.id,
       'date': instance.date,
       'name': instance.name,
+      'imageUrl': instance.imageUrl,
     };

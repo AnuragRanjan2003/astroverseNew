@@ -81,7 +81,7 @@ class MyMartItemFullScreen extends StatelessWidget {
                                   item.uses.toString(),
                                   const Icon(
                                     Icons.data_exploration_outlined,
-                                    color: Colors.blueAccent,
+                                    color: ProjectColors.primary,
                                   )),
                               const SizedBox(
                                 width: 10,

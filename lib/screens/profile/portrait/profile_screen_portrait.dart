@@ -1,21 +1,18 @@
 import 'package:astroverse/components/buy_coins.dart';
 import 'package:astroverse/components/name_plate.dart';
 import 'package:astroverse/controllers/auth_controller.dart';
-import 'package:astroverse/models/user.dart';
 import 'package:astroverse/res/colors/project_colors.dart';
 import 'package:astroverse/res/img/images.dart';
+import 'package:astroverse/screens/ask/ask_screen.dart';
 import 'package:astroverse/utils/num_parser.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:shimmer/shimmer.dart';
 
-import '../../../routes/routes.dart';
-
 class ProfileScreenPortrait extends StatelessWidget {
   final BoxConstraints cons;
-  final User? user;
 
-  const ProfileScreenPortrait({super.key, required this.cons, this.user});
+  const ProfileScreenPortrait({super.key, required this.cons});
 
   @override
   Widget build(BuildContext context) {
@@ -46,10 +43,32 @@ class ProfileScreenPortrait extends StatelessWidget {
                     info: auth.info.value!,
                     bankDetails: auth.bankDetails.value,
                     onEdit: () {},
+                    onQualificationUpdate: (e) {
+                      if (auth.user.value == null) return;
+                      auth.updateUser(
+                          {"qualifications": e.body}, auth.user.value!.uid,
+                          (e) {
+                        if (e.isSuccess) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                  content: Text("Qualifications Updated")));
+                        } else {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                  content: Text("Some Error Occurred")));
+                        }
+                      });
+                    },
                     onLogOut: () {
-                      auth.logOut(() {
-                        Navigator.of(context).popUntil(ModalRoute.withName(Routes.ask));
-                      },);
+                      auth.logOut(
+                        () {
+                          Navigator.of(context).pushAndRemoveUntil(
+                              MaterialPageRoute(
+                                builder: (context) => const AskScreen(),
+                              ),
+                              (route) => false);
+                        },
+                      );
                     },
                   );
                 } else {

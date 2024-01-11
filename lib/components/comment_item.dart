@@ -1,4 +1,5 @@
 import 'package:astroverse/models/comment.dart';
+import 'package:astroverse/res/colors/project_colors.dart';
 import 'package:astroverse/utils/crypt.dart';
 import 'package:flutter/material.dart';
 
@@ -80,11 +81,11 @@ class CommentItem extends StatelessWidget {
                   Icon(
                     Icons.comment,
                     size: 17,
-                    color: Colors.blue,
+                    color: ProjectColors.primary,
                   ),
                   Text(
                     "replies",
-                    style: TextStyle(color: Colors.blue),
+                    style: TextStyle(color: ProjectColors.primary),
                   )
                 ],
               ),

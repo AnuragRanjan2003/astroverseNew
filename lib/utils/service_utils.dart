@@ -2,6 +2,7 @@ import 'dart:developer';
 
 import 'package:astroverse/models/save_service.dart';
 import 'package:astroverse/models/service.dart';
+import 'package:astroverse/models/user.dart';
 import 'package:astroverse/utils/geo.dart';
 import 'package:astroverse/utils/postable.dart';
 import 'package:astroverse/utils/resource.dart';
@@ -27,6 +28,13 @@ CollectionReference<SaveService> _userServiceCollection(String uid) =>
               SaveService.fromJson(snapshot.data()),
           toFirestore: (value, options) => value.toJson(),
         );
+
+final _userCollection = FirebaseFirestore.instance
+    .collection(BackEndStrings.userCollection)
+    .withConverter<User>(
+      fromFirestore: (snapshot, options) => User.fromJson(snapshot.data()),
+      toFirestore: (user, options) => user.toJson(),
+    );
 
 const _limit = 20;
 
@@ -108,11 +116,11 @@ class ServiceUtils extends Postable<Service, SaveService> {
           .limit(_limit);
 
       final res = await Future.wait([
+        queryFeatured.get(),
         queryLocality.get(),
         queryCity.get(),
         queryState.get(),
         queryAll.get(),
-        queryFeatured.get(),
       ]);
 
       data.addIfNotUser(uid, res[0].docs);
@@ -192,11 +200,11 @@ class ServiceUtils extends Postable<Service, SaveService> {
         queryFeatured = queryFeatured.startAfterDocument(lastPostForFeatured);
       }
       final res = await Future.wait([
+        queryFeatured.get(),
         queryLocality.get(),
         queryCity.get(),
         queryState.get(),
         queryAll.get(),
-        queryFeatured.get()
       ]);
 
       data.addOthersPost(uid, res[0].docs);
@@ -276,10 +284,15 @@ class ServiceUtils extends Postable<Service, SaveService> {
     try {
       final batch = FirebaseFirestore.instance.batch();
       batch.set(ref.doc(post.id), post);
-      final savePost =
-          SaveService(post.id, post.date.toIso8601String(), post.title);
+      final savePost = SaveService(
+          post.id, post.date.toIso8601String(), post.title, post.imageUrl);
 
       batch.set(_userServiceCollection(uid).doc(post.id), savePost);
+
+      batch.update(_userCollection.doc(post.authorId), {
+        "servicesPostedToday": FieldValue.increment(1),
+        "lastServicePosted": FieldValue.serverTimestamp(),
+      });
 
       await batch.commit();
 
@@ -302,8 +315,8 @@ class ServiceUtils extends Postable<Service, SaveService> {
               .doc(post.authorId);
       final batch = FirebaseFirestore.instance.batch();
 
-      final savePost =
-          SaveService(post.id, post.date.toIso8601String(), post.title);
+      final savePost = SaveService(
+          post.id, post.date.toIso8601String(), post.title, post.imageUrl);
 
       batch.set(ref.doc(post.id), post);
       batch.set(_userServiceCollection(post.authorId).doc(post.id), savePost);
@@ -340,7 +353,8 @@ class ServiceUtils extends Postable<Service, SaveService> {
   Future<Resource<List<QueryDocumentSnapshot<SaveService>>>>
       fetchMyServices() async {
     try {
-      final res = await likeRef!.orderBy("date", descending: true).get();
+      final res =
+          await likeRef!.orderBy("date", descending: true).limit(_limit).get();
       return Success(res.docs);
     } on FirebaseException catch (e) {
       return Failure(e.message.toString());
@@ -349,7 +363,6 @@ class ServiceUtils extends Postable<Service, SaveService> {
     }
   }
 
-  @override
   Future<Resource<Json>> update(Json data, String id) async {
     try {
       await ref.doc(id).update(data);

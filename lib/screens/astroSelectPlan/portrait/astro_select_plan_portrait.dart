@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:astroverse/db/plans_db.dart';
 import 'package:astroverse/res/dims/global.dart';
+import 'package:astroverse/screens/emailverfication/email_verification_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
@@ -14,7 +15,6 @@ import '../../../res/colors/project_colors.dart';
 import '../../../res/decor/button_decor.dart';
 import '../../../res/img/images.dart';
 import '../../../res/textStyles/text_styles.dart';
-import '../../../routes/routes.dart';
 import '../../../utils/resource.dart';
 
 class AstroSelectPlanPortrait extends StatelessWidget {
@@ -116,14 +116,14 @@ class AstroSelectPlanPortrait extends StatelessWidget {
                     debugPrint(user.toString());
                     if (user.uid.isEmpty) {
                       auth.createUserWithEmail(user, auth.pass.value, (p0) {
-                        updateUI(p0);
+                        updateUI(p0,context);
                       });
                     } else {
                       auth.saveGoogleData(user, (value) {
                         if (value is Success<void>) {
                           debugPrint("user done");
                         }
-                      },true ,(){});
+                      }, true, () {});
                     }
                   },
                   padding: const EdgeInsets.symmetric(vertical: 15),
@@ -161,9 +161,11 @@ class AstroSelectPlanPortrait extends StatelessWidget {
       );
 }
 
-void updateUI(Resource p) {
+void updateUI(Resource p, BuildContext context) {
   if (p is Success) {
-    Get.toNamed(Routes.emailVerify);
+    Navigator.of(context).pushReplacement(MaterialPageRoute(
+      builder: (context) => const EmailVerificationScreen(),
+    ));
   } else {
     Get.snackbar("Error", (p as Failure<void>).error);
   }

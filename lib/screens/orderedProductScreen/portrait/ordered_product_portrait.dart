@@ -230,7 +230,7 @@ class OrderedProductPortrait extends StatelessWidget {
                             item.uses.toString(),
                             const Icon(
                               Icons.data_exploration_outlined,
-                              color: Colors.blueAccent,
+                              color: ProjectColors.primary,
                             ),
                             null),
                         const SizedBox(
@@ -583,7 +583,7 @@ class OrderedProductPortrait extends StatelessWidget {
                               isScrollControlled: true);
                         },
                   disabledColor: ProjectColors.disabled,
-                  color: Colors.blue,
+                  color: ProjectColors.primary,
                   padding: const EdgeInsets.symmetric(vertical: 12),
                   shape: const RoundedRectangleBorder(
                       borderRadius: BorderRadius.all(Radius.circular(10))),
@@ -760,7 +760,7 @@ class OrderedProductPortrait extends StatelessWidget {
           // Set the height of the button
           decoration: const BoxDecoration(
             shape: BoxShape.circle, // Makes the container circular
-            color: Colors.lightBlue, // Set the background color of the button
+            color: ProjectColors.primary, // Set the background color of the button
           ),
           child: const Center(
               child: Icon(

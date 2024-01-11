@@ -63,4 +63,11 @@ class CreatePostController extends GetxController {
       });
     }
   }
+
+
+}
+
+bool areDatesSame(DateTime lastPosted) {
+  final now = DateTime.now();
+  return (lastPosted.year==now.year && lastPosted.month==now.month && lastPosted.day==now.day);
 }

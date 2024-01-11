@@ -1,5 +1,6 @@
 import 'package:astroverse/controllers/location_controller.dart';
 import 'package:astroverse/res/dims/global.dart';
+import 'package:astroverse/screens/askLocationScreen/ask_location_screen.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -13,7 +14,6 @@ import '../../../res/decor/button_decor.dart';
 import '../../../res/img/images.dart';
 import '../../../res/strings/user_signup_strings.dart';
 import '../../../res/textStyles/text_styles.dart';
-import '../../../routes/routes.dart';
 
 class AstroSignUpPortrait extends StatelessWidget {
   final BoxConstraints cons;
@@ -109,6 +109,11 @@ class AstroSignUpPortrait extends StatelessWidget {
                               true,
                               "",
                               "",
+                              "",
+                              0,
+                              DateTime(1900),
+                              0,
+                              DateTime(1900),
                               false,
                               coins: 0,
                               profileViews: 0,
@@ -116,8 +121,13 @@ class AstroSignUpPortrait extends StatelessWidget {
                             debugPrint(" sent : ${user.toString()}");
                             auth.pass.value = password.value.text;
                             //TODO("nav")
-                            Get.offNamed(Routes.upiScreen,
-                                arguments: Parcel(data: user, google: false));
+                            // Get.offNamed(Routes.upiScreen,
+                            //     arguments: Parcel(data: user, google: false));
+                            Navigator.of(context)
+                                .pushReplacement(MaterialPageRoute(
+                              builder: (context) => AskLocationScreen(
+                                  parcel: Parcel(data: user, google: false)),
+                            ));
                           },
                           shape: ButtonDecors.filled,
                           color: ProjectColors.main,
@@ -139,16 +149,22 @@ class AstroSignUpPortrait extends StatelessWidget {
                                   p0,
                                   (value) {
                                     //TODO("nav")
-                                    Get.offNamed(Routes.upiScreen,
-                                        arguments:
-                                            Parcel(data: p0, google: true));
+                                    Navigator.of(context)
+                                        .pushReplacement(MaterialPageRoute(
+                                      builder: (context) => AskLocationScreen(
+                                          parcel:
+                                              Parcel(data: p0, google: true)),
+                                    ));
                                   },
                                   true,
                                   () {
                                     // TODO("nav")
-                                    Get.offNamed(Routes.upiScreen,
-                                        arguments:
-                                            Parcel(data: p0, google: true));
+                                    Navigator.of(context)
+                                        .pushReplacement(MaterialPageRoute(
+                                      builder: (context) => AskLocationScreen(
+                                          parcel:
+                                              Parcel(data: p0, google: true)),
+                                    ));
                                   });
                             }, true, geo);
                           },

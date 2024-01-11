@@ -2,13 +2,12 @@ import 'package:astroverse/controllers/auth_controller.dart';
 import 'package:astroverse/res/colors/project_colors.dart';
 import 'package:astroverse/res/decor/button_decor.dart';
 import 'package:astroverse/res/dims/global.dart';
-import 'package:astroverse/res/img/images.dart';
 import 'package:astroverse/res/strings/ask_screen_strings.dart';
 import 'package:astroverse/res/textStyles/text_styles.dart';
-import 'package:astroverse/routes/routes.dart';
 import 'package:astroverse/screens/astroLogIn/astro_login_screen.dart';
 import 'package:astroverse/screens/userLogin/user_login_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 
 class AskScreenPortrait extends StatelessWidget {
@@ -34,7 +33,7 @@ class AskScreenPortrait extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
-              const Expanded(child: Image(image: ProjectImages.appLogo)),
+              Expanded(child: SvgPicture.asset('lib/assets/svg/welcome.svg' , fit: BoxFit.fitWidth,)),
               Text(
                 AskScreenStrings.title,
                 style: TextStylesLight().header,
@@ -62,7 +61,7 @@ class AskScreenPortrait extends StatelessWidget {
                 height: 15,
               ),
               MaterialButton(
-                onPressed: ()=>navigateToAstroLogin(context),
+                onPressed: () => navigateToAstroLogin(context),
                 padding: const EdgeInsets.symmetric(vertical: 15),
                 color: ProjectColors.main,
                 shape: ButtonDecors.filled,
@@ -80,11 +79,15 @@ class AskScreenPortrait extends StatelessWidget {
 
   void navigateToUserLogin(BuildContext context) {
     //Get.toNamed(Routes.userLogin);
-    Navigator.of(context).push(MaterialPageRoute(builder: (context) => const UserLoginScreen(),));
+    Navigator.of(context).push(MaterialPageRoute(
+      builder: (context) => const UserLoginScreen(),
+    ));
   }
 
   void navigateToAstroLogin(BuildContext context) {
     //Get.toNamed(Routes.astroLogin);
-    Navigator.of(context).push(MaterialPageRoute(builder: (context) => const AstroLogInScreen(),));
+    Navigator.of(context).push(MaterialPageRoute(
+      builder: (context) => const AstroLogInScreen(),
+    ));
   }
 }

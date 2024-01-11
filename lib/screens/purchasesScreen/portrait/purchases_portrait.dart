@@ -82,7 +82,7 @@ class PurchasesPortrait extends StatelessWidget {
         child: const TabBar(
             indicatorPadding: EdgeInsets.symmetric(horizontal: 0, vertical: 2),
             indicator: BoxDecoration(
-                color: Colors.blue,
+                color: ProjectColors.primary,
                 borderRadius: BorderRadius.all(Radius.circular(15))),
             indicatorColor: Colors.transparent,
             indicatorSize: TabBarIndicatorSize.tab,
@@ -141,7 +141,7 @@ class PurchasesPortrait extends StatelessWidget {
                             ),
                             Icon(
                               Icons.refresh,
-                              color: Colors.lightBlue,
+                              color: ProjectColors.primary,
                               size: 18,
                             )
                           ])),
@@ -198,15 +198,11 @@ class PurchasesPortrait extends StatelessWidget {
                 );
               } else if (index == list.length + 1) {
                 return LoadMoreButton(cons: cons, loadMore: loadMore);
-              } else if (index == list.length + 2) {
-                return const SizedBox(
-                  height: 200,
-                );
               } else {
                 return PurchaseItem(purchase: list[index - 1]);
               }
             },
-            itemCount: list.length + 3,
+            itemCount: list.length + 2,
             separatorBuilder: (context, index) => const SizedBox(
               height: 10,
             ),

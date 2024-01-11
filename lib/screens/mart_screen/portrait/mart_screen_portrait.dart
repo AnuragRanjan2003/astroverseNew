@@ -1,12 +1,16 @@
 import 'dart:developer';
 
 import 'package:astroverse/components/load_more_button.dart';
+import 'package:astroverse/components/loading_middle_ware.dart';
 import 'package:astroverse/components/mart_item.dart';
 import 'package:astroverse/components/message_screen.dart';
+import 'package:astroverse/components/my_service_item.dart';
 import 'package:astroverse/components/search_box.dart';
 import 'package:astroverse/controllers/location_controller.dart';
 import 'package:astroverse/controllers/service_controller.dart';
+import 'package:astroverse/models/save_service.dart';
 import 'package:astroverse/models/service.dart';
+import 'package:astroverse/repo/service_repo.dart';
 import 'package:astroverse/res/colors/project_colors.dart';
 import 'package:astroverse/screens/createService/create_service_screen.dart';
 import 'package:astroverse/screens/my_mart_item_full_screen/my_mart_item_full_screen.dart';
@@ -14,7 +18,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:intl/intl.dart';
 import 'package:location/location.dart';
 
 import '../../../controllers/auth_controller.dart';
@@ -101,7 +104,7 @@ class MartScreenPortrait extends StatelessWidget {
                             curve: Curves.linear);
                       }
                     },
-                    backgroundColor: Colors.lightBlue.shade300,
+                    backgroundColor: ProjectColors.primary,
                     elevation: 0,
                     child: const Icon(
                       Icons.switch_access_shortcut,
@@ -129,7 +132,7 @@ class MartScreenPortrait extends StatelessWidget {
                       // TODO("nav")
                       return _postItemScreen(context);
                     },
-                    backgroundColor: Colors.lightBlue.shade300,
+                    backgroundColor: ProjectColors.primary,
                     elevation: 0,
                     child: const Icon(
                       Icons.add,
@@ -293,7 +296,7 @@ class MartScreenPortrait extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 20),
+                    padding: EdgeInsets.symmetric(horizontal: 10),
                     child: Text(
                       "Your\nServices",
                       style: TextStyle(
@@ -302,6 +305,7 @@ class MartScreenPortrait extends StatelessWidget {
                           color: ProjectColors.lightBlack),
                     ),
                   ),
+                  const SizedBox(height: 10,),
                   Expanded(
                     child: Obx(() {
                       var list = service.myServices;
@@ -313,21 +317,21 @@ class MartScreenPortrait extends StatelessWidget {
                         itemCount: list.length,
                         itemBuilder: (context, index) {
                           final s = list[index];
-                          return ListTile(
-                              leading: const Icon(Icons.shopping_bag_outlined),
-                              title: Text(s.name),
-                              onTap: () {
-                                //TODO(""nav")
-                                //Get.toNamed(Routes.myMartItemScreen, arguments: s);
-                                Navigator.of(context).push(MaterialPageRoute(
-                                  builder: (context) =>
-                                      MyMartItemFullScreen(ss: s),
-                                ));
-                              },
-                              subtitle: Text(
-                                DateFormat.yMMMd()
-                                    .format(DateTime.parse(s.date)),
-                              ));
+                          return MyServiceItem(s, onTap: () {
+                            //TODO(""nav")
+                            Navigator.of(context).push(MaterialPageRoute(
+                                builder: (context) =>
+                                    LoadingMiddleWare<Service>(
+                                      asyncData:
+                                          ServiceRepo().fetchService(s.id),
+                                      onLoad: (p0) => MyMartItemFullScreen(
+                                          ss: SaveService(
+                                              p0.data.id,
+                                              p0.data.date.toIso8601String(),
+                                              p0.data.title,
+                                              p0.data.imageUrl)),
+                                    )));
+                          });
                         },
                         separatorBuilder: (context, index) => const Divider(),
                       );
@@ -354,7 +358,7 @@ class MartScreenPortrait extends StatelessWidget {
       selected: selected,
       backgroundColor: Colors.white,
       checkmarkColor: Colors.white,
-      selectedColor: Colors.lightBlue.shade300,
+      selectedColor: ProjectColors.primary,
       shape: const RoundedRectangleBorder(
           borderRadius: BorderRadius.all(Radius.circular(20))),
     );

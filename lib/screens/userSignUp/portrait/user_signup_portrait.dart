@@ -3,7 +3,7 @@ import 'package:astroverse/controllers/auth_controller.dart';
 import 'package:astroverse/controllers/location_controller.dart';
 import 'package:astroverse/models/user.dart';
 import 'package:astroverse/res/img/images.dart';
-import 'package:astroverse/routes/routes.dart';
+import 'package:astroverse/screens/askLocationScreen/ask_location_screen.dart';
 import 'package:astroverse/screens/astroSignUp/portrait/astro_signup_portrait.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
@@ -105,6 +105,11 @@ class UserSignUpPortrait extends StatelessWidget {
                               false,
                               "",
                               "",
+                              "",
+                              0,
+                              DateTime(1900),
+                              0,
+                              DateTime(1900),
                               false,
                               coins: 0,
                               profileViews: 0,
@@ -112,8 +117,11 @@ class UserSignUpPortrait extends StatelessWidget {
                             // Get.toNamed(Routes.upiScreen,
                             //     arguments: Parcel(data: user, google: false));
                             //TODO("nav")
-                            Get.offNamed(Routes.upiScreen,
-                                arguments: Parcel(data: user, google: false));
+                            Navigator.of(context)
+                                .pushReplacement(MaterialPageRoute(
+                              builder: (context) => AskLocationScreen(
+                                  parcel: Parcel(data: user, google: false)),
+                            ));
                           },
                           shape: ButtonDecors.filled,
                           color: ProjectColors.main,
@@ -137,20 +145,32 @@ class UserSignUpPortrait extends StatelessWidget {
                                     // Get.toNamed(Routes.upiScreen,
                                     //     arguments:
                                     //         Parcel(data: p0, google: true));
+                                    Navigator.of(context)
+                                        .pushReplacement(MaterialPageRoute(
+                                      builder: (context) => AskLocationScreen(
+                                          parcel:
+                                              Parcel(data: p0, google: true)),
+                                    ));
                                     //TODO("nav")
-                                    Get.offNamed(Routes.upiScreen,
-                                        arguments:
-                                            Parcel(data: p0, google: true));
+                                    // Get.offNamed(Routes.upiScreen,
+                                    //     arguments:
+                                    //         Parcel(data: p0, google: true));
                                   },
                                   false,
                                   () {
                                     // Get.toNamed(Routes.upiScreen,
                                     //     arguments:
                                     //         Parcel(data: p0, google: true));
+                                    Navigator.of(context)
+                                        .pushReplacement(MaterialPageRoute(
+                                      builder: (context) => AskLocationScreen(
+                                          parcel:
+                                              Parcel(data: p0, google: true)),
+                                    ));
                                     //TODO("nav")
-                                    Get.offNamed(Routes.upiScreen,
-                                        arguments:
-                                            Parcel(data: p0, google: true));
+                                    // Get.offNamed(Routes.upiScreen,
+                                    //     arguments:
+                                    //         Parcel(data: p0, google: true));
                                   });
                             }, false, geo);
                           },
@@ -181,7 +201,7 @@ class UserSignUpPortrait extends StatelessWidget {
                     ),
                     TextButton(
                       onPressed: () {
-                        Get.back();
+                        Navigator.pop(context);
                       },
                       child: Text(
                         "Log In",

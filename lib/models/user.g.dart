@@ -15,6 +15,17 @@ User _$UserFromJson(Map json) => User(
       json['astro'] as bool,
       json['phNo'] as String,
       json['geoHash'] as String,
+      json["qualifications"] != null ? json["qualifications"] as String : "",
+      json["postedToday"] != null ? (json["postedToday"] as num).toInt() : 0,
+      json["lastPosted"] != null
+          ? (json["lastPosted"] as Timestamp).toDate()
+          : DateTime.now(),
+      json["servicesPostedToday"] != null
+          ? (json["servicesPostedToday"] as num).toInt()
+          : 0,
+      json["lastServicePosted"] != null
+          ? (json["lastServicePosted"] as Timestamp).toDate()
+          : DateTime.now(),
       json['featured'] as bool,
       location: User._fromJsonGeoPoint(json['location'] as GeoPoint?),
       coins: json['coins'] as int? ?? 0,
@@ -34,5 +45,10 @@ Map<String, dynamic> _$UserToJson(User instance) => <String, dynamic>{
       'profileViews': instance.profileViews,
       'phNo': instance.phNo,
       'coins': instance.coins,
+      "qualifications": instance.qualifications,
       'featured': instance.featured,
+      "lastPosted": instance.lastPosted,
+      "lastServicePosted": instance.lastServicePosted,
+      "postedToday": instance.postedToday,
+      "servicesPostedToday": instance.servicesPostedToday,
     };

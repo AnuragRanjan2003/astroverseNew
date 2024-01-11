@@ -2,6 +2,8 @@ import 'package:cometchat_chat_uikit/cometchat_chat_uikit.dart';
 import 'package:cometchat_chat_uikit/cometchat_chat_uikit.dart' as c;
 import 'package:flutter/material.dart';
 
+import '../res/colors/project_colors.dart';
+
 class Messaging extends StatelessWidget {
   final c.User receiver;
 
@@ -59,7 +61,7 @@ class Messaging extends StatelessWidget {
     ActionItem item1 = ActionItem(
         id: '1',
         title: 'files',
-        background: Colors.blue,
+        background: ProjectColors.primary,
         cornerRadius: 20,
         onItemClick: () {
           //any function you want to perform

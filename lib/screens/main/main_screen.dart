@@ -3,6 +3,7 @@ import 'dart:developer';
 import 'package:astroverse/controllers/in_app_purchase_controller.dart';
 import 'package:astroverse/controllers/main_controller.dart';
 import 'package:astroverse/db/coins_data_db.dart';
+import 'package:astroverse/res/colors/project_colors.dart';
 import 'package:astroverse/routes/routes.dart';
 import 'package:astroverse/screens/main/landscape/main_screen_landscape.dart';
 import 'package:astroverse/screens/main/portrait/main_screen_portrait.dart';
@@ -145,7 +146,7 @@ class _MainScreenState extends State<MainScreen> {
         color: Colors.transparent,
         child: const Center(
           child: CircularProgressIndicator(
-            color: Colors.blue,
+            color: ProjectColors.primary,
             strokeWidth: 1.5,
           ),
         ),

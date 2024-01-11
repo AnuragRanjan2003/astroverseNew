@@ -1,29 +1,24 @@
-import 'dart:developer';
-
 import 'package:astroverse/components/glass_morph_container.dart';
 import 'package:astroverse/controllers/auth_controller.dart';
 import 'package:astroverse/models/user.dart' as m;
 import 'package:astroverse/res/colors/project_colors.dart';
 import 'package:astroverse/res/textStyles/text_styles.dart';
-import 'package:astroverse/routes/routes.dart';
 import 'package:astroverse/screens/mart_screen/mart_screen.dart';
 import 'package:astroverse/screens/peopleScreen/portrait/people_screen_portrait.dart';
 import 'package:astroverse/screens/profile/profile_screen.dart';
 import 'package:astroverse/screens/purchasesScreen/purchases_screen.dart';
 import 'package:astroverse/utils/crypt.dart';
-import 'package:astroverse/utils/env_vars.dart';
 import 'package:astroverse/utils/resource.dart';
 import 'package:astroverse/utils/zego_cloud_services.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:cometchat_chat_uikit/cometchat_chat_uikit.dart' as c;
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get/get.dart';
 import 'package:google_nav_bar/google_nav_bar.dart';
 import 'package:shimmer/shimmer.dart';
+import 'package:zego_uikit_prebuilt_call/zego_uikit_prebuilt_call.dart';
 
 import '../../discover/discover_screen.dart';
 
@@ -38,6 +33,7 @@ class MainScreenPortrait extends StatefulWidget {
 
 class _MainScreenPortraitState extends State<MainScreenPortrait> {
   late AuthController auth;
+  late ZegoUIKitPrebuiltCallController? callController;
 
   @override
   Widget build(BuildContext context) {
@@ -45,8 +41,6 @@ class _MainScreenPortraitState extends State<MainScreenPortrait> {
         FirebaseAnalyticsObserver(analytics: FirebaseAnalytics.instance);
     final PageController pageController = PageController(initialPage: 0);
     final double wd = widget.cons.maxWidth;
-
-
 
     final tabs = [
       const GButton(
@@ -121,7 +115,7 @@ class _MainScreenPortraitState extends State<MainScreenPortrait> {
             auth.page.value = e;
           },
           tabs: tabs,
-          activeColor: Colors.lightBlue,
+          activeColor: ProjectColors.primary,
           tabBackgroundColor: Colors.transparent,
         ),
       ),
@@ -156,10 +150,9 @@ class _MainScreenPortraitState extends State<MainScreenPortrait> {
         ),
       ),
       onTap: () {
-        Get.toNamed(
-          Routes.profile,
-          arguments: auth.user.value!,
-        );
+        Navigator.of(context).push(MaterialPageRoute(
+          builder: (context) => const ProfileScreen(),
+        ));
       },
     );
   }
@@ -189,18 +182,28 @@ class _MainScreenPortraitState extends State<MainScreenPortrait> {
   void initState() {
     auth = Get.find();
     var user = auth.user.value;
+    callController = ZegoUIKitPrebuiltCallController();
     if (user == null) {
       auth.getUserData(FirebaseAuth.instance.currentUser!.uid).then((value) {
         if (value.isSuccess) {
           value as Success<DocumentSnapshot<m.User>>;
-          ZegoCloudServices().initCallInvitationService(value.data.data()!.uid,
-              Crypt().decryptFromBase64String(value.data.data()!.name));
+          ZegoCloudServices().initCallInvitationService(
+              value.data.data()!.uid,
+              Crypt().decryptFromBase64String(value.data.data()!.name),
+              callController,
+              context);
         }
       });
     } else {
-      ZegoCloudServices().initCallInvitationService(
-          user.uid, Crypt().decryptFromBase64String(user.name));
+      ZegoCloudServices().initCallInvitationService(user.uid,
+          Crypt().decryptFromBase64String(user.name), callController, context);
     }
     super.initState();
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    callController = null;
   }
 }

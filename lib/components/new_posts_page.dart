@@ -5,6 +5,7 @@ import 'package:astroverse/components/post_item.dart';
 import 'package:astroverse/controllers/auth_controller.dart';
 import 'package:astroverse/controllers/main_controller.dart';
 import 'package:astroverse/controllers/new_page_controller.dart';
+import 'package:astroverse/res/colors/project_colors.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -37,7 +38,7 @@ class NewPostsPage extends StatelessWidget {
 
     const genres = NewPageController.genresList;
     return RefreshIndicator(
-      color: Colors.lightBlue,
+      color: ProjectColors.primary,
       onRefresh: () async {
         log('refreshing', name: "REFRESH");
         mainController.refreshPosts(
@@ -70,16 +71,12 @@ class NewPostsPage extends StatelessWidget {
                           height: 100,
                         );
                       }
-                    } else if (index == list.length + 2) {
-                      return const SizedBox(
-                        height: 100,
-                      );
                     }
 
                     return listItem(list[index - 1]);
                   },
                   separatorBuilder: (context, index) => separator(),
-                  itemCount: list.length + 3);
+                  itemCount: list.length + 2);
             },
           ),
           Positioned(
@@ -123,7 +120,7 @@ class NewPostsPage extends StatelessWidget {
               color: newPage.genres[index] ? Colors.white : Colors.black),
         ),
         selected: newPage.genres[index],
-        selectedColor: Colors.lightBlue.shade300,
+        selectedColor: ProjectColors.primary,
         shape: const RoundedRectangleBorder(
             borderRadius: BorderRadius.all(Radius.circular(30))),
       ),

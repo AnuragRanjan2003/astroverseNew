@@ -4,8 +4,8 @@ import 'package:astroverse/models/service.dart';
 import 'package:astroverse/utils/resource.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
+typedef Json = Map<String, dynamic>;
 
-typedef Json = Map<String,dynamic>;
 class OrderRepo {
   final _db = Database();
 
@@ -17,13 +17,16 @@ class OrderRepo {
       _db.purchaseStream(currentUid, purchaseId);
 
   Future<Resource<Json>> confirmDelivery(
-          String orderId, String buyerId, String sellerId) =>
-      _db.updatePurchase(
-          {"deliveredOn": FieldValue.serverTimestamp(), "delivered": true},
-          orderId,
-          buyerId,
-          sellerId);
+          String orderId, String buyerId, String sellerId, double amount) =>
+      _db.confirmPurchase(
+        {"deliveredOn": FieldValue.serverTimestamp(), "delivered": true},
+        orderId,
+        buyerId,
+        sellerId,
+        amount,
+      );
 
-  Future<Resource<Json>> cancelPurchase(String id, String buyerId , String sellerId) =>
-      _db.cancelPurchase(id, buyerId , sellerId);
+  Future<Resource<Json>> cancelPurchase(
+          String id, String buyerId, String sellerId) =>
+      _db.cancelPurchase(id, buyerId, sellerId);
 }

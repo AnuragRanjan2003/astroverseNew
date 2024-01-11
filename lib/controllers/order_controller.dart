@@ -5,6 +5,7 @@ import 'package:astroverse/models/purchase.dart';
 import 'package:astroverse/models/service.dart';
 import 'package:astroverse/repo/orders_repo.dart';
 import 'package:astroverse/res/strings/backend_strings.dart';
+import 'package:astroverse/utils/constants.dart';
 import 'package:astroverse/utils/crypt.dart';
 import 'package:astroverse/utils/resource.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -49,7 +50,10 @@ class OrderController extends GetxController {
 
     _repo
         .confirmDelivery(
-            purchase.purchaseId, purchase.buyerId, purchase.sellerId)
+            purchase.purchaseId,
+            purchase.buyerId,
+            purchase.sellerId,
+            _computeAmountToSeller(true, double.parse(purchase.itemPrice)))
         .then((value) {
       confirming.value = false;
       if (value.isSuccess) {
@@ -87,11 +91,20 @@ class OrderController extends GetxController {
     });
   }
 
-  cancelPurchase(String id, String buyerId,String sellerId, Function(Resource) updateUI) {
+  cancelPurchase(
+      String id, String buyerId, String sellerId, Function(Resource) updateUI) {
     cancelingPurchase.value = true;
-    _repo.cancelPurchase(id, buyerId ,sellerId).then((value) {
+    _repo.cancelPurchase(id, buyerId, sellerId).then((value) {
       cancelingPurchase.value = false;
       updateUI(value);
     });
+  }
+
+  double _computeAmountToSeller(bool chargeConvenience, double amount) {
+    if (chargeConvenience) {
+      return amount - Constants.appConvenienceFee;
+    } else {
+      return amount;
+    }
   }
 }

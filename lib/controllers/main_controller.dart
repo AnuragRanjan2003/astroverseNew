@@ -53,13 +53,24 @@ class MainController extends GetxController {
         for (var element in value.data) {
           if (element.exists) {
             list.add(element.data());
-            lastPost.value = element;
+            if (!element.data().featured) {
+              lastPost.value = element;
+            } else {
+              lastPostForFeatured.value = element;
+            }
           }
         }
         //log("${lastPost.value!.data()}", name: "IS NULL");
         log(list.length.toString(), name: "GOT LIST SIZE");
         log(list.toString(), name: "GOT LIST");
         postList.value = list;
+        postList.sort(
+          (a, b) {
+            if (a.featured && !b.featured) return -1;
+            if (a.featured && b.featured) return 0;
+            return 1;
+          },
+        );
         nothingToShow.value = list.isEmpty;
         log(postList.length.toString(), name: "POST LIST SUCCESS");
       } else {
@@ -75,10 +86,12 @@ class MainController extends GetxController {
       return;
     }
     loadingMorePosts.value = true;
-    if (lastPost.value == null && lastPostForFeatured.value==null) {
+    if (lastPost.value == null && lastPostForFeatured.value == null) {
       fetchPostsByGenreAndPage(NewPageController.genresList, uid);
     } else {
-      _postRepo.fetchMorePost(lastPost.value,lastPostForFeatured.value, genre, uid).then((value) {
+      _postRepo
+          .fetchMorePost(lastPost.value, lastPostForFeatured.value, genre, uid)
+          .then((value) {
         loadingMorePosts.value = false;
         if (value.isSuccess) {
           value = value as Success<List<QueryDocumentSnapshot<Post>>>;
@@ -87,7 +100,7 @@ class MainController extends GetxController {
           for (var s in value.data) {
             if (s.exists) {
               list.add(s.data());
-              if(s.data().featured) {
+              if (s.data().featured) {
                 lastPostForFeatured.value = s;
               } else {
                 lastPost.value = s;
@@ -98,6 +111,13 @@ class MainController extends GetxController {
           log(list.length.toString(), name: "GOT LIST SIZE");
           log(list.toString(), name: "GOT LIST");
           postList.addAll(list);
+          postList.sort(
+            (a, b) {
+              if (a.featured && !b.featured) return -1;
+              if (a.featured && b.featured) return 0;
+              return 1;
+            },
+          );
           morePostsToLoad.value = list.isNotEmpty;
           log(postList.length.toString(), name: "POST LIST SUCCESS");
         } else {
