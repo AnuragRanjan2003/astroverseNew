@@ -33,6 +33,8 @@ class InAppPurchaseController extends GetxController {
       log("store inactive", name: "IAP");
     }
 
+
+
     _subscription = _iapConnection.purchaseStream.listen((event) {
       purchases.addAll(event);
       for (var element in event) {

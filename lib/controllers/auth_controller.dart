@@ -7,6 +7,7 @@ import 'package:astroverse/models/extra_info.dart';
 import 'package:astroverse/models/qualifications.dart';
 import 'package:astroverse/models/user.dart' as models;
 import 'package:astroverse/models/user_bank_details.dart';
+import 'package:astroverse/models/withdraw_request.dart';
 import 'package:astroverse/repo/auth_repo.dart';
 import 'package:astroverse/res/strings/backend_strings.dart';
 import 'package:astroverse/routes/routes.dart';
@@ -20,6 +21,7 @@ import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:firebase_auth/firebase_auth.dart' as fb;
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:geocode/geocode.dart';
 import 'package:get/get.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:image_picker/image_picker.dart';
@@ -66,6 +68,7 @@ class AuthController extends GetxController {
   RxInt selectedUpgradeFeatures = 0.obs;
   RxBool upgradingFeatures = false.obs;
   RxBool resetEmailLoading = false.obs;
+  RxString userAddress = "not found".obs;
 
   @override
   void onInit() async {
@@ -92,6 +95,12 @@ class AuthController extends GetxController {
     accError.value = null;
     ifscError.value = null;
     branchError.value = null;
+  }
+
+  void getAddress(GeoPoint? loc) {
+    _computeAddress(loc).then((value) {
+      userAddress.value = value;
+    });
   }
 
   loginUser(String email, String password,
@@ -402,7 +411,9 @@ class AuthController extends GetxController {
 
   signInWithGoogle(
       void Function(Resource<UserCredential>) updateUI, Function() onLogin) {
+    loading.value = true;
     _repo.signInWithGoogle().then((value) {
+      loading.value = false;
       if (value.isSuccess) {
         _analytics.logLogin(loginMethod: "Google");
         value = value as Success<UserCredential>;
@@ -602,6 +613,7 @@ class AuthController extends GetxController {
   }
 
   void logOut(Function() onLogout) {
+    userAddress.value = "not found";
     CometChatUIKit.logout(onSuccess: (p0) {
       log("comet chat log out", name: "LOG OUT");
       _repo.logOut().then((value) {
@@ -621,6 +633,41 @@ class AuthController extends GetxController {
           onLogout();
         });
       });
+    });
+  }
+
+  Future<String> _computeAddress(GeoPoint? location) async {
+    if (location == null) {
+      return "not set";
+    }
+
+    final lat = location.latitude, lng = location.longitude;
+
+    final geoCode = GeoCode();
+    try {
+      Address address =
+          await geoCode.reverseGeocoding(latitude: lat, longitude: lng);
+      if (address.streetAddress == null || address.postal == null) {
+        return "could not fetch";
+      }
+      if (address.streetAddress == null && address.postal == null) {
+        return "please refresh";
+      }
+      return "${address.streetAddress} , ${address.postal}";
+    } on GeocodeException catch (e) {
+      return "Error!Please refresh [${lat.toStringAsFixed(2)},${lng.toStringAsFixed(2)}]";
+    } catch (e) {
+      return "Error!Please refresh [${lat.toStringAsFixed(2)},${lng.toStringAsFixed(2)}]";
+    }
+  }
+
+  addWithdrawRequest(WithdrawRequest req, Function(Resource) updateUI) {
+    _repo.addWithdrawRequest(req).then((value) {
+      if (value.isSuccess) {
+        updateUI(value as Success<WithdrawRequest>);
+      } else {
+        updateUI(value as Failure<WithdrawRequest>);
+      }
     });
   }
 

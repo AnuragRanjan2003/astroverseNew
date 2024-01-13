@@ -24,6 +24,7 @@ class Purchase {
   final bool delivered;
   final bool active;
   final int? review;
+  final String? refundId;
   final int deliveryMethod;
   @JsonKey(fromJson: _nullableDateFromTimeStamp, toJson: _nullableDateAsIs)
   final DateTime? deliveredOn;
@@ -45,6 +46,7 @@ class Purchase {
       required this.boughtOn,
       required this.delivered,
       required this.review,
+      required this.refundId,
       required this.active,
       required this.deliveryMethod,
       required this.deliveredOn});
@@ -84,6 +86,7 @@ class Purchase {
       purchaseId: '1',
       paymentId: '1',
       review: 0,
+      refundId: null,
       secretCode: "000",
       deliveryMethod: 0,
       active: true,

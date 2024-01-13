@@ -4,6 +4,7 @@ import 'package:astroverse/components/order_bottom_sheet.dart';
 import 'package:astroverse/controllers/auth_controller.dart';
 import 'package:astroverse/controllers/order_controller.dart';
 import 'package:astroverse/models/purchase.dart';
+import 'package:astroverse/models/refund_request.dart';
 import 'package:astroverse/models/service.dart';
 import 'package:astroverse/res/img/images.dart';
 import 'package:astroverse/screens/messaging.dart';
@@ -14,11 +15,12 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
+import 'package:shortid/shortid.dart';
 
 import '../../../res/colors/project_colors.dart';
 import '../../../utils/resource.dart';
 
-class OrderedProductPortrait extends StatelessWidget {
+class OrderedProductPortrait extends StatefulWidget {
   final BoxConstraints cons;
   Purchase? purchase;
 
@@ -26,31 +28,52 @@ class OrderedProductPortrait extends StatelessWidget {
       {super.key, required this.cons, required this.purchase});
 
   @override
-  Widget build(BuildContext context) {
-    //Purchase? purchase = Get.arguments;
-    final OrderController order = Get.find();
-    final AuthController auth = Get.find();
-    final crypto = Crypt();
-    final zegoService = ZegoCloudServices();
+  State<OrderedProductPortrait> createState() => _OrderedProductPortraitState();
+}
 
-    if (purchase == null) {
+class _OrderedProductPortraitState extends State<OrderedProductPortrait> {
+
+  late OrderController order;
+  late AuthController auth;
+  late ZegoCloudServices zegoService;
+  late Purchase? purchase;
+
+
+  @override
+  void initState() {
+    order = Get.find();
+    auth = Get.find();
+    zegoService = ZegoCloudServices();
+    purchase = widget.purchase;
+    super.initState();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+
+
+    final crypto = Crypt();
+
+
+    if (widget.purchase == null) {
       return const Center(
         child: Text("unexpected error occurred"),
       );
     }
-    log(purchase.toString(), name: "PURCHASE");
+    log(widget.purchase.toString(), name: "PURCHASE");
 
-    order.purchase.value = purchase;
+    order.purchase.value = widget.purchase;
 
     if (auth.user.value != null) {
-      order.fetchService(auth.user.value!.uid, purchase!.itemId);
-      order.startPurchaseStream(auth.user.value!.uid, purchase!.purchaseId,
+      order.fetchService(auth.user.value!.uid, widget.purchase!.itemId);
+      order.startPurchaseStream(auth.user.value!.uid, widget.purchase!.purchaseId,
           (p0) {
         purchase = p0;
       });
     }
 
     return Scaffold(
+
       floatingActionButtonLocation: FloatingActionButtonLocation.endDocked,
       floatingActionButton: Obx(() =>
           _buildFab(order.purchase.value, order, crypto, zegoService, context)),
@@ -83,18 +106,18 @@ class OrderedProductPortrait extends StatelessWidget {
                       tag: "service ${item.id}",
                       child: Image(
                         image: NetworkImage(item.imageUrl),
-                        height: cons.maxHeight * 0.45,
+                        height: widget.cons.maxHeight * 0.45,
                         fit: BoxFit.fitHeight,
-                        width: cons.maxWidth,
+                        width: widget.cons.maxWidth,
                       ),
                     )
                   : Hero(
                       tag: "service ${item.id}",
                       child: Image(
                         image: ProjectImages.planet,
-                        height: cons.maxHeight * 0.45,
+                        height: widget.cons.maxHeight * 0.45,
                         fit: BoxFit.fitHeight,
-                        width: cons.maxWidth,
+                        width: widget.cons.maxWidth,
                       ),
                     );
             }),
@@ -180,6 +203,7 @@ class OrderedProductPortrait extends StatelessWidget {
                           }
                         }
                       })),
+
                   const Expanded(
                     flex: 1,
                     child: SizedBox(),
@@ -378,6 +402,21 @@ class OrderedProductPortrait extends StatelessWidget {
                 ],
               ),
             ),
+            Obx(() {
+              final item = order.service.value;
+              if (item == null) {
+                if (order.serviceDeleted.isTrue) return const SizedBox.shrink();
+                return Container(
+                  color: Colors.grey,
+                  width: 200,
+                  height: 70,
+                );
+              }
+              return buildRow(
+                  'service id',
+                  item.id,
+                  Icons.numbers);
+            }),
             Obx(() {
               final item = order.service.value;
               if (item == null) {
@@ -622,14 +661,31 @@ class OrderedProductPortrait extends StatelessWidget {
                               title: const Text("Cancel Order"),
                               content: const Text(
                                   "Are you sure you want to cancel the order"),
-                              actionsAlignment: MainAxisAlignment.center,
+                              actionsAlignment: MainAxisAlignment.spaceAround,
+
                               actions: [
                                 TextButton(
                                     onPressed: () {
+                                      final refund = RefundRequest(
+                                          id: shortid.generate(),
+                                          paymentId:
+                                              order.purchase.value!.paymentId,
+                                          purchaseId:
+                                              order.purchase.value!.purchaseId,
+                                          amountToRefund: double.parse(
+                                              order.purchase.value!.itemPrice),
+                                          amount: double.parse(
+                                              order.purchase.value!.itemPrice),
+                                          refundDate: DateTime.now(),
+                                          status: RefundStatus.pending,
+                                          lastActionOn: null,
+                                          receiverUid: auth.user.value!.uid);
+
                                       order.cancelPurchase(
                                           order.purchase.value!.purchaseId,
                                           order.purchase.value!.buyerId,
-                                          order.purchase.value!.sellerId, (e) {
+                                          order.purchase.value!.sellerId,
+                                          refund, (e) {
                                         String? text;
                                         Navigator.pop(context);
                                         if (e.isSuccess) {
@@ -649,6 +705,9 @@ class OrderedProductPortrait extends StatelessWidget {
                                       "Yes",
                                       style: TextStyle(color: Colors.red),
                                     )),
+                                TextButton(onPressed: (){
+                                  Navigator.of(context).pop();
+                                }, child: const Text("No"))
                               ],
                             ),
                           );
@@ -760,7 +819,8 @@ class OrderedProductPortrait extends StatelessWidget {
           // Set the height of the button
           decoration: const BoxDecoration(
             shape: BoxShape.circle, // Makes the container circular
-            color: ProjectColors.primary, // Set the background color of the button
+            color:
+                ProjectColors.primary, // Set the background color of the button
           ),
           child: const Center(
               child: Icon(
@@ -803,6 +863,8 @@ class OrderedProductPortrait extends StatelessWidget {
     }
     return const SizedBox.shrink();
   }
+
+
 }
 
 String _calculateMetric(Service item) {
@@ -812,8 +874,7 @@ String _calculateMetric(Service item) {
 }
 
 String methodToString(int e) {
-  if (e == 0) return "in-person";
-  if (e == 1) {
+  if (e == 0) {
     return "chat";
   } else {
     return "call";
@@ -821,7 +882,6 @@ String methodToString(int e) {
 }
 
 IconData methodToIcon(int m) {
-  if (m == 0) return Icons.people_outline;
-  if (m == 1) return Icons.messenger_outline_outlined;
+  if (m == 0) return Icons.messenger_outline_outlined;
   return Icons.call_outlined;
 }

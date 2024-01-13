@@ -42,7 +42,7 @@ class MyApp extends StatelessWidget {
   static FirebaseAnalytics analytics = FirebaseAnalytics.instance;
   static FirebaseAnalyticsObserver observer =
       FirebaseAnalyticsObserver(analytics: analytics);
-
+ 
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
@@ -58,6 +58,8 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         fontFamily: 'Poppins',
         colorScheme: ColorScheme.fromSeed(seedColor: ProjectColors.primary),
+        disabledColor: ProjectColors.disabled,
+        progressIndicatorTheme: const ProgressIndicatorThemeData(color: ProjectColors.primary),
         useMaterial3: true,
       ),
     );

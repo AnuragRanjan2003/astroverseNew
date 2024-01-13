@@ -5,6 +5,7 @@ import 'package:astroverse/models/extra_info.dart';
 import 'package:astroverse/models/qualifications.dart';
 import 'package:astroverse/models/user.dart' as models;
 import 'package:astroverse/models/user_bank_details.dart';
+import 'package:astroverse/models/withdraw_request.dart';
 import 'package:astroverse/utils/phone_auth_callbacks.dart';
 import 'package:astroverse/utils/resource.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -56,8 +57,9 @@ class AuthRepo {
   Future<bool> checkOTP(PhoneAuthCredential cred) async =>
       await _auth.checkOtp(cred);
 
-  Future<Resource<SetInfo>> setExtraInfo(ExtraInfo info,Qualification q, String uid) async =>
-      await _db.setExtraInfo(info,q, uid);
+  Future<Resource<SetInfo>> setExtraInfo(
+          ExtraInfo info, Qualification q, String uid) async =>
+      await _db.setExtraInfo(info, q, uid);
 
   Future<Resource<ExtraInfo>> getExtraInfo(String uid) async =>
       await _db.getExtraInfo(uid);
@@ -92,6 +94,9 @@ class AuthRepo {
 
   Future<Resource<String>> sendPasswordResetEmail(String email) =>
       _auth.sentForgotPasswordEmail(email);
+
+  Future<Resource<WithdrawRequest>> addWithdrawRequest(WithdrawRequest req) =>
+      _db.addWithdrawRequest(req);
 
   Future<void> logOut() async => await _auth.logOut();
 }

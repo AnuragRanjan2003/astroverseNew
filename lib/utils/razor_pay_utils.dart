@@ -32,7 +32,7 @@ class RazorPayUtils {
       if (res.statusCode == 200) {
         return Success<Json>(jsonDecode(res.body));
       } else {
-        return Failure<Json>("returned status code : ${res.statusCode}");
+        return Failure<Json>(jsonDecode(res.body)["description"]);
       }
     } on HttpException catch (e) {
       return Failure<Json>(e.message);

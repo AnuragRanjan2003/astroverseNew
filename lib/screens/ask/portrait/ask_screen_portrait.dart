@@ -31,23 +31,32 @@ class AskScreenPortrait extends StatelessWidget {
               vertical: GlobalDims.verticalPaddingExtra),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
-            mainAxisAlignment: MainAxisAlignment.end,
+            mainAxisAlignment: MainAxisAlignment.start,
             children: [
-              Expanded(child: SvgPicture.asset('lib/assets/svg/welcome.svg' , fit: BoxFit.fitWidth,)),
-              Text(
+              const Text(
                 AskScreenStrings.title,
-                style: TextStylesLight().header,
+                style: TextStyle(fontSize: 28 , fontWeight: FontWeight.bold),
               ),
-              const SizedBox(
-                height: 5,
+              const SizedBox(height: 30,),
+              Flexible(
+                flex: 2,
+                  child: SvgPicture.asset(
+                'lib/assets/svg/welcome.svg',
+                width: 200,
+              )),
+              const Spacer(),
+              const Text(
+                "Location Based Social Commerece Enabled Astrology Marketplace - The Gem in Astrology",
+                style: TextStyle(fontSize: 12, color: ProjectColors.disabled),
               ),
-              Text(
+              const Spacer(),
+              const Text(
                 AskScreenStrings.subTitle,
-                style: TextStylesLight().subtitle,
+                style: TextStyle(fontWeight: FontWeight.bold , fontSize: 16),
                 overflow: TextOverflow.visible,
               ),
               const SizedBox(
-                height: 30,
+                height: 20,
               ),
               MaterialButton(
                   onPressed: () => navigateToUserLogin(context),

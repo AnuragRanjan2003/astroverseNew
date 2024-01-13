@@ -45,7 +45,7 @@ class OtpScreenPortrait extends StatelessWidget {
     log(code.toString(), name: "CODE");
     if (user == null) Get.snackbar("Error", "unexpected error");
     return Scaffold(
-        backgroundColor: ProjectColors.primary,
+        backgroundColor: Colors.orange.shade100,
         body: SingleChildScrollView(
           child: Container(
             width: wd,

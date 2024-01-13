@@ -1,5 +1,9 @@
 import 'package:astroverse/models/extra_info.dart';
 import 'package:astroverse/models/purchase.dart';
+import 'package:astroverse/models/refund_request.dart';
+import 'package:astroverse/models/transaction.dart' as m;
+import 'package:astroverse/models/transaction.dart';
+import 'package:astroverse/res/strings/backend_strings.dart';
 import 'package:astroverse/utils/crypt.dart';
 import 'package:astroverse/utils/postable.dart';
 import 'package:astroverse/utils/resource.dart';
@@ -12,6 +16,22 @@ class PurchaseUtils extends Postable<Purchase, Purchase> {
   final CollectionReference? servicesCollection;
   final DocumentReference<ExtraInfo>? extraInfoDocument;
   static const int _limit = 20;
+
+  final _refundCollection = FirebaseFirestore.instance
+      .collection(BackEndStrings.refundCollection)
+      .withConverter<RefundRequest>(
+        fromFirestore: (snapshot, options) =>
+            RefundRequest.fromJson(snapshot.data()),
+        toFirestore: (value, options) => value.toJson(),
+      );
+
+  final _transactionsCollection = FirebaseFirestore.instance
+      .collection(BackEndStrings.transactionCollection)
+      .withConverter<m.Transaction>(
+        fromFirestore: (snapshot, options) =>
+            m.Transaction.fromJson(snapshot.data()),
+        toFirestore: (value, options) => value.toJson(),
+      );
 
   final _crypto = Crypt();
 
@@ -157,7 +177,8 @@ class PurchaseUtils extends Postable<Purchase, Purchase> {
       final batch = _db.batch();
       batch.update(ref.doc(id), data);
       batch.update(likeRef!.doc(id), data);
-      batch.update(extraInfoDocument!, {"moneyGenerate": FieldValue.increment(amount)});
+      batch.update(
+          extraInfoDocument!, {"moneyGenerate": FieldValue.increment(amount)});
       await batch.commit();
       return Success<Json>(data);
     } on FirebaseException catch (e) {
@@ -171,18 +192,30 @@ class PurchaseUtils extends Postable<Purchase, Purchase> {
     return ref.doc(id).snapshots();
   }
 
-  Future<Resource<Json>> cancelPurchaseByUser(String id) async {
+  Future<Resource<RefundRequest>> cancelPurchaseByUser(
+      String id, RefundRequest refund) async {
     try {
-      final data = {'active': false};
+      final data = {
+        'active': false,
+        "refundId": refund.id,
+      };
+
       final batch = FirebaseFirestore.instance.batch();
+
       batch.update(ref.doc(id), data);
       batch.update(likeRef!.doc(id), data);
+      batch.update(_transactionsCollection.doc(id), {
+        "status": TransactionStatus.canceledByUser,
+      });
+      batch.set(_refundCollection.doc(refund.id), refund);
+
       await batch.commit();
-      return Success<Json>(data);
+
+      return Success<RefundRequest>(refund);
     } on FirebaseException catch (e) {
-      return Failure<Json>(e.message.toString());
+      return Failure<RefundRequest>(e.message.toString());
     } catch (e) {
-      return Failure<Json>(e.toString());
+      return Failure<RefundRequest>(e.toString());
     }
   }
 }

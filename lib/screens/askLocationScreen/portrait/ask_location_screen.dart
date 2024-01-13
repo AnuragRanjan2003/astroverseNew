@@ -56,7 +56,7 @@ class AskLocationPortrait extends StatelessWidget {
     log(user.toString(), name: "USER");
     if (user == null) Get.snackbar("Error", "unexpected error");
     return Scaffold(
-        backgroundColor: ProjectColors.primary,
+        backgroundColor: Colors.orange.shade200,
         body: SingleChildScrollView(
           child: Container(
             padding: const EdgeInsets.only(top: 10),

@@ -1,8 +1,8 @@
 import 'package:astroverse/models/save_service.dart';
 import 'package:astroverse/res/colors/project_colors.dart';
-import 'package:astroverse/utils/num_parser.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:shimmer/shimmer.dart';
 
 class MyServiceItem extends StatefulWidget {
   final SaveService ss;
@@ -22,7 +22,9 @@ class _MyServiceItemState extends State<MyServiceItem> {
     return InkWell(
       onTap: widget.onTap,
       child: Container(
-        decoration: const BoxDecoration(color: Colors.white , borderRadius: BorderRadius.all(Radius.circular(20))),
+        decoration: const BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.all(Radius.circular(20))),
         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.center,
@@ -31,6 +33,18 @@ class _MyServiceItemState extends State<MyServiceItem> {
               borderRadius: const BorderRadius.all(Radius.circular(20)),
               child: Image(
                 image: NetworkImage(widget.ss.imageUrl),
+                fit: BoxFit.fill,
+                loadingBuilder: (context, child, loadingProgress) {
+                  if (loadingProgress == null) return child;
+                  return Shimmer.fromColors(
+                      baseColor: Colors.grey.shade200,
+                      highlightColor: Colors.grey.shade400,
+                      child: Container(
+                        height: 100,
+                        width: 100,
+                        color: Colors.white,
+                      ));
+                },
                 height: 100,
                 width: 100,
               ),
@@ -43,18 +57,21 @@ class _MyServiceItemState extends State<MyServiceItem> {
               children: [
                 Text(
                   widget.ss.name,
-                  style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                  style: const TextStyle(
+                      fontSize: 16, fontWeight: FontWeight.bold),
                 ),
-                const SizedBox(height: 10,),
+                const SizedBox(
+                  height: 10,
+                ),
                 Text(
                   DateFormat.yMMMd().format(
                     DateTime.parse(widget.ss.date),
                   ),
-                  style: const TextStyle(fontSize: 12, color: ProjectColors.disabled),
+                  style: const TextStyle(
+                      fontSize: 12, color: ProjectColors.disabled),
                 ),
               ],
             ),
-
           ],
         ),
       ),

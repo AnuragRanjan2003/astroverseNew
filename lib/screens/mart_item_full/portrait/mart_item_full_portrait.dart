@@ -15,7 +15,8 @@ class MartItemFullPortrait extends StatelessWidget {
   final BoxConstraints cons;
   final Service item;
 
-  const MartItemFullPortrait({super.key, required this.cons, required this.item});
+  const MartItemFullPortrait(
+      {super.key, required this.cons, required this.item});
 
   @override
   Widget build(BuildContext context) {
@@ -200,6 +201,10 @@ class MartItemFullPortrait extends StatelessWidget {
                     ),
                   ),
                   buildRow(
+                      'service Id',
+                      item.id,
+                      Icons.numbers),
+                  buildRow(
                       'seller',
                       crypto.decryptFromBase64String(item.authorName),
                       Icons.person_2),
@@ -230,7 +235,10 @@ class MartItemFullPortrait extends StatelessWidget {
                           service.makePayment(
                               item,
                               crypto.decryptFromBase64String(user.phNo),
-                              crypto.decryptFromBase64String(user.email));
+                              crypto.decryptFromBase64String(user.email), (e) {
+                            ScaffoldMessenger.of(context)
+                                .showSnackBar(SnackBar(content: Text(e)));
+                          });
                         },
                   color: const Color(0xff444040),
                   disabledColor: ProjectColors.disabled,
@@ -299,6 +307,7 @@ class MartItemFullPortrait extends StatelessWidget {
                 ),
                 Text(
                   label,
+                  overflow: TextOverflow.ellipsis,
                   style: const TextStyle(
                       color: ProjectColors.lightBlack,
                       fontWeight: FontWeight.w500),
@@ -320,8 +329,7 @@ class MartItemFullPortrait extends StatelessWidget {
   }
 
   String methodToString(int e) {
-    if (e == 0) return "in-person";
-    if (e == 1) {
+    if (e == 0) {
       return "chat";
     } else {
       return "call";
@@ -329,8 +337,7 @@ class MartItemFullPortrait extends StatelessWidget {
   }
 
   IconData methodToIcon(int m) {
-    if (m == 0) return Icons.people_outline;
-    if (m == 1) return Icons.messenger_outline_outlined;
+    if (m == 0) return Icons.messenger_outline_outlined;
     return Icons.call_outlined;
   }
 }

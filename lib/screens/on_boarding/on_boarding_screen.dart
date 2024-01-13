@@ -15,22 +15,22 @@ class OnBoardingScreen extends StatefulWidget {
 
 class _OnBoardingScreenState extends State<OnBoardingScreen> {
   static const onBoardingTitle = [
-    "Connect and Share",
-    "Expert Connections at Your Fingertips",
-    "Your Personal Marketplace",
-    "Welcome Aboard!\nLet's Dive In"
+    "Connect with your favourite Astrologers ",
+    "Astrology, Locally Crafted",
+    "Navigate the Stars, Wherever You Are",
+    "Social Stars Align"
   ];
   static const onBoardingSubtitle = [
-    " Dive into the vibrant community of Astro-Sapphire.\nShare your thoughts, experiences, and creativity.",
-    "Unlock a world of knowledge and guidance with Astro-Sapphire.\nConnect seamlessly with astrologers and mentors through calls and chats.",
-    "Explore a curated marketplace within Astro-Sapphire where you can buy and sell unique merchandise.\nStart browsing, buying, and selling today!",
-    "Whether you're here for social connections, expert advice, shopping, or all of the above, we're thrilled to have you."
+    "Explore a online marketplace where users and astrologers converge for insightful astrology services and products.",
+    "Unleash the power of astrology in your community – discover local astrologers and products, fostering a sense of cosmic connection right where you are.",
+    "Experience astrology tailored to your location, providing you with personalized insights and access to services within your social proximity.",
+    " Join a community where social connections meet celestial wisdom, bridging the gap between astrology enthusiasts and local practitioners."
   ];
   static const onBoardingImages = [
-    "lib/assets/svg/social.svg",
-    "lib/assets/svg/call.svg",
-    "lib/assets/svg/shop.svg",
-    "lib/assets/svg/get_started.svg"
+    "lib/assets/svg/connect.svg",
+    "lib/assets/svg/local.svg",
+    "lib/assets/svg/stars.svg",
+    "lib/assets/svg/social.svg"
   ];
 
   late int currentPage;

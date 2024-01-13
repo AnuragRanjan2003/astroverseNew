@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:developer';
 
 import 'package:astroverse/models/purchase.dart';
+import 'package:astroverse/models/refund_request.dart';
 import 'package:astroverse/models/service.dart';
 import 'package:astroverse/repo/orders_repo.dart';
 import 'package:astroverse/res/strings/backend_strings.dart';
@@ -92,9 +93,9 @@ class OrderController extends GetxController {
   }
 
   cancelPurchase(
-      String id, String buyerId, String sellerId, Function(Resource) updateUI) {
+      String id, String buyerId, String sellerId,RefundRequest refund, Function(Resource<RefundRequest>) updateUI) {
     cancelingPurchase.value = true;
-    _repo.cancelPurchase(id, buyerId, sellerId).then((value) {
+    _repo.cancelPurchase(id, buyerId, sellerId,refund).then((value) {
       cancelingPurchase.value = false;
       updateUI(value);
     });

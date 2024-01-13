@@ -6,11 +6,13 @@ import 'package:astroverse/models/post.dart';
 import 'package:astroverse/models/post_save.dart';
 import 'package:astroverse/models/purchase.dart';
 import 'package:astroverse/models/qualifications.dart';
+import 'package:astroverse/models/refund_request.dart';
 import 'package:astroverse/models/save_service.dart';
 import 'package:astroverse/models/service.dart';
 import 'package:astroverse/models/transaction.dart' as t;
 import 'package:astroverse/models/user.dart' as models;
 import 'package:astroverse/models/user_bank_details.dart';
+import 'package:astroverse/models/withdraw_request.dart';
 import 'package:astroverse/res/strings/backend_strings.dart';
 import 'package:astroverse/utils/comment_utils.dart';
 import 'package:astroverse/utils/geo.dart';
@@ -19,6 +21,7 @@ import 'package:astroverse/utils/reply_utils.dart';
 import 'package:astroverse/utils/resource.dart';
 import 'package:astroverse/utils/safe_call.dart';
 import 'package:astroverse/utils/service_utils.dart';
+import 'package:astroverse/utils/withdraw_util.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
@@ -187,12 +190,12 @@ class Database {
       final batch = _fireStore.batch();
       batch.set(_postCollection.doc(post.id), post);
       batch.set(_userPostCollection(post.authorId).doc(post.id), post);
-      
+
       batch.update(_userCollection.doc(post.authorId), {
         "postedToday": FieldValue.increment(1),
         "lastPosted": FieldValue.serverTimestamp(),
       });
-      
+
       await batch.commit();
       return Success(post);
     } on FirebaseException catch (e) {
@@ -636,6 +639,9 @@ class Database {
     }
   }
 
+  Future<Resource<WithdrawRequest>> addWithdrawRequest(WithdrawRequest req) =>
+      WithdrawUtils().addRequest(req);
+
   Future<Resource<Purchase>> postPurchase(Purchase purchase) async {
     return await PurchaseUtils(
             _purchasesCollection(purchase.buyerId),
@@ -685,11 +691,11 @@ class Database {
       await PurchaseUtils(_purchasesCollection(uid), null, null, null)
           .fetchMore(lastPost, [], uid);
 
-  Future<Resource<Json>> cancelPurchase(
-          String id, String buyerId, String sellerId) =>
+  Future<Resource<RefundRequest>> cancelPurchase(
+          String id, String buyerId, String sellerId , RefundRequest refund) =>
       PurchaseUtils(_purchasesCollection(buyerId),
               _purchasesCollection(sellerId), null, null)
-          .cancelPurchaseByUser(id);
+          .cancelPurchaseByUser(id,refund);
 
   Future<Resource<Json>> updateService(
           Json data, String serviceId, String uid) async =>

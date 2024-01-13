@@ -5,6 +5,7 @@ import 'package:astroverse/res/textStyles/text_styles.dart';
 import 'package:astroverse/screens/mart_item_full/mart_item_full_screen.dart';
 import 'package:astroverse/utils/crypt.dart';
 import 'package:flutter/material.dart';
+import 'package:shimmer/shimmer.dart';
 
 class MartItem extends StatelessWidget {
   final Service item;
@@ -37,6 +38,16 @@ class MartItem extends StatelessWidget {
                         item.imageUrl,
                         fit: BoxFit.fill,
                         height: 140,
+                        loadingBuilder: (context, child, loadingProgress) {
+                          if (loadingProgress == null) return child;
+                          return Shimmer.fromColors(
+                              baseColor: Colors.grey.shade200,
+                              highlightColor: Colors.grey.shade400,
+                              child: Container(
+                                height: 140,
+                                color: Colors.white,
+                              ));
+                        },
                       ),
                     )
                   : Hero(
@@ -154,8 +165,7 @@ class MartItem extends StatelessWidget {
   }
 
   String methodToString(int e) {
-    if (e == 0) return "in-person";
-    if (e == 1) {
+    if (e == 0) {
       return "chat";
     } else {
       return "call";
@@ -163,8 +173,7 @@ class MartItem extends StatelessWidget {
   }
 
   IconData methodToIcon(int m) {
-    if (m == 0) return Icons.people_outline;
-    if (m == 1) return Icons.messenger_outline_outlined;
+    if (m == 0) return Icons.messenger_outline_outlined;
     return Icons.call_outlined;
   }
 }

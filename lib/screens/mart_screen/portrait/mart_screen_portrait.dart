@@ -24,11 +24,28 @@ import '../../../controllers/auth_controller.dart';
 
 class MartScreenPortrait extends StatelessWidget {
   final BoxConstraints cons;
+  static const _list = {
+    'vedic astrology': 0,
+    'palm reading': 1,
+    'online puja': 2,
+    'marriage kundli matching': 3,
+    'vashikaran': 4,
+    'tantra': 5,
+    'vastu': 6,
+    'Career': 7,
+    'lal kitab': 8,
+  };
   static const chipNames = [
-    'item',
-    'job prediction',
+    'all',
+    'vedic astrology',
     'palm reading',
-    'marriage prediction'
+    'online puja',
+    'marriage kundli matching',
+    'vashikaran',
+    'tantra',
+    'vastu',
+    'Career',
+    'lal kitab',
   ];
 
   const MartScreenPortrait({super.key, required this.cons});
@@ -173,7 +190,7 @@ class MartScreenPortrait extends StatelessWidget {
                             if (service.selectedItem.value == 0) {
                               list.add(element);
                             } else if (element.genre.contains(
-                                chipNames[service.selectedItem.value - 1])) {
+                                chipNames[service.selectedItem.value])) {
                               list.add(element);
                             }
                           }
@@ -230,43 +247,17 @@ class MartScreenPortrait extends StatelessWidget {
                               controller: service.searchController,
                               bottom: SizedBox(
                                 height: 50,
-                                child: ListView(
+                                child: ListView.separated(
                                   scrollDirection: Axis.horizontal,
-                                  children: [
-                                    Obx(() =>
-                                        buildFilterChip(chipNames[0], (e) {
-                                          e
-                                              ? service.selectedItem.value = 1
-                                              : service.selectedItem.value = 0;
-                                        }, service.selectedItem.value == 1)),
-                                    const SizedBox(
-                                      width: 5,
-                                    ),
-                                    Obx(() =>
-                                        buildFilterChip(chipNames[1], (e) {
-                                          e
-                                              ? service.selectedItem.value = 2
-                                              : service.selectedItem.value = 0;
-                                        }, service.selectedItem.value == 2)),
-                                    const SizedBox(
-                                      width: 5,
-                                    ),
-                                    Obx(() =>
-                                        buildFilterChip(chipNames[2], (e) {
-                                          e
-                                              ? service.selectedItem.value = 3
-                                              : service.selectedItem.value = 0;
-                                        }, service.selectedItem.value == 3)),
-                                    const SizedBox(
-                                      width: 5,
-                                    ),
-                                    Obx(() =>
-                                        buildFilterChip(chipNames[3], (e) {
-                                          e
-                                              ? service.selectedItem.value = 4
-                                              : service.selectedItem.value = 0;
-                                        }, service.selectedItem.value == 4)),
-                                  ],
+                                  itemCount: chipNames.length,
+                                  itemBuilder: (context, index) => Obx(
+                                      () => buildFilterChip(chipNames[index], (e) {
+                                            e
+                                                ? service.selectedItem.value = index
+                                                : service.selectedItem.value =
+                                                    0;
+                                          }, service.selectedItem.value == index)),
+                                  separatorBuilder: (context, index) => const SizedBox(width: 5,),
                                 ),
                               ),
                               hint: 'Search in Mart',
@@ -305,7 +296,9 @@ class MartScreenPortrait extends StatelessWidget {
                           color: ProjectColors.lightBlack),
                     ),
                   ),
-                  const SizedBox(height: 10,),
+                  const SizedBox(
+                    height: 10,
+                  ),
                   Expanded(
                     child: Obx(() {
                       var list = service.myServices;
@@ -333,7 +326,9 @@ class MartScreenPortrait extends StatelessWidget {
                                     )));
                           });
                         },
-                        separatorBuilder: (context, index) => const Divider(),
+                        separatorBuilder: (context, index) => const SizedBox(
+                          height: 10,
+                        ),
                       );
                     }),
                   ),

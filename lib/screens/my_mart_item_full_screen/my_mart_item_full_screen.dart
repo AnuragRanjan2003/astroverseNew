@@ -64,6 +64,15 @@ class MyMartItemFullScreen extends StatelessWidget {
                         ),
                         Padding(
                           padding: const EdgeInsets.symmetric(
+                              horizontal: 15, vertical: 8),
+                          child: Text(
+                            '₹ ${item.price.toStringAsFixed(2)}',
+                            style: const TextStyle(
+                                fontWeight: FontWeight.bold, fontSize: 18 , color: Colors.green),
+                          ),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(
                               horizontal: 15, vertical: 5),
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.start,
@@ -189,6 +198,10 @@ class MyMartItemFullScreen extends StatelessWidget {
                           ),
                         ),
                         buildRow(
+                            'service id',
+                            item.id,
+                            Icons.numbers),
+                        buildRow(
                             'seller',
                             crypto.decryptFromBase64String(item.authorName),
                             Icons.person_2),
@@ -221,7 +234,7 @@ class MyMartItemFullScreen extends StatelessWidget {
                                       if (p.isSuccess) {
                                         msg = "service deleted";
                                       } else {
-                                        msg = "could not delete service";
+                                        msg = (p as Failure<String>).error;
                                       }
 
                                       ScaffoldMessenger.of(context)
@@ -302,8 +315,7 @@ class MyMartItemFullScreen extends StatelessWidget {
   }
 
   String methodToString(int e) {
-    if (e == 0) return "in-person";
-    if (e == 1) {
+    if (e == 0) {
       return "chat";
     } else {
       return "call";
@@ -317,8 +329,7 @@ class MyMartItemFullScreen extends StatelessWidget {
   }
 
   IconData methodToIcon(int m) {
-    if (m == 0) return Icons.people_outline;
-    if (m == 1) return Icons.messenger_outline_outlined;
+    if (m == 0) return Icons.messenger_outline_outlined;
     return Icons.call_outlined;
   }
 

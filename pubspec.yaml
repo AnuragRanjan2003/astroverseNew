@@ -68,6 +68,8 @@ dependencies:
   in_app_purchase: ^3.1.11
   flutter_svg: ^2.0.9
   shared_preferences: ^2.2.2
+  shortid: ^0.1.2
+  url_launcher: ^6.2.3
 
 dev_dependencies:
   flutter_test:

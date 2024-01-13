@@ -4,12 +4,15 @@ import 'dart:io';
 import 'package:astroverse/controllers/auth_controller.dart';
 import 'package:astroverse/controllers/location_controller.dart';
 import 'package:astroverse/controllers/service_controller.dart';
+import 'package:astroverse/db/plans_db.dart';
+import 'package:astroverse/models/plan.dart';
 import 'package:astroverse/models/service.dart';
 import 'package:astroverse/res/colors/project_colors.dart';
 import 'package:astroverse/res/img/images.dart';
 import 'package:astroverse/utils/constants.dart';
 import 'package:astroverse/utils/geo.dart';
 import 'package:astroverse/utils/resource.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
@@ -27,7 +30,6 @@ class CreateServicePortrait extends StatelessWidget {
     'vastu': 6,
     'Career': 7,
     'lal kitab': 8,
-    'item': 9,
   };
   static const _listIcons = {
     'vedic astrology': Icon(Icons.star_border),
@@ -39,7 +41,6 @@ class CreateServicePortrait extends StatelessWidget {
     'vastu': Icon(Icons.star_border),
     'Career': Icon(Icons.work_history_outlined),
     'lal kitab': Icon(Icons.book_outlined),
-    'item': Icon(Icons.card_giftcard),
   };
 
   const CreateServicePortrait({super.key, required this.cons});
@@ -91,6 +92,18 @@ class CreateServicePortrait extends StatelessWidget {
           service.selectedItem.value,
           service.selectedMode.value);
     });
+
+    body.addListener(() {
+      service.formValid.value = validate(
+          title,
+          body,
+          price,
+          place,
+          service.image.value,
+          service.selectedItem.value,
+          service.selectedMode.value);
+    });
+
     final cost = _getPriceForRange(service.selectedRange.value);
     final userCoins = auth.user.value!.coins;
     if (userCoins < cost) {
@@ -206,6 +219,7 @@ class CreateServicePortrait extends StatelessWidget {
                         ),
                         DropdownMenu(
                             width: 190,
+                            textStyle: const TextStyle(fontSize: 12),
                             initialSelection: _list.keys.first,
                             inputDecorationTheme: const InputDecorationTheme(
                                 border: OutlineInputBorder(
@@ -221,8 +235,9 @@ class CreateServicePortrait extends StatelessWidget {
                               if (e == null) {
                               } else {
                                 service.selectedItem.value = _list[e]!;
-                                if (_list[e] == 1)
+                                if (_list[e] == 1) {
                                   service.selectedRange.value = 0;
+                                }
                               }
                               log(service.selectedItem.value.toString(),
                                   name: 'DROPDOWN');
@@ -240,9 +255,9 @@ class CreateServicePortrait extends StatelessWidget {
                           height: 10,
                         ),
                         ToggleSwitch(
-                          initialLabelIndex: 0,
-                          labels: const ["in-person", "chat", "call"],
-                          totalSwitches: 3,
+                          initialLabelIndex: 1,
+                          labels: const ["chat", "call"],
+                          totalSwitches: 2,
                           minWidth: 100,
                           inactiveBgColor: ProjectColors.greyBackground,
                           centerText: true,
@@ -255,7 +270,6 @@ class CreateServicePortrait extends StatelessWidget {
                           ],
                           radiusStyle: true,
                           icons: const [
-                            Icons.person_outline,
                             Icons.messenger_outline,
                             Icons.call_outlined
                           ],
@@ -282,8 +296,9 @@ class CreateServicePortrait extends StatelessWidget {
                         ),
                         Obx(() {
                           return Visibility(
-                            visible: service.selectedItem.value == _list["item"] &&
-                                service.selectedMode.value != 0,
+                            visible:
+                                service.selectedItem.value == _list["item"] &&
+                                    service.selectedMode.value != 0,
                             child: const Text(
                               "in-person requires",
                               style: TextStyle(color: Colors.red),
@@ -353,32 +368,36 @@ class CreateServicePortrait extends StatelessWidget {
                                     child: Text(
                                       "free",
                                       textAlign: TextAlign.start,
-                                      style:
-                                          TextStyle(fontSize: 10,fontWeight: FontWeight.w400),
+                                      style: TextStyle(
+                                          fontSize: 10,
+                                          fontWeight: FontWeight.w400),
                                     ),
                                   ),
                                   Expanded(
                                     child: Text(
                                       "astro disha\nlite",
                                       textAlign: TextAlign.start,
-                                      style:
-                                          TextStyle(fontSize: 10,fontWeight: FontWeight.w400),
+                                      style: TextStyle(
+                                          fontSize: 10,
+                                          fontWeight: FontWeight.w400),
                                     ),
                                   ),
                                   Expanded(
                                     child: Text(
                                       textAlign: TextAlign.end,
                                       "astro kripa\nlite",
-                                      style:
-                                          TextStyle(fontSize: 10,fontWeight: FontWeight.w400),
+                                      style: TextStyle(
+                                          fontSize: 10,
+                                          fontWeight: FontWeight.w400),
                                     ),
                                   ),
                                   Expanded(
                                     child: Text(
                                       "astro mahima\nlite",
                                       textAlign: TextAlign.end,
-                                      style:
-                                          TextStyle(fontSize: 10,fontWeight: FontWeight.w400),
+                                      style: TextStyle(
+                                          fontSize: 10,
+                                          fontWeight: FontWeight.w400),
                                     ),
                                   ),
                                 ],
@@ -442,6 +461,63 @@ class CreateServicePortrait extends StatelessWidget {
                             )
                           ],
                         ),
+                        const SizedBox(
+                          height: 30,
+                        ),
+                        const Text(
+                          "Place of origin",
+                          style: TextStyle(
+                              color: ProjectColors.lightBlack,
+                              fontWeight: FontWeight.bold),
+                        ),
+                        const SizedBox(
+                          height: 10,
+                        ),
+                        const Text(
+                          "This location effects where your products are visible",
+                          style: TextStyle(fontSize: 12, color: Colors.red),
+                        ),
+                        const SizedBox(
+                          height: 10,
+                        ),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                              vertical: 10, horizontal: 16),
+                          decoration: BoxDecoration(
+                              borderRadius:
+                                  const BorderRadius.all(Radius.circular(10)),
+                              border: Border.all(
+                                  color: ProjectColors.disabled, width: 0.5)),
+                          child: Obx(() => Wrap(
+                                spacing: 8,
+                                crossAxisAlignment: WrapCrossAlignment.center,
+                                children: [
+                                  Icon(service.useCurrentLocation.isTrue
+                                      ? Icons.my_location
+                                      : Icons.business),
+                                  Text(
+                                      "using ${service.useCurrentLocation.isTrue ? "current" : "business"} location"),
+                                ],
+                              )),
+                        ),
+                        const SizedBox(
+                          height: 5,
+                        ),
+                        Row(
+                          children: [
+                            Obx(() => Checkbox(
+                                checkColor: Colors.white,
+                                shape: const CircleBorder(),
+                                value: service.useCurrentLocation.value,
+                                onChanged: (e) {
+                                  service.useCurrentLocation.value = e ?? false;
+                                })),
+                            const Text("use current location"),
+                          ],
+                        ),
+                        const SizedBox(
+                          height: 30,
+                        ),
                         const Text(
                           "Set a Price",
                           style: TextStyle(
@@ -488,7 +564,9 @@ class CreateServicePortrait extends StatelessWidget {
                             ),
                           ],
                         ),
-                        const SizedBox(height: 10,),
+                        const SizedBox(
+                          height: 10,
+                        ),
                       ],
                     ),
                   ),
@@ -508,8 +586,33 @@ class CreateServicePortrait extends StatelessWidget {
                               horizontal: 50, vertical: 12),
                           onPressed: service.formValid.isTrue
                               ? () {
-                                  var location = loc.location.value!;
+                                  if (service.hasPostedToday(
+                                      auth.user.value!.lastServicePosted)) {
+                                    if (auth.user.value!.servicesPostedToday >=
+                                        _findPlan(auth.user.value!.plan,
+                                                auth.user.value!.astro)
+                                            .servicesPerDay) {
+                                      ScaffoldMessenger.of(context)
+                                          .showSnackBar(const SnackBar(
+                                              content: Text(
+                                                  "limit reached for today")));
+                                      return;
+                                    }
+                                  }
                                   var user = auth.user.value!;
+                                  late GeoPoint location;
+                                  if (loc.location.value != null) {
+                                    location = GeoPoint(
+                                        loc.location.value!.latitude!,
+                                        loc.location.value!.longitude!);
+                                  } else {
+                                    location = user.location!;
+                                  }
+
+                                  if (service.useCurrentLocation.isTrue &&
+                                      user.location != null) {
+                                    location = user.location!;
+                                  }
                                   log(
                                       ' post is valid : ${validate(
                                         title,
@@ -533,8 +636,8 @@ class CreateServicePortrait extends StatelessWidget {
                                       price: double.parse(price.value.text),
                                       uses: 0,
                                       lastDate: DateTime(1900),
-                                      lat: location.latitude!,
-                                      lng: location.longitude!,
+                                      lat: location.latitude,
+                                      lng: location.longitude,
                                       title: title.value.text,
                                       description: body.value.text,
                                       genre: [
@@ -604,7 +707,8 @@ class CreateServicePortrait extends StatelessWidget {
                               const BorderRadius.all(Radius.circular(10))),
                       padding: const EdgeInsets.symmetric(
                           horizontal: 35, vertical: 12),
-                      child: Obx(() => Text("₹ ${service.price.value.toInt() + Constants.appConvenienceFee }",
+                      child: Obx(() => Text(
+                          "₹ ${service.price.value.toInt() + Constants.appConvenienceFee}",
                           style: const TextStyle(
                               color: Colors.black,
                               fontWeight: FontWeight.w700,
@@ -623,24 +727,25 @@ class CreateServicePortrait extends StatelessWidget {
   int _getPriceForRange(double range) => ((range) * 15).toInt();
 
   bool validate(
-      TextEditingController title,
-      TextEditingController body,
-      TextEditingController price,
-      TextEditingController address,
-      XFile? image,
-      int productType,
-      int mode,
-      ) {
+    TextEditingController title,
+    TextEditingController body,
+    TextEditingController price,
+    TextEditingController address,
+    XFile? image,
+    int productType,
+    int mode,
+  ) {
     final t = title.value.text;
     final b = body.value.text;
-    final add = address.value.text;
 
     if (t.isEmpty || b.isEmpty) return false;
-    if (productType ==  _list["item"] && add.isEmpty) return false;
-    if (productType == _list["item"] && image == null) return false;
-    if (productType == _list["item"] && mode != 0) return false;
     return true;
   }
+
+  Plan _findPlan(int plan, bool astro) {
+    if (!astro) return Plans.plans[0];
+    return Plans.astroPlans
+            .firstWhereOrNull((element) => element.value == plan) ??
+        Plans.astroPlans[0];
+  }
 }
-
-

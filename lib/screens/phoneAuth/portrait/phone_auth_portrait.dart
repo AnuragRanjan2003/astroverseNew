@@ -37,7 +37,7 @@ class PhoneAuthPortrait extends StatelessWidget {
     if (user == null) Get.snackbar("Error", "unexpected error");
     late OTPPhoneCallbacks callbacks;
     return Scaffold(
-      backgroundColor: ProjectColors.primary,
+      backgroundColor: Colors.orange.shade100,
       body: SingleChildScrollView(
         child: SizedBox(
           width: wd,

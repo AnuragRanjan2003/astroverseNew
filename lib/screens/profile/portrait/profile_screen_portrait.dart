@@ -42,6 +42,9 @@ class ProfileScreenPortrait extends StatelessWidget {
                     user: auth.user.value!,
                     info: auth.info.value!,
                     bankDetails: auth.bankDetails.value,
+                    address: auth.userAddress.value,
+                    refreshAddress: () =>
+                        auth.getAddress(auth.user.value!.location),
                     onEdit: () {},
                     onQualificationUpdate: (e) {
                       if (auth.user.value == null) return;

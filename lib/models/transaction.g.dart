@@ -14,6 +14,10 @@ Transaction _$TransactionFromJson(Map json) => Transaction(
       json['itemType'] as String,
       (json['amount'] as num).toDouble(),
       json['orderId'] as String,
+      json['status'] != null ? json["status"] as String : "pending",
+      json['lastAction'] != null
+          ? Transaction._dateFromTimeStamp(json['lastAction'] as Timestamp)
+          : null,
     );
 
 Map<String, dynamic> _$TransactionToJson(Transaction instance) =>
@@ -25,4 +29,6 @@ Map<String, dynamic> _$TransactionToJson(Transaction instance) =>
       'itemType': instance.itemType,
       'amount': instance.amount,
       'orderId': instance.orderId,
+      'status': instance.status,
+      'lastAction': instance.lastAction,
     };

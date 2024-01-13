@@ -4,25 +4,31 @@ import 'package:astroverse/components/update_bank_bottomsheet.dart';
 import 'package:astroverse/components/update_qualifications_bottom_sheet.dart';
 import 'package:astroverse/components/upgrade_features_bottom_sheet.dart';
 import 'package:astroverse/components/upgrade_range_bottomsheet.dart';
+import 'package:astroverse/components/withdraw_request_bottom_sheet.dart';
+import 'package:astroverse/controllers/auth_controller.dart';
 import 'package:astroverse/db/plans_db.dart';
 import 'package:astroverse/models/extra_info.dart';
 import 'package:astroverse/models/qualifications.dart';
 import 'package:astroverse/models/user_bank_details.dart';
+import 'package:astroverse/models/withdraw_request.dart';
 import 'package:astroverse/res/colors/project_colors.dart';
 import 'package:astroverse/res/dims/global.dart';
+import 'package:astroverse/res/strings/backend_strings.dart';
 import 'package:astroverse/utils/crypt.dart';
 import 'package:astroverse/utils/geo.dart';
 import 'package:astroverse/utils/num_parser.dart';
-import 'package:astroverse/utils/resource.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../models/user.dart';
 
 class NamePlate extends StatelessWidget {
   final User user;
   final ExtraInfo info;
+  final String address;
+  final void Function() refreshAddress;
   final UserBankDetails? bankDetails;
   final void Function() onLogOut;
   final void Function() onEdit;
@@ -37,6 +43,8 @@ class NamePlate extends StatelessWidget {
     required this.info,
     this.bankDetails,
     required this.onQualificationUpdate,
+    required this.address,
+    required this.refreshAddress,
   });
 
   @override
@@ -80,7 +88,7 @@ class NamePlate extends StatelessWidget {
                       fontSize: 20, fontWeight: FontWeight.w500),
                 ),
                 SelectableText(
-                  user.uid,
+                  "uid: ${user.uid}",
                   style: const TextStyle(
                       fontSize: 12, fontWeight: FontWeight.w500),
                 ),
@@ -90,6 +98,79 @@ class NamePlate extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
+                Visibility(
+                  visible: user.astro,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Wrap(
+                            crossAxisAlignment: WrapCrossAlignment.center,
+                            spacing: 8,
+                            children: [
+                              Visibility(
+                                visible: user.qualifications.isEmpty,
+                                child: const Tooltip(
+                                    triggerMode: TooltipTriggerMode.tap,
+                                    message:
+                                        "Add your qualifications for a better engagement.",
+                                    child: Icon(
+                                      Icons.warning_rounded,
+                                      size: 20,
+                                      color: Colors.orangeAccent,
+                                    )),
+                              ),
+                              const Text(
+                                "Qualifications",
+                                textAlign: TextAlign.start,
+                                style: TextStyle(
+                                    fontSize: 16, fontWeight: FontWeight.w600),
+                              ),
+                            ],
+                          ),
+                          IconButton(
+                            onPressed: () {
+                              Scaffold.of(context).showBottomSheet(
+                                  (context) => UpdateQualificationsBottomSheet(
+                                        previousQualifications:
+                                            user.qualifications,
+                                        onUpdate: onQualificationUpdate,
+                                      ),
+                                  constraints:
+                                      const BoxConstraints(maxHeight: 570));
+                            },
+                            icon: const Icon(
+                              Icons.edit,
+                              size: 22,
+                            ),
+                          )
+                        ],
+                      ),
+                      Container(
+                        decoration: const BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.all(Radius.circular(10))),
+                        padding: const EdgeInsets.all(12),
+                        child: Text(
+                          user.qualifications.isNotEmpty
+                              ? user.qualifications
+                              : "empty",
+                          style: const TextStyle(
+                            color: ProjectColors.disabled,
+                            fontSize: 13,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      )
+                    ],
+                  ),
+                ),
+                const SizedBox(
+                  height: 10,
+                ),
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -97,61 +178,34 @@ class NamePlate extends StatelessWidget {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Wrap(
-                          crossAxisAlignment: WrapCrossAlignment.center,
-                          spacing: 8,
-                          children: [
-                            Visibility(
-                              visible: user.qualifications.isEmpty,
-                              child: const Tooltip(
-                                  triggerMode: TooltipTriggerMode.tap,
-                                  message:
-                                      "Add your qualifications for a better engagement.",
-                                  child: Icon(
-                                    Icons.warning_rounded,
-                                    size: 20,
-                                    color: Colors.orangeAccent,
-                                  )),
-                            ),
-                            const Text(
-                              "Qualifications",
-                              textAlign: TextAlign.start,
-                              style: TextStyle(
-                                  fontSize: 16, fontWeight: FontWeight.w600),
-                            ),
-                          ],
+                        const Text(
+                          "Business Location",
+                          textAlign: TextAlign.start,
+                          style: TextStyle(
+                              fontSize: 15, fontWeight: FontWeight.w600),
                         ),
                         IconButton(
-                          onPressed: () {
-                            Scaffold.of(context).showBottomSheet((context) =>
-                                UpdateQualificationsBottomSheet(
-                                  previousQualifications: user.qualifications,
-                                  onUpdate: onQualificationUpdate,
-                                ),constraints: const BoxConstraints(maxHeight: 570));
-                          },
-                          icon: const Icon(
-                            Icons.edit,
-                            size: 22,
-                          ),
-                        )
+                            onPressed: () {
+                              refreshAddress();
+                            },
+                            icon: const Icon(Icons.refresh_sharp))
                       ],
                     ),
                     Container(
-                      decoration: const BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.all(Radius.circular(10))),
+                      margin: const EdgeInsets.symmetric(vertical: 10),
                       padding: const EdgeInsets.all(12),
+                      decoration: const BoxDecoration(
+                          borderRadius: BorderRadius.all(Radius.circular(10)),
+                          color: Colors.white),
                       child: Text(
-                        user.qualifications.isNotEmpty
-                            ? user.qualifications
-                            : "empty",
+                        address,
                         style: const TextStyle(
                           color: ProjectColors.disabled,
                           fontSize: 13,
                           fontWeight: FontWeight.w500,
                         ),
                       ),
-                    )
+                    ),
                   ],
                 ),
                 const SizedBox(
@@ -454,8 +508,14 @@ class NamePlate extends StatelessWidget {
                                 color: ProjectColors.primary,
                                 size: _sizeIcon,
                               ),
-                              'terms of service',
-                              () {}),
+                              'terms of service', () async {
+                            final url = Uri.parse(BackEndStrings.tnCUrl);
+                            if (!await launchUrl(url)) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                      content: Text("could not open url")));
+                            }
+                          }),
                           divider,
                           nameItemWithButton(
                               const Icon(
@@ -494,6 +554,27 @@ class NamePlate extends StatelessWidget {
                                   BoxConstraints(maxHeight: Get.height * 0.8),
                             );
                           }),
+                          user.astro ? divider : const SizedBox.shrink(),
+                          user.astro
+                              ? nameItemWithButton(
+                                  const Icon(
+                                    Icons.monetization_on_outlined,
+                                    color: ProjectColors.primary,
+                                  ),
+                                  "withdraw money", () {
+                                  Scaffold.of(context).showBottomSheet(
+                                    (context) => WithdrawRequestBottomSheet(
+                                        user: user,
+                                        onConfirm: (wr) => _handleOnConfirm(
+                                              wr,
+                                              Get.find<AuthController>(),
+                                              context,
+                                            )),
+                                    constraints: BoxConstraints(
+                                        maxHeight: Get.height * 0.55),
+                                  );
+                                })
+                              : const SizedBox.shrink(),
                           divider,
                           nameItemWithButton(
                               const Icon(
@@ -659,5 +740,19 @@ class NamePlate extends StatelessWidget {
               (element) => element.value + VisibilityPlans.all + 1 == plan)
           .name;
     }
+  }
+
+  _handleOnConfirm(
+      WithdrawRequest wr, AuthController auth, BuildContext context) {
+    auth.addWithdrawRequest(wr, (p0) {
+      Navigator.of(context).pop();
+      if (p0.isSuccess) {
+        ScaffoldMessenger.of(context)
+            .showSnackBar(const SnackBar(content: Text("request submitted")));
+      } else {
+        ScaffoldMessenger.of(context)
+            .showSnackBar(const SnackBar(content: Text("some error occurred")));
+      }
+    });
   }
 }

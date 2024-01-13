@@ -29,6 +29,15 @@ CollectionReference<SaveService> _userServiceCollection(String uid) =>
           toFirestore: (value, options) => value.toJson(),
         );
 
+final CollectionReference<SaveService> _deletedServiceCollection =
+    FirebaseFirestore.instance
+        .collection(BackEndStrings.deletedCollection)
+        .withConverter<SaveService>(
+          fromFirestore: (snapshot, options) =>
+              SaveService.fromJson(snapshot.data()),
+          toFirestore: (value, options) => value.toJson(),
+        );
+
 final _userCollection = FirebaseFirestore.instance
     .collection(BackEndStrings.userCollection)
     .withConverter<User>(
@@ -336,11 +345,7 @@ class ServiceUtils extends Postable<Service, SaveService> {
       final batch = FirebaseFirestore.instance.batch();
       batch.delete(ref.doc(ss.id));
       batch.delete(_userServiceCollection(uid).doc(ss.id));
-      batch.set(
-          FirebaseFirestore.instance
-              .collection(BackEndStrings.deletedCollection)
-              .doc(ss.id),
-          ss);
+      batch.set<SaveService>(_deletedServiceCollection.doc(ss.id), ss);
       await batch.commit();
       return Success("deleted");
     } on FirebaseException catch (e) {

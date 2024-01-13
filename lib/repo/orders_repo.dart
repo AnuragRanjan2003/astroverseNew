@@ -1,5 +1,6 @@
 import 'package:astroverse/db/db.dart';
 import 'package:astroverse/models/purchase.dart';
+import 'package:astroverse/models/refund_request.dart';
 import 'package:astroverse/models/service.dart';
 import 'package:astroverse/utils/resource.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -26,7 +27,7 @@ class OrderRepo {
         amount,
       );
 
-  Future<Resource<Json>> cancelPurchase(
-          String id, String buyerId, String sellerId) =>
-      _db.cancelPurchase(id, buyerId, sellerId);
+  Future<Resource<RefundRequest>> cancelPurchase(
+          String id, String buyerId, String sellerId ,RefundRequest refund) =>
+      _db.cancelPurchase(id, buyerId, sellerId,refund);
 }

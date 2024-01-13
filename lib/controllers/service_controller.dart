@@ -1,10 +1,12 @@
 import 'dart:developer';
 import 'dart:io';
+import 'dart:math' as math;
 
 import 'package:astroverse/models/purchase.dart';
 import 'package:astroverse/models/save_service.dart';
 import 'package:astroverse/models/service.dart';
 import 'package:astroverse/models/transaction.dart' as t;
+import 'package:astroverse/models/transaction.dart';
 import 'package:astroverse/models/user.dart';
 import 'package:astroverse/repo/service_repo.dart';
 import 'package:astroverse/res/strings/backend_strings.dart';
@@ -19,7 +21,7 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:razorpay_flutter/razorpay_flutter.dart';
-import 'package:uuid/uuid.dart';
+import 'package:shortid/shortid.dart';
 
 const tag = "SERVICE";
 
@@ -48,12 +50,13 @@ class ServiceController extends GetxController {
   RxString searchText = "".obs;
   RxBool paymentLoading = false.obs;
   RxDouble imageSize = 0.45.obs;
-  RxInt selectedMode = 0.obs;
+  RxInt selectedMode = 1.obs;
   Rxn<String> serviceProvider = Rxn();
   RxDouble selectedRange = 0.0.obs;
   RxList<SaveService> myServices = RxList();
   RxInt currPage = 0.obs;
   RxBool deletingService = false.obs;
+  RxBool useCurrentLocation = false.obs;
 
   final searchController = TextEditingController(text: "");
 
@@ -66,8 +69,16 @@ class ServiceController extends GetxController {
     paymentLoading.value = false;
     log("success", name: "RAZOR");
     log(item.toString(), name: "RAZOR ITEM");
-    final trans = t.Transaction(response.paymentId.toString(), user.uid,
-        DateTime.now(), item.id, item.genre[0], item.price, response.orderId!);
+    final trans = t.Transaction(
+        response.paymentId.toString(),
+        user.uid,
+        DateTime.now(),
+        item.id,
+        item.genre[0],
+        item.price,
+        response.orderId!,
+        TransactionStatus.pending,
+        null);
     final res = await _repo.addTransaction(trans);
     final purchase = Purchase(
         itemId: item.id,
@@ -76,8 +87,8 @@ class ServiceController extends GetxController {
         secretCode: response.orderId.toString(),
         itemName: item.title,
         itemImage: item.imageUrl,
-        itemPrice: item.price.toString(),
-        totalPrice: _computeFinalPrice(item.price).toString(),
+        itemPrice: (math.max(0,item.price - Constants.appConvenienceFee)).toString(),
+        totalPrice: item.price.toString(),
         buyerId: user.uid,
         buyerName: user.name,
         sellerId: item.authorId,
@@ -86,6 +97,7 @@ class ServiceController extends GetxController {
         boughtOn: DateTime.now(),
         delivered: false,
         review: null,
+        refundId: null,
         active: true,
         deliveredOn: null);
     final res1 = await _repo.postPurchase(purchase);
@@ -165,7 +177,8 @@ class ServiceController extends GetxController {
     _razorPay.open(options);
   }
 
-  void makePayment(Service item, String phNo, String email) async {
+  void makePayment(Service item, String phNo, String email,
+      void Function(String) onError) async {
     paymentLoading.value = true;
     final key = dotenv.get(EnvVars.razorPayKey);
     final response = await callOrderApi(item);
@@ -178,7 +191,7 @@ class ServiceController extends GetxController {
     } else {
       paymentLoading.value = false;
       response as Failure<Json>;
-      Get.snackbar('fail', response.error);
+      onError(response.error);
     }
   }
 
@@ -206,8 +219,9 @@ class ServiceController extends GetxController {
   }
 
   postService(Service s, int coinCost, Function(Resource<Service>) updateUI) {
-    final id = const Uuid().v4();
+    final id = "service_${shortid.generate()}";
     s.id = id;
+    s.price = _computeFinalPrice(s.price);
     loading.value = 1;
     if (image.value == null) {
       s.imageUrl = BackEndStrings.defaultServiceImage;
@@ -495,7 +509,7 @@ class ServiceController extends GetxController {
   }
 
   static double _computeFinalPrice(double price) {
-    return price+Constants.appConvenienceFee;
+    return price + Constants.appConvenienceFee;
   }
 
   void resetServiceCreationValues() {
@@ -505,5 +519,13 @@ class ServiceController extends GetxController {
     selectedItem.value = 0;
     selectedRange.value = 0.0;
     selectedMode.value = 0;
+    useCurrentLocation.value = false;
+  }
+
+  bool hasPostedToday(DateTime lastPosted) {
+    final now = DateTime.now();
+    return (lastPosted.year == now.year &&
+        lastPosted.month == now.month &&
+        lastPosted.day == now.day);
   }
 }
