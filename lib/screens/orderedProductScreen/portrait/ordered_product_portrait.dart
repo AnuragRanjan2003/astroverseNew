@@ -1,5 +1,6 @@
 import 'dart:developer';
 
+import 'package:astroverse/components/ask_review_screen.dart';
 import 'package:astroverse/components/order_bottom_sheet.dart';
 import 'package:astroverse/controllers/auth_controller.dart';
 import 'package:astroverse/controllers/order_controller.dart';
@@ -32,12 +33,10 @@ class OrderedProductPortrait extends StatefulWidget {
 }
 
 class _OrderedProductPortraitState extends State<OrderedProductPortrait> {
-
   late OrderController order;
   late AuthController auth;
   late ZegoCloudServices zegoService;
   late Purchase? purchase;
-
 
   @override
   void initState() {
@@ -50,11 +49,7 @@ class _OrderedProductPortraitState extends State<OrderedProductPortrait> {
 
   @override
   Widget build(BuildContext context) {
-
-
     final crypto = Crypt();
-
-
     if (widget.purchase == null) {
       return const Center(
         child: Text("unexpected error occurred"),
@@ -66,293 +61,343 @@ class _OrderedProductPortraitState extends State<OrderedProductPortrait> {
 
     if (auth.user.value != null) {
       order.fetchService(auth.user.value!.uid, widget.purchase!.itemId);
-      order.startPurchaseStream(auth.user.value!.uid, widget.purchase!.purchaseId,
-          (p0) {
-        purchase = p0;
-      });
+
+      order.startPurchaseStream(
+        auth.user.value!.uid,
+        widget.purchase!.purchaseId,
+        (p0) {
+          purchase = p0;
+        },
+      );
     }
 
     return Scaffold(
-
       floatingActionButtonLocation: FloatingActionButtonLocation.endDocked,
       floatingActionButton: Obx(() =>
           _buildFab(order.purchase.value, order, crypto, zegoService, context)),
-      body: SingleChildScrollView(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Obx(() {
-              final item = order.service.value;
-              if (item == null) {
-                if (order.serviceDeleted.isTrue) {
-                  return Container(
-                    height: 200,
-                    color: Colors.grey,
-                    child: const Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(Icons.info_outline_rounded),
-                        Text("service deleted"),
-                      ],
-                    ),
-                  );
-                }
-                return Container(
-                  color: Colors.grey,
-                );
-              }
-              return item.imageUrl.isNotEmpty
-                  ? Hero(
-                      tag: "service ${item.id}",
-                      child: Image(
-                        image: NetworkImage(item.imageUrl),
-                        height: widget.cons.maxHeight * 0.45,
-                        fit: BoxFit.fitHeight,
-                        width: widget.cons.maxWidth,
+      body: Stack(
+        children: [
+          SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Obx(() {
+                  final item = order.service.value;
+                  if (item == null) {
+                    if (order.serviceDeleted.isTrue) {
+                      return Container(
+                        height: 200,
+                        color: Colors.grey,
+                        child: const Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(Icons.info_outline_rounded),
+                            Text("service deleted"),
+                          ],
+                        ),
+                      );
+                    }
+                    return Container(
+                      color: Colors.grey,
+                    );
+                  }
+                  return item.imageUrl.isNotEmpty
+                      ? Hero(
+                          tag: "service ${item.id}",
+                          child: Image(
+                            image: NetworkImage(item.imageUrl),
+                            height: widget.cons.maxHeight * 0.45,
+                            fit: BoxFit.fitHeight,
+                            width: widget.cons.maxWidth,
+                          ),
+                        )
+                      : Hero(
+                          tag: "service ${item.id}",
+                          child: Image(
+                            image: ProjectImages.planet,
+                            height: widget.cons.maxHeight * 0.45,
+                            fit: BoxFit.fitHeight,
+                            width: widget.cons.maxWidth,
+                          ),
+                        );
+                }),
+                const SizedBox(
+                  height: 10,
+                ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 10),
+                  child: Obx(() {
+                    final item = order.service.value;
+                    return Text(
+                      item == null
+                          ? (order.serviceDeleted.isFalse
+                              ? "fetching"
+                              : "service deleted")
+                          : item.title,
+                      style: const TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
                       ),
-                    )
-                  : Hero(
-                      tag: "service ${item.id}",
-                      child: Image(
-                        image: ProjectImages.planet,
-                        height: widget.cons.maxHeight * 0.45,
-                        fit: BoxFit.fitHeight,
-                        width: widget.cons.maxWidth,
+                      textAlign: TextAlign.start,
+                    );
+                  }),
+                ),
+                const SizedBox(
+                  height: 10,
+                ),
+                Padding(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 15, vertical: 5),
+                  child: Row(
+                    children: [
+                      Expanded(
+                          flex: 1,
+                          child: Obx(() {
+                            if (order.purchase.value == null) {
+                              if (order.serviceDeleted.isTrue) {
+                                return const SizedBox(
+                                  width: 150,
+                                  height: 50,
+                                  child: Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Icon(Icons.info_outline_rounded),
+                                      Text("service deleted"),
+                                    ],
+                                  ),
+                                );
+                              }
+                              return Container(
+                                width: 150,
+                                height: 50,
+                                color: Colors.grey,
+                              );
+                            }
+                            if (order.purchase.value!.delivered) {
+                              return buildChip(
+                                  'delivered',
+                                  const FaIcon(
+                                    FontAwesomeIcons.truckFast,
+                                    size: 20,
+                                    color: Colors.green,
+                                  ),
+                                  Colors.green);
+                            } else {
+                              if (order.purchase.value!.active) {
+                                return buildChip(
+                                    'pending',
+                                    const FaIcon(
+                                      FontAwesomeIcons.truckFast,
+                                      size: 20,
+                                      color: Colors.orange,
+                                    ),
+                                    Colors.orange);
+                              } else {
+                                return buildChip(
+                                    'canceled',
+                                    const FaIcon(
+                                      FontAwesomeIcons.cancel,
+                                      size: 16,
+                                      color: Colors.red,
+                                    ),
+                                    Colors.red);
+                              }
+                            }
+                          })),
+                      const Expanded(
+                        flex: 1,
+                        child: SizedBox(),
+                      )
+                    ],
+                  ),
+                ),
+                Padding(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 15, vertical: 5),
+                  child: Obx(() {
+                    final item = order.service.value;
+                    if (item == null) {
+                      if (order.serviceDeleted.isTrue) {
+                        return const SizedBox(
+                          width: 200,
+                          height: 70,
+                          child: Column(
+                            children: [
+                              Icon(Icons.info_outline_rounded),
+                              Text("service deleted"),
+                            ],
+                          ),
+                        );
+                      }
+                      return Container(
+                        color: Colors.grey,
+                        width: 200,
+                        height: 70,
+                      );
+                    }
+                    return Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          children: [
+                            buildChip(
+                                (item.netStars*5).toStringAsFixed(2),
+                                const Icon(
+                                  Icons.star,
+                                  color: Colors.lightGreen,
+                                ),
+                                null),
+                            const SizedBox(
+                              width: 10,
+                            ),
+                            buildChip(
+                                item.uses.toString(),
+                                const Icon(
+                                  Icons.data_exploration_outlined,
+                                  color: ProjectColors.primary,
+                                ),
+                                null),
+                            const SizedBox(
+                              width: 10,
+                            ),
+                            buildChip(
+                                item.genre.first,
+                                const Icon(
+                                  Icons.category_outlined,
+                                  color: Colors.black,
+                                ),
+                                null),
+                          ],
+                        ),
+                        const SizedBox(
+                          height: 10,
+                        ),
+                        Row(
+                          children: [
+                            buildChip(
+                                methodToString(item.deliveryMethod),
+                                Icon(
+                                  methodToIcon(item.deliveryMethod),
+                                  color: Colors.black,
+                                ),
+                                null),
+                            const Spacer(),
+                          ],
+                        ),
+                      ],
+                    );
+                  }),
+                ),
+                Padding(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 20, vertical: 3),
+                  child: Obx(() {
+                    final sb = StringBuffer();
+                    final item = order.service.value;
+                    log(item.toString(), name: "ITEM");
+                    if (item == null) {
+                      if (order.serviceDeleted.isTrue) {
+                        return const SizedBox.shrink();
+                      }
+                      return Container(
+                        color: Colors.grey,
+                        width: 200,
+                        height: 70,
+                      );
+                    }
+                    sb.writeAll(item.genre, ", ");
+                    return Text(
+                      sb.toString(),
+                      style: const TextStyle(
+                          color: ProjectColors.lightBlack,
+                          fontWeight: FontWeight.bold),
+                    );
+                  }),
+                ),
+                Padding(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+                  child: Obx(() {
+                    final item = order.service.value;
+                    if (item == null) {
+                      if (order.serviceDeleted.isTrue) {
+                        return const SizedBox.shrink();
+                      }
+                      return Container(
+                        color: Colors.grey,
+                        width: 200,
+                        height: 70,
+                      );
+                    }
+                    return Text(
+                      item.description,
+                      style: const TextStyle(
+                        color: ProjectColors.lightBlack,
                       ),
                     );
-            }),
-            const SizedBox(
-              height: 10,
-            ),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 10),
-              child: Obx(() {
-                final item = order.service.value;
-                return Text(
-                  item == null
-                      ? (order.serviceDeleted.isFalse
-                          ? "fetching"
-                          : "service deleted")
-                      : item.title,
-                  style: const TextStyle(
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
-                  ),
-                  textAlign: TextAlign.start,
-                );
-              }),
-            ),
-            const SizedBox(
-              height: 10,
-            ),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 5),
-              child: Row(
-                children: [
-                  Expanded(
-                      flex: 1,
-                      child: Obx(() {
-                        if (order.purchase.value == null) {
-                          if (order.serviceDeleted.isTrue) {
-                            return const SizedBox(
-                              width: 150,
-                              height: 50,
-                              child: Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Icon(Icons.info_outline_rounded),
-                                  Text("service deleted"),
-                                ],
-                              ),
-                            );
-                          }
-                          return Container(
-                            width: 150,
-                            height: 50,
-                            color: Colors.grey,
-                          );
-                        }
-                        if (order.purchase.value!.delivered) {
-                          return buildChip(
-                              'delivered',
-                              const FaIcon(
-                                FontAwesomeIcons.truckFast,
-                                size: 20,
-                                color: Colors.green,
-                              ),
-                              Colors.green);
-                        } else {
-                          if (order.purchase.value!.active) {
-                            return buildChip(
-                                'pending',
-                                const FaIcon(
-                                  FontAwesomeIcons.truckFast,
-                                  size: 20,
-                                  color: Colors.orange,
-                                ),
-                                Colors.orange);
-                          } else {
-                            return buildChip(
-                                'canceled',
-                                const FaIcon(
-                                  FontAwesomeIcons.cancel,
-                                  size: 16,
-                                  color: Colors.red,
-                                ),
-                                Colors.red);
-                          }
-                        }
-                      })),
-
-                  const Expanded(
-                    flex: 1,
-                    child: SizedBox(),
-                  )
-                ],
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 5),
-              child: Obx(() {
-                final item = order.service.value;
-                if (item == null) {
-                  if (order.serviceDeleted.isTrue) {
-                    return const SizedBox(
-                      width: 200,
-                      height: 70,
-                      child: Column(
+                  }),
+                ),
+                const SizedBox(
+                  height: 15,
+                ),
+                Obx(() {
+                  final item = order.service.value;
+                  if (item == null) return const SizedBox.shrink();
+                  return Visibility(
+                    visible: item.place.isNotEmpty,
+                    child: const Padding(
+                      padding:
+                          EdgeInsets.symmetric(horizontal: 15, vertical: 8),
+                      child: Wrap(
                         children: [
-                          Icon(Icons.info_outline_rounded),
-                          Text("service deleted"),
+                          Icon(
+                            Icons.location_pin,
+                            color: Colors.black,
+                          ),
+                          Text(
+                            'Pickup Address',
+                            style: TextStyle(
+                                fontSize: 16,
+                                color: Colors.black,
+                                fontWeight: FontWeight.bold),
+                          ),
                         ],
                       ),
-                    );
-                  }
-                  return Container(
-                    color: Colors.grey,
-                    width: 200,
-                    height: 70,
+                    ),
                   );
-                }
-                return Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      children: [
-                        buildChip(
-                            _calculateMetric(item),
-                            const Icon(
-                              Icons.star,
-                              color: Colors.lightGreen,
-                            ),
-                            null),
-                        const SizedBox(
-                          width: 10,
+                }),
+                Obx(() {
+                  final item = order.service.value;
+                  if (item == null) return const SizedBox.shrink();
+                  return Visibility(
+                    visible: item.place.isNotEmpty,
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 35, vertical: 0),
+                      child: Text(
+                        item.place,
+                        style: const TextStyle(
+                          color: ProjectColors.lightBlack,
                         ),
-                        buildChip(
-                            item.uses.toString(),
-                            const Icon(
-                              Icons.data_exploration_outlined,
-                              color: ProjectColors.primary,
-                            ),
-                            null),
-                        const SizedBox(
-                          width: 10,
-                        ),
-                        buildChip(
-                            item.genre.first,
-                            const Icon(
-                              Icons.category_outlined,
-                              color: Colors.black,
-                            ),
-                            null),
-                      ],
+                      ),
                     ),
-                    const SizedBox(
-                      height: 10,
-                    ),
-                    Row(
-                      children: [
-                        buildChip(
-                            methodToString(item.deliveryMethod),
-                            Icon(
-                              methodToIcon(item.deliveryMethod),
-                              color: Colors.black,
-                            ),
-                            null),
-                        const Spacer(),
-                      ],
-                    ),
-                  ],
-                );
-              }),
-            ),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 3),
-              child: Obx(() {
-                final sb = StringBuffer();
-                final item = order.service.value;
-                log(item.toString(), name: "ITEM");
-                if (item == null) {
-                  if (order.serviceDeleted.isTrue) {
-                    return const SizedBox.shrink();
-                  }
-                  return Container(
-                    color: Colors.grey,
-                    width: 200,
-                    height: 70,
                   );
-                }
-                sb.writeAll(item.genre, ", ");
-                return Text(
-                  sb.toString(),
-                  style: const TextStyle(
-                      color: ProjectColors.lightBlack,
-                      fontWeight: FontWeight.bold),
-                );
-              }),
-            ),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-              child: Obx(() {
-                final item = order.service.value;
-                if (item == null) {
-                  if (order.serviceDeleted.isTrue) {
-                    return const SizedBox.shrink();
-                  }
-                  return Container(
-                    color: Colors.grey,
-                    width: 200,
-                    height: 70,
-                  );
-                }
-                return Text(
-                  item.description,
-                  style: const TextStyle(
-                    color: ProjectColors.lightBlack,
-                  ),
-                );
-              }),
-            ),
-            const SizedBox(
-              height: 15,
-            ),
-            Obx(() {
-              final item = order.service.value;
-              if (item == null) return const SizedBox.shrink();
-              return Visibility(
-                visible: item.place.isNotEmpty,
-                child: const Padding(
+                }),
+                const Padding(
                   padding: EdgeInsets.symmetric(horizontal: 15, vertical: 8),
                   child: Wrap(
                     children: [
                       Icon(
-                        Icons.location_pin,
+                        Icons.info,
                         color: Colors.black,
+                        size: 22,
+                      ),
+                      SizedBox(
+                        width: 5,
                       ),
                       Text(
-                        'Pickup Address',
+                        'Details',
                         style: TextStyle(
                             fontSize: 16,
                             color: Colors.black,
@@ -361,377 +406,350 @@ class _OrderedProductPortraitState extends State<OrderedProductPortrait> {
                     ],
                   ),
                 ),
-              );
-            }),
-            Obx(() {
-              final item = order.service.value;
-              if (item == null) return const SizedBox.shrink();
-              return Visibility(
-                visible: item.place.isNotEmpty,
-                child: Padding(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 35, vertical: 0),
-                  child: Text(
-                    item.place,
-                    style: const TextStyle(
-                      color: ProjectColors.lightBlack,
-                    ),
+                Obx(() {
+                  final item = order.service.value;
+                  if (item == null) {
+                    if (order.serviceDeleted.isTrue)
+                      return const SizedBox.shrink();
+                    return Container(
+                      color: Colors.grey,
+                      width: 200,
+                      height: 70,
+                    );
+                  }
+                  return buildRow('service id', item.id, Icons.numbers);
+                }),
+                Obx(() {
+                  final item = order.service.value;
+                  if (item == null) {
+                    if (order.serviceDeleted.isTrue) {
+                      return const SizedBox(
+                        height: 200,
+                        child: Column(
+                          children: <Widget>[
+                            Icon(Icons.info_outline_rounded),
+                            Text("service deleted"),
+                          ],
+                        ),
+                      );
+                    }
+                    return Container(
+                      color: Colors.grey,
+                      width: 200,
+                      height: 70,
+                    );
+                  }
+                  return buildRow(
+                      'seller',
+                      Crypt().decryptFromBase64String(item.authorName),
+                      Icons.person_2);
+                }),
+                Obx(() {
+                  final item = order.service.value;
+                  if (item == null) {
+                    if (order.serviceDeleted.isTrue)
+                      return const SizedBox.shrink();
+                    return Container(
+                      color: Colors.grey,
+                      width: 200,
+                      height: 70,
+                    );
+                  }
+                  return buildRow(
+                      'date',
+                      DateFormat.yMMMd().format(item.date).toString(),
+                      Icons.date_range);
+                }),
+                Obx(() {
+                  final item = order.service.value;
+                  if (item == null) {
+                    if (order.serviceDeleted.isTrue)
+                      return const SizedBox.shrink();
+                    return Container(
+                      color: Colors.grey,
+                      width: 200,
+                      height: 70,
+                    );
+                  }
+                  return buildRow(
+                      'uses', item.uses.toString(), Icons.data_thresholding);
+                }),
+                Obx(() {
+                  final item = order.service.value;
+                  if (item == null) {
+                    if (order.serviceDeleted.isTrue)
+                      return const SizedBox.shrink();
+                    return Container(
+                      color: Colors.grey,
+                      width: 200,
+                      height: 70,
+                    );
+                  }
+                  return buildRow(
+                      'views', item.views.toString(), Icons.remove_red_eye);
+                }),
+                const SizedBox(
+                  height: 20,
+                ),
+                const Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 15, vertical: 8),
+                  child: Wrap(
+                    children: [
+                      Icon(
+                        Icons.inventory_outlined,
+                        color: Colors.black,
+                        size: 22,
+                      ),
+                      SizedBox(
+                        width: 5,
+                      ),
+                      Text(
+                        'Invoice',
+                        style: TextStyle(
+                            fontSize: 16,
+                            color: Colors.black,
+                            fontWeight: FontWeight.bold),
+                      ),
+                    ],
                   ),
                 ),
-              );
-            }),
-            const Padding(
-              padding: EdgeInsets.symmetric(horizontal: 15, vertical: 8),
-              child: Wrap(
-                children: [
-                  Icon(
-                    Icons.info,
-                    color: Colors.black,
-                    size: 22,
-                  ),
-                  SizedBox(
-                    width: 5,
-                  ),
-                  Text(
-                    'Details',
-                    style: TextStyle(
-                        fontSize: 16,
+                order.purchase.value != null
+                    ? buildRow(
+                        'payment Id',
+                        order.purchase.value!.paymentId.toString(),
+                        Icons.numbers)
+                    : Container(
+                        width: 100,
+                        height: 30,
+                        color: Colors.grey,
+                      ),
+                order.purchase.value != null
+                    ? buildRow('price', '₹ ${order.purchase.value!.itemPrice}',
+                        Icons.money)
+                    : Container(
+                        width: 100,
+                        height: 30,
+                        color: Colors.grey,
+                      ),
+                order.purchase.value != null
+                    ? buildRow('total price',
+                        '₹ ${order.purchase.value!.totalPrice}', Icons.money)
+                    : Container(
+                        width: 100,
+                        height: 30,
+                        color: Colors.grey,
+                      ),
+                order.purchase.value != null
+                    ? buildRow(
+                        'bought on',
+                        DateFormat.yMMMd()
+                            .format(order.purchase.value!.boughtOn)
+                            .toString(),
+                        Icons.date_range)
+                    : Container(
+                        width: 100,
+                        height: 30,
+                        color: Colors.grey,
+                      ),
+                const SizedBox(
+                  height: 20,
+                ),
+                const Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 15, vertical: 8),
+                  child: Wrap(
+                    children: [
+                      Icon(
+                        FontAwesomeIcons.truck,
                         color: Colors.black,
-                        fontWeight: FontWeight.bold),
+                        size: 18,
+                      ),
+                      SizedBox(
+                        width: 10,
+                      ),
+                      Text(
+                        'Order fulfillment',
+                        style: TextStyle(
+                            fontSize: 16,
+                            color: Colors.black,
+                            fontWeight: FontWeight.bold),
+                      ),
+                    ],
                   ),
-                ],
-              ),
-            ),
-            Obx(() {
-              final item = order.service.value;
-              if (item == null) {
-                if (order.serviceDeleted.isTrue) return const SizedBox.shrink();
-                return Container(
-                  color: Colors.grey,
-                  width: 200,
-                  height: 70,
-                );
-              }
-              return buildRow(
-                  'service id',
-                  item.id,
-                  Icons.numbers);
-            }),
-            Obx(() {
-              final item = order.service.value;
-              if (item == null) {
-                if (order.serviceDeleted.isTrue) {
-                  return const SizedBox(
-                    height: 200,
-                    child: Column(
-                      children: <Widget>[
-                        Icon(Icons.info_outline_rounded),
-                        Text("service deleted"),
-                      ],
-                    ),
-                  );
-                }
-                return Container(
-                  color: Colors.grey,
-                  width: 200,
-                  height: 70,
-                );
-              }
-              return buildRow(
-                  'seller',
-                  Crypt().decryptFromBase64String(item.authorName),
-                  Icons.person_2);
-            }),
-            Obx(() {
-              final item = order.service.value;
-              if (item == null) {
-                if (order.serviceDeleted.isTrue) return const SizedBox.shrink();
-                return Container(
-                  color: Colors.grey,
-                  width: 200,
-                  height: 70,
-                );
-              }
-              return buildRow(
-                  'date',
-                  DateFormat.yMMMd().format(item.date).toString(),
-                  Icons.date_range);
-            }),
-            Obx(() {
-              final item = order.service.value;
-              if (item == null) {
-                if (order.serviceDeleted.isTrue) return const SizedBox.shrink();
-                return Container(
-                  color: Colors.grey,
-                  width: 200,
-                  height: 70,
-                );
-              }
-              return buildRow(
-                  'uses', item.uses.toString(), Icons.data_thresholding);
-            }),
-            Obx(() {
-              final item = order.service.value;
-              if (item == null) {
-                if (order.serviceDeleted.isTrue) return const SizedBox.shrink();
-                return Container(
-                  color: Colors.grey,
-                  width: 200,
-                  height: 70,
-                );
-              }
-              return buildRow(
-                  'views', item.views.toString(), Icons.remove_red_eye);
-            }),
-            const SizedBox(
-              height: 20,
-            ),
-            const Padding(
-              padding: EdgeInsets.symmetric(horizontal: 15, vertical: 8),
-              child: Wrap(
-                children: [
-                  Icon(
-                    Icons.inventory_outlined,
-                    color: Colors.black,
-                    size: 22,
-                  ),
-                  SizedBox(
-                    width: 5,
-                  ),
-                  Text(
-                    'Invoice',
-                    style: TextStyle(
-                        fontSize: 16,
-                        color: Colors.black,
-                        fontWeight: FontWeight.bold),
-                  ),
-                ],
-              ),
-            ),
-            order.purchase.value != null
-                ? buildRow('payment Id',
-                    order.purchase.value!.paymentId.toString(), Icons.numbers)
-                : Container(
-                    width: 100,
-                    height: 30,
-                    color: Colors.grey,
-                  ),
-            order.purchase.value != null
-                ? buildRow('price', '₹ ${order.purchase.value!.itemPrice}',
-                    Icons.money)
-                : Container(
-                    width: 100,
-                    height: 30,
-                    color: Colors.grey,
-                  ),
-            order.purchase.value != null
-                ? buildRow('total price',
-                    '₹ ${order.purchase.value!.totalPrice}', Icons.money)
-                : Container(
-                    width: 100,
-                    height: 30,
-                    color: Colors.grey,
-                  ),
-            order.purchase.value != null
-                ? buildRow(
-                    'bought on',
-                    DateFormat.yMMMd()
-                        .format(order.purchase.value!.boughtOn)
-                        .toString(),
-                    Icons.date_range)
-                : Container(
-                    width: 100,
-                    height: 30,
-                    color: Colors.grey,
-                  ),
-            const SizedBox(
-              height: 20,
-            ),
-            const Padding(
-              padding: EdgeInsets.symmetric(horizontal: 15, vertical: 8),
-              child: Wrap(
-                children: [
-                  Icon(
-                    FontAwesomeIcons.truck,
-                    color: Colors.black,
-                    size: 18,
-                  ),
-                  SizedBox(
-                    width: 10,
-                  ),
-                  Text(
-                    'Order fulfillment',
-                    style: TextStyle(
-                        fontSize: 16,
-                        color: Colors.black,
-                        fontWeight: FontWeight.bold),
-                  ),
-                ],
-              ),
-            ),
-            Obx(() {
-              if (order.purchase.value == null) {
-                return Container(
-                  width: 90,
-                  height: 40,
-                  color: Colors.grey,
-                );
-              }
-              return buildRow(
-                  'status',
-                  order.purchase.value!.delivered ? "delivered" : "pending",
-                  Icons.numbers);
-            }),
-            Obx(() {
-              if (order.purchase.value == null) {
-                return Container(
-                  width: 90,
-                  height: 40,
-                  color: Colors.grey,
-                );
-              }
-              return buildRow(
-                  'delivered on',
-                  order.purchase.value!.deliveredOn != null
-                      ? DateFormat.yMMMd()
-                          .format(order.purchase.value!.deliveredOn!)
-                          .toString()
-                      : "to be delivered",
-                  Icons.date_range);
-            }),
-            const SizedBox(
-              height: 20,
-            ),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 35),
-              child: Obx(() {
-                final user = auth.user.value!;
-                return MaterialButton(
-                  onPressed: order.purchase.value!.delivered ||
-                          order.serviceDeleted.isTrue ||
-                          order.purchase.value!.active == false
-                      ? null
-                      : () {
-                          if (order.purchase.value == null) return;
-                          Get.bottomSheet(
-                              OrderBottomSheet(
-                                purchase: order.purchase.value,
-                                item: order.service.value,
-                                currentUser: auth.user.value,
-                              ),
-                              isScrollControlled: true);
-                        },
-                  disabledColor: ProjectColors.disabled,
-                  color: ProjectColors.primary,
-                  padding: const EdgeInsets.symmetric(vertical: 12),
-                  shape: const RoundedRectangleBorder(
-                      borderRadius: BorderRadius.all(Radius.circular(10))),
-                  child: Text(
-                    order.purchase.value != null
-                        ? ((user.uid == order.purchase.value!.sellerId)
-                            ? "Claim"
-                            : "Received")
-                        : "fetching",
-                    style: const TextStyle(
-                        fontSize: 15,
-                        color: Colors.white,
-                        fontWeight: FontWeight.w500),
-                  ),
-                );
-              }),
-            ),
-            const SizedBox(
-              height: 10,
-            ),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 35),
-              child: Obx(() {
-                return MaterialButton(
-                  onPressed: order.purchase.value!.delivered ||
-                          order.cancelingPurchase.isTrue ||
-                          order.purchase.value!.active == false
-                      ? null
-                      : () {
-                          if (order.purchase.value == null) return;
+                ),
+                Obx(() {
+                  if (order.purchase.value == null) {
+                    return Container(
+                      width: 90,
+                      height: 40,
+                      color: Colors.grey,
+                    );
+                  }
+                  return buildRow(
+                      'status',
+                      order.purchase.value!.delivered ? "delivered" : "pending",
+                      Icons.numbers);
+                }),
+                Obx(() {
+                  if (order.purchase.value == null) {
+                    return Container(
+                      width: 90,
+                      height: 40,
+                      color: Colors.grey,
+                    );
+                  }
+                  return buildRow(
+                      'delivered on',
+                      order.purchase.value!.deliveredOn != null
+                          ? DateFormat.yMMMd()
+                              .format(order.purchase.value!.deliveredOn!)
+                              .toString()
+                          : "to be delivered",
+                      Icons.date_range);
+                }),
+                const SizedBox(
+                  height: 20,
+                ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 35),
+                  child: Obx(() {
+                    final user = auth.user.value!;
+                    return MaterialButton(
+                      onPressed: order.purchase.value!.delivered ||
+                              order.serviceDeleted.isTrue ||
+                              order.purchase.value!.active == false
+                          ? null
+                          : () {
+                              if (order.purchase.value == null) return;
+                              Get.bottomSheet(
+                                  OrderBottomSheet(
+                                    purchase: order.purchase.value,
+                                    item: order.service.value,
+                                    currentUser: auth.user.value,
+                                  ),
+                                  isScrollControlled: true);
+                            },
+                      disabledColor: ProjectColors.disabled,
+                      color: ProjectColors.primary,
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      shape: const RoundedRectangleBorder(
+                          borderRadius: BorderRadius.all(Radius.circular(10))),
+                      child: Text(
+                        order.purchase.value != null
+                            ? ((user.uid == order.purchase.value!.sellerId)
+                                ? "Claim"
+                                : "Received")
+                            : "fetching",
+                        style: const TextStyle(
+                            fontSize: 15,
+                            color: Colors.white,
+                            fontWeight: FontWeight.w500),
+                      ),
+                    );
+                  }),
+                ),
+                const SizedBox(
+                  height: 10,
+                ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 35),
+                  child: Obx(() {
+                    return MaterialButton(
+                      onPressed: order.purchase.value!.delivered ||
+                              order.cancelingPurchase.isTrue ||
+                              order.purchase.value!.active == false
+                          ? null
+                          : () {
+                              if (order.purchase.value == null) return;
 
-                          showDialog(
-                            context: context,
-                            builder: (context) => AlertDialog(
-                              surfaceTintColor: Colors.white,
-                              title: const Text("Cancel Order"),
-                              content: const Text(
-                                  "Are you sure you want to cancel the order"),
-                              actionsAlignment: MainAxisAlignment.spaceAround,
+                              showDialog(
+                                context: context,
+                                builder: (context) => AlertDialog(
+                                  surfaceTintColor: Colors.white,
+                                  title: const Text("Cancel Order"),
+                                  content: const Text(
+                                      "Are you sure you want to cancel the order"),
+                                  actionsAlignment:
+                                      MainAxisAlignment.spaceAround,
+                                  actions: [
+                                    TextButton(
+                                        onPressed: () {
+                                          final refund = RefundRequest(
+                                              id: shortid.generate(),
+                                              paymentId: order
+                                                  .purchase.value!.paymentId,
+                                              purchaseId: order
+                                                  .purchase.value!.purchaseId,
+                                              amountToRefund: double.parse(order
+                                                  .purchase.value!.itemPrice),
+                                              amount: double.parse(order
+                                                  .purchase.value!.itemPrice),
+                                              refundDate: DateTime.now(),
+                                              status: RefundStatus.pending,
+                                              lastActionOn: null,
+                                              receiverUid:
+                                                  auth.user.value!.uid);
 
-                              actions: [
-                                TextButton(
-                                    onPressed: () {
-                                      final refund = RefundRequest(
-                                          id: shortid.generate(),
-                                          paymentId:
-                                              order.purchase.value!.paymentId,
-                                          purchaseId:
+                                          order.cancelPurchase(
                                               order.purchase.value!.purchaseId,
-                                          amountToRefund: double.parse(
-                                              order.purchase.value!.itemPrice),
-                                          amount: double.parse(
-                                              order.purchase.value!.itemPrice),
-                                          refundDate: DateTime.now(),
-                                          status: RefundStatus.pending,
-                                          lastActionOn: null,
-                                          receiverUid: auth.user.value!.uid);
-
-                                      order.cancelPurchase(
-                                          order.purchase.value!.purchaseId,
-                                          order.purchase.value!.buyerId,
-                                          order.purchase.value!.sellerId,
-                                          refund, (e) {
-                                        String? text;
-                                        Navigator.pop(context);
-                                        if (e.isSuccess) {
-                                          text =
-                                              "Purchase has been deleted. Refund will be initiated.";
-                                        } else {
-                                          e as Failure<Json>;
-                                          text =
-                                              "Could not cancel the purchase. Try again later";
-                                        }
-                                        ScaffoldMessenger.of(context)
-                                            .showSnackBar(
-                                                SnackBar(content: Text(text)));
-                                      });
-                                    },
-                                    child: const Text(
-                                      "Yes",
-                                      style: TextStyle(color: Colors.red),
-                                    )),
-                                TextButton(onPressed: (){
-                                  Navigator.of(context).pop();
-                                }, child: const Text("No"))
-                              ],
-                            ),
-                          );
-                        },
-                  disabledColor: ProjectColors.disabled,
-                  color: Colors.red,
-                  padding: const EdgeInsets.symmetric(vertical: 12),
-                  shape: const RoundedRectangleBorder(
-                      borderRadius: BorderRadius.all(Radius.circular(10))),
-                  child: const Text(
-                    "Cancel",
-                    style: TextStyle(
-                        fontSize: 15,
-                        color: Colors.white,
-                        fontWeight: FontWeight.w500),
-                  ),
-                );
-              }),
+                                              order.purchase.value!.buyerId,
+                                              order.purchase.value!.sellerId,
+                                              refund, (e) {
+                                            String? text;
+                                            Navigator.pop(context);
+                                            if (e.isSuccess) {
+                                              text =
+                                                  "Purchase has been deleted. Refund will be initiated.";
+                                            } else {
+                                              e as Failure<Json>;
+                                              text =
+                                                  "Could not cancel the purchase. Try again later";
+                                            }
+                                            ScaffoldMessenger.of(context)
+                                                .showSnackBar(SnackBar(
+                                                    content: Text(text)));
+                                          });
+                                        },
+                                        child: const Text(
+                                          "Yes",
+                                          style: TextStyle(color: Colors.red),
+                                        )),
+                                    TextButton(
+                                        onPressed: () {
+                                          Navigator.of(context).pop();
+                                        },
+                                        child: const Text("No"))
+                                  ],
+                                ),
+                              );
+                            },
+                      disabledColor: ProjectColors.disabled,
+                      color: Colors.red,
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      shape: const RoundedRectangleBorder(
+                          borderRadius: BorderRadius.all(Radius.circular(10))),
+                      child: const Text(
+                        "Cancel",
+                        style: TextStyle(
+                            fontSize: 15,
+                            color: Colors.white,
+                            fontWeight: FontWeight.w500),
+                      ),
+                    );
+                  }),
+                ),
+                const SizedBox(
+                  height: 20,
+                ),
+              ],
             ),
-            const SizedBox(
-              height: 20,
-            )
-          ],
-        ),
+          ),
+          order.purchase.value!.review == null
+              ? Align(
+                  alignment: Alignment.bottomCenter,
+                  child: AskReviewBottomSheet(purchase: order.purchase.value!),
+                )
+              : const SizedBox.shrink(),
+        ],
       ),
     );
   }
@@ -863,8 +881,6 @@ class _OrderedProductPortraitState extends State<OrderedProductPortrait> {
     }
     return const SizedBox.shrink();
   }
-
-
 }
 
 String _calculateMetric(Service item) {

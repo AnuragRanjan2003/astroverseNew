@@ -82,7 +82,7 @@ class MartItemFullPortrait extends StatelessWidget {
                       mainAxisAlignment: MainAxisAlignment.start,
                       children: [
                         buildChip(
-                            calculateMetric(item),
+                            (item.netStars*5).toStringAsFixed(2),
                             const Icon(
                               Icons.star,
                               color: Colors.lightGreen,

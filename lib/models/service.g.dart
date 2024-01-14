@@ -24,6 +24,10 @@ Service _$ServiceFromJson(Map json) => Service(
       authorId: json['authorId'] as String,
       place: json['place'] as String,
       views: (json['views'] as num).toInt(),
+      netStars: json["netStars"] != null ? (json['netStars'] as num).toDouble() : 0,
+      reviewCount: json["reviewCount"] != null
+          ? (json['reviewCount'] as num).toInt()
+          : 0,
       active: (json['active'] as bool),
       featured: (json['featured'] as bool),
     )
@@ -36,7 +40,8 @@ Map<String, dynamic> _$ServiceToJson(Service instance) => <String, dynamic>{
       'description': instance.description,
       'genre': instance.genre,
       'imageUrl': instance.imageUrl,
-      'upVotes': instance.upVotes,
+      'netStars': instance.netStars,
+      'reviewCount': instance.reviewCount,
       'lat': instance.lat,
       'lng': instance.lng,
       'authorName': instance.authorName,

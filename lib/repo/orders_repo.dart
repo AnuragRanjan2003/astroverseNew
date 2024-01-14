@@ -27,6 +27,9 @@ class OrderRepo {
         amount,
       );
 
+  Future<Resource<Json>> postReview(int stars ,String sellerId ,String buyerId , String pid ,String serviceId)=>_db.postReview(stars, serviceId, pid, sellerId, buyerId);
+
+
   Future<Resource<RefundRequest>> cancelPurchase(
           String id, String buyerId, String sellerId ,RefundRequest refund) =>
       _db.cancelPurchase(id, buyerId, sellerId,refund);

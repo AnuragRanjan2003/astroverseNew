@@ -1,6 +1,7 @@
 import 'package:astroverse/models/extra_info.dart';
 import 'package:astroverse/models/purchase.dart';
 import 'package:astroverse/models/refund_request.dart';
+import 'package:astroverse/models/service.dart';
 import 'package:astroverse/models/transaction.dart' as m;
 import 'package:astroverse/models/transaction.dart';
 import 'package:astroverse/res/strings/backend_strings.dart';
@@ -163,6 +164,46 @@ class PurchaseUtils extends Postable<Purchase, Purchase> {
       batch.update(ref.doc(id), data);
       batch.update(likeRef!.doc(id), data);
       await batch.commit();
+      return Success<Json>(data);
+    } on FirebaseException catch (e) {
+      return Failure<Json>(e.message.toString());
+    } catch (e) {
+      return Failure<Json>(e.toString());
+    }
+  }
+
+  Future<Resource<Json>> postReview(int stars, String serviceId, String pid) async {
+    try {
+      final data = {"review": stars};
+
+          FirebaseFirestore.instance.runTransaction((transaction) async {
+
+            final sp = await transaction.get(FirebaseFirestore.instance
+                .collection(BackEndStrings.serviceCollection)
+                .doc(serviceId)
+                .withConverter<Service>(
+              fromFirestore: (snapshot, options) =>
+                  Service.fromJson(snapshot.data()),
+              toFirestore: (value, options) => value.toJson(),
+            ));
+
+
+        transaction.update(ref.doc(pid), data);
+        transaction.update(likeRef!.doc(pid), data);
+
+
+
+        transaction.update(
+            FirebaseFirestore.instance
+                .collection(BackEndStrings.serviceCollection)
+                .doc(serviceId),
+            {
+              "netStars": sp.data()!.netStars * sp.data()!.reviewCount +
+                  stars / (sp.data()!.reviewCount * 5 + 5),
+              "reviewCount": FieldValue.increment(1),
+            });
+      });
+
       return Success<Json>(data);
     } on FirebaseException catch (e) {
       return Failure<Json>(e.message.toString());

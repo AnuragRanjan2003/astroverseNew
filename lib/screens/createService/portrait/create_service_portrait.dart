@@ -635,6 +635,8 @@ class CreateServicePortrait extends StatelessWidget {
                                   final res = Service(
                                       price: double.parse(price.value.text),
                                       uses: 0,
+                                      reviewCount: 0,
+                                      netStars: 0,
                                       lastDate: DateTime(1900),
                                       lat: location.latitude,
                                       lng: location.longitude,

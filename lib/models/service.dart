@@ -17,6 +17,8 @@ class Service extends Post {
   String geoHash;
   int deliveryMethod;
   final int range;
+  final int reviewCount;
+  final double netStars;
   final bool active;
 
   Service({
@@ -30,6 +32,8 @@ class Service extends Post {
     required this.geoHash,
     required this.range,
     required this.active,
+    required this.netStars,
+    required this.reviewCount,
     required this.deliveryMethod,
     required super.description,
     required super.genre,

@@ -31,6 +31,13 @@ class OrderController extends GetxController {
     _purchaseSub?.cancel();
   }
 
+  postReview(int stars, String pid, String serviceId, String buyerId,
+      String sellerId, Function(Resource<Map<String, dynamic>>) updateUi) {
+    _repo.postReview(stars, sellerId, buyerId, pid, serviceId).then((value) {
+      updateUi(value);
+    });
+  }
+
   processConfirmation(String enteredCode, String codeHash, Function() onFail,
       Purchase purchase, String currentUserId) {
     enteredCode = "order_$enteredCode";
@@ -92,10 +99,10 @@ class OrderController extends GetxController {
     });
   }
 
-  cancelPurchase(
-      String id, String buyerId, String sellerId,RefundRequest refund, Function(Resource<RefundRequest>) updateUI) {
+  cancelPurchase(String id, String buyerId, String sellerId,
+      RefundRequest refund, Function(Resource<RefundRequest>) updateUI) {
     cancelingPurchase.value = true;
-    _repo.cancelPurchase(id, buyerId, sellerId,refund).then((value) {
+    _repo.cancelPurchase(id, buyerId, sellerId, refund).then((value) {
       cancelingPurchase.value = false;
       updateUI(value);
     });

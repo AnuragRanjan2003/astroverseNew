@@ -21,7 +21,7 @@ Purchase _$PurchaseFromJson(Map json) => Purchase(
       boughtOn: Purchase._dateFromTimeStamp(json['boughtOn'] as Timestamp),
       delivered: json['delivered'] as bool,
       review: json['review'] as int?,
-      refundId: json['review'] as String?,
+      refundId: json['refundId'] as String?,
       active: (json['active'] ?? true) as bool,
       deliveryMethod: (json['deliveryMethod'] as num).toInt(),
       deliveredOn: Purchase._nullableDateFromTimeStamp(

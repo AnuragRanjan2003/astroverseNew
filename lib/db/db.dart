@@ -686,16 +686,22 @@ class Database {
               _purchasesCollection(uid), _purchasesCollection(uid), null, null)
           .fetchSoldItems(uid);
 
+  Future<Resource<Json>> postReview(int stars, String serviceId, String pid,
+          String sellerId, String buyerId) =>
+      PurchaseUtils(_purchasesCollection(sellerId),
+              _purchasesCollection(buyerId), null, null)
+          .postReview(stars, serviceId, pid);
+
   Future<Resource<List<QueryDocumentSnapshot<Purchase>>>> fetchMoreSoldItems(
           QueryDocumentSnapshot<Purchase> lastPost, String uid) async =>
       await PurchaseUtils(_purchasesCollection(uid), null, null, null)
           .fetchMore(lastPost, [], uid);
 
   Future<Resource<RefundRequest>> cancelPurchase(
-          String id, String buyerId, String sellerId , RefundRequest refund) =>
+          String id, String buyerId, String sellerId, RefundRequest refund) =>
       PurchaseUtils(_purchasesCollection(buyerId),
               _purchasesCollection(sellerId), null, null)
-          .cancelPurchaseByUser(id,refund);
+          .cancelPurchaseByUser(id, refund);
 
   Future<Resource<Json>> updateService(
           Json data, String serviceId, String uid) async =>
