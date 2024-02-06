@@ -146,7 +146,12 @@ class MartScreenPortrait extends StatelessWidget {
                                 content: Text("bank details not available")));
                         return;
                       }
-                      // TODO("nav")
+                      if (auth.user.value!.activated == false) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                                content: Text("account not activated")));
+                        return;
+                      }
                       return _postItemScreen(context);
                     },
                     backgroundColor: ProjectColors.primary,
@@ -250,14 +255,16 @@ class MartScreenPortrait extends StatelessWidget {
                                 child: ListView.separated(
                                   scrollDirection: Axis.horizontal,
                                   itemCount: chipNames.length,
-                                  itemBuilder: (context, index) => Obx(
-                                      () => buildFilterChip(chipNames[index], (e) {
-                                            e
-                                                ? service.selectedItem.value = index
-                                                : service.selectedItem.value =
-                                                    0;
-                                          }, service.selectedItem.value == index)),
-                                  separatorBuilder: (context, index) => const SizedBox(width: 5,),
+                                  itemBuilder: (context, index) => Obx(() =>
+                                      buildFilterChip(chipNames[index], (e) {
+                                        e
+                                            ? service.selectedItem.value = index
+                                            : service.selectedItem.value = 0;
+                                      }, service.selectedItem.value == index)),
+                                  separatorBuilder: (context, index) =>
+                                      const SizedBox(
+                                    width: 5,
+                                  ),
                                 ),
                               ),
                               hint: 'Search in Mart',

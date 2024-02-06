@@ -9,4 +9,6 @@ class Plan {
 
   const Plan(this.name, this.price, this.content, this.value, this.postPerDay, this.servicesPerDay, this.maxServicePrice);
 
+
+
 }

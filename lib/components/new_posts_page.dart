@@ -145,6 +145,9 @@ class NewPostsPage extends StatelessWidget {
   List<Post> filterPostList(List<Post> l1, List<String> g) {
     List<Post> filter = <Post>[];
     if (g.isEmpty) return l1;
+    if (g.contains("astro challenge")) {
+      return [];
+    }
     for (Post it in l1) {
       if (it.genre.any((element) => g.contains(element))) filter.add(it);
     }

@@ -1,5 +1,6 @@
 import 'dart:developer';
 
+import 'package:astroverse/models/deleted_service.dart';
 import 'package:astroverse/models/save_service.dart';
 import 'package:astroverse/models/service.dart';
 import 'package:astroverse/models/user.dart';
@@ -29,12 +30,12 @@ CollectionReference<SaveService> _userServiceCollection(String uid) =>
           toFirestore: (value, options) => value.toJson(),
         );
 
-final CollectionReference<SaveService> _deletedServiceCollection =
+final CollectionReference<DeletedService> _deletedServiceCollection =
     FirebaseFirestore.instance
         .collection(BackEndStrings.deletedCollection)
-        .withConverter<SaveService>(
+        .withConverter<DeletedService>(
           fromFirestore: (snapshot, options) =>
-              SaveService.fromJson(snapshot.data()),
+              DeletedService.fromJson(snapshot.data()),
           toFirestore: (value, options) => value.toJson(),
         );
 
@@ -340,12 +341,12 @@ class ServiceUtils extends Postable<Service, SaveService> {
     }
   }
 
-  Future<Resource<String>> deleteService(SaveService ss) async {
+  Future<Resource<String>> deleteService(DeletedService ss) async {
     try {
       final batch = FirebaseFirestore.instance.batch();
       batch.delete(ref.doc(ss.id));
       batch.delete(_userServiceCollection(uid).doc(ss.id));
-      batch.set<SaveService>(_deletedServiceCollection.doc(ss.id), ss);
+      batch.set<DeletedService>(_deletedServiceCollection.doc(ss.id), ss);
       await batch.commit();
       return Success("deleted");
     } on FirebaseException catch (e) {

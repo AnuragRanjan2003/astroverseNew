@@ -2,6 +2,7 @@ import 'dart:developer';
 import 'dart:io';
 import 'dart:math' as math;
 
+import 'package:astroverse/models/deleted_service.dart';
 import 'package:astroverse/models/purchase.dart';
 import 'package:astroverse/models/save_service.dart';
 import 'package:astroverse/models/service.dart';
@@ -149,7 +150,7 @@ class ServiceController extends GetxController {
       _repo.fetchService(serviceId);
 
   void deleteService(
-      SaveService ss, String userId, Function(Resource<String>) updateUI) {
+      DeletedService ss, String userId, Function(Resource<String>) updateUI) {
     deletingService.value = true;
     _repo.deleteService(ss, userId).then((value) {
       deletingService.value = false;

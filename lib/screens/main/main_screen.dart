@@ -34,57 +34,7 @@ class _MainScreenState extends State<MainScreen> {
   @override
   Widget build(BuildContext context) {
     main.setUser(auth.user.value);
-    c.UIKitSettings uiKitSettings = (c.UIKitSettingsBuilder()
-          ..subscriptionType = c.CometChatSubscriptionType.allUsers
-          ..autoEstablishSocketConnection = true
-          ..region =
-              dotenv.get(EnvVars.cometRegionId) //Replace with your region
-          ..appId = dotenv.get(EnvVars.cometAppId) //replace with your app Id
-          ..authKey = dotenv.get(EnvVars.cometAuthId)
-          ..extensions = c.CometChatUIKitChatExtensions
-              .getDefaultExtensions() //replace this with empty array you want to disable all extensions
-        ) //replace with your auth Key
-        .build();
 
-    c.CometChatUIKit.init(
-        uiKitSettings: uiKitSettings,
-        onSuccess: (String successMessage) {
-          debugPrint("Initialization completed successfully  $successMessage");
-        },
-        onError: (c.CometChatException e) {
-          debugPrint("Initialization failed with exception: ${e.message}");
-        });
-
-    c.CometChatUIKit.login(auth.user.value!.uid, onSuccess: (e) {
-      log("login completed successfully  ${e.toString()}", name: "CHAT");
-    }, onError: (e) {
-      if (e.code == "ERR_UID_NOT_FOUND") {
-        log("user not found , creating user!", name: "CHAT");
-        var user = auth.user.value!;
-        final authUser = c.User(
-            name: crypto.decryptFromBase64String(user.name),
-            uid: user.uid,
-            avatar: user.image);
-        c.CometChatUIKit.createUser(
-            c.User(
-                name: authUser.name,
-                uid: authUser.uid,
-                avatar: authUser.avatar), onSuccess: (e) {
-          log("created user successfully  ${e.toString()}", name: "CHAT");
-
-          c.CometChatUIKit.login(authUser.uid);
-        }, onError: (e) {
-          log("sign up failed with exception: ${e.message}", name: "CHAT");
-          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-              content: Text("could not connect to chat servers")));
-        });
-      } else {
-        log("login failed with exception: ${e.message} ; code : ${e.code}",
-            name: "CHAT");
-        ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text("could not connect to chat servers")));
-      }
-    });
     iap.attachEventHandler(
       (p0) => _handleSuccessfulPurchase(p0, auth, context),
       (p0) => _handlePendingPurchase(p0, auth, context),

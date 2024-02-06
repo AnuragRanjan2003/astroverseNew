@@ -1,6 +1,8 @@
 import 'dart:developer';
 
+import 'package:astroverse/models/challenge.dart';
 import 'package:astroverse/models/comment.dart';
+import 'package:astroverse/models/deleted_service.dart';
 import 'package:astroverse/models/extra_info.dart';
 import 'package:astroverse/models/post.dart';
 import 'package:astroverse/models/post_save.dart';
@@ -14,6 +16,7 @@ import 'package:astroverse/models/user.dart' as models;
 import 'package:astroverse/models/user_bank_details.dart';
 import 'package:astroverse/models/withdraw_request.dart';
 import 'package:astroverse/res/strings/backend_strings.dart';
+import 'package:astroverse/utils/challenge_utils.dart';
 import 'package:astroverse/utils/comment_utils.dart';
 import 'package:astroverse/utils/geo.dart';
 import 'package:astroverse/utils/purchase_utils.dart';
@@ -415,6 +418,15 @@ class Database {
     return await CommentUtils(postId, postAuthorId).savePost(post);
   }
 
+  Future<Resource<List<Challenge>>> fetchChallenges() =>
+      ChallengeUtils().getChallenges();
+
+  Future<Resource<Challenge>> fetchChallengeById(String id) => ChallengeUtils().getChallengeById(id);
+
+  Future<Resource<Json>> addVoteInChallenge(
+          String challengeId, models.User user, bool isAgainst) =>
+      ChallengeUtils().addVoteInChallenge(challengeId, user, isAgainst);
+
   Future<void> addPostView(String id, String authorId) async {
     try {
       final batch = FirebaseFirestore.instance.batch();
@@ -442,6 +454,7 @@ class Database {
       QuerySnapshot<models.User> res = await _userCollection
           .limit(_limit)
           .where('astro', isEqualTo: true)
+          .where("activated" , isEqualTo: true)
           .where('uid', isNotEqualTo: currentUid)
           .get();
       final data = res.docs;
@@ -461,6 +474,7 @@ class Database {
       final Query<models.User> queryLocality = Geo()
           .createGeoQuery(
               _userCollection, VisibilityPlans.localityRadius, userLocation)
+          .where("activated" , isEqualTo: true)
           .where('plan', isEqualTo: VisibilityPlans.locality)
           .where('astro', isEqualTo: true)
           .limit(_limit);
@@ -468,6 +482,7 @@ class Database {
       final Query<models.User> queryCity = Geo()
           .createGeoQuery(
               _userCollection, VisibilityPlans.cityRadius, userLocation)
+          .where("activated" , isEqualTo: true)
           .where('astro', isEqualTo: true)
           .where('plan', isEqualTo: VisibilityPlans.city)
           .limit(_limit);
@@ -475,6 +490,7 @@ class Database {
       final Query<models.User> queryState = Geo()
           .createGeoQuery(
               _userCollection, VisibilityPlans.stateRadius, userLocation)
+          .where("activated" , isEqualTo: true)
           .where('astro', isEqualTo: true)
           .where('plan', isEqualTo: VisibilityPlans.state)
           .limit(_limit);
@@ -510,6 +526,7 @@ class Database {
         final Query<models.User> queryLocality = Geo()
             .createGeoQuery(
                 _userCollection, VisibilityPlans.localityRadius, userLocation)
+            .where("activated" , isEqualTo: true)
             .where('plan', isEqualTo: VisibilityPlans.locality)
             .where('astro', isEqualTo: true)
             .startAfterDocument(lastForLocality)
@@ -523,6 +540,7 @@ class Database {
             .createGeoQuery(
                 _userCollection, VisibilityPlans.cityRadius, userLocation)
             .where('astro', isEqualTo: true)
+            .where("activated" , isEqualTo: true)
             .where('plan', isEqualTo: VisibilityPlans.city)
             .startAfterDocument(lastForCity)
             .limit(_limit);
@@ -534,6 +552,7 @@ class Database {
             .createGeoQuery(
                 _userCollection, VisibilityPlans.stateRadius, userLocation)
             .where('astro', isEqualTo: true)
+            .where("activated" , isEqualTo: true)
             .where('plan', isEqualTo: VisibilityPlans.state)
             .startAfterDocument(lastForState)
             .limit(_limit);
@@ -543,6 +562,7 @@ class Database {
       if (lastForAll != null) {
         final Query<models.User> queryAll = _userCollection
             .where('astro', isEqualTo: true)
+            .where("activated" , isEqualTo: true)
             .where('plan', isEqualTo: VisibilityPlans.all)
             .startAfterDocument(lastForAll)
             .limit(_limit);
@@ -566,6 +586,7 @@ class Database {
       final QuerySnapshot<models.User> res = await _userCollection
           .limit(_limit)
           .where('astro', isEqualTo: true)
+          .where("activated" , isEqualTo: true)
           .where('uid', isNotEqualTo: currentUid)
           .startAfterDocument(last)
           .get();
@@ -714,7 +735,7 @@ class Database {
   Future<Resource<Service>> fetchService(String uid, String serviceId) =>
       ServiceUtils(uid).fetchService(serviceId);
 
-  Future<Resource<String>> deleteService(SaveService ss, String userId) =>
+  Future<Resource<String>> deleteService(DeletedService ss, String userId) =>
       ServiceUtils(userId).deleteService(ss);
 
   Future<Resource<List<QueryDocumentSnapshot<Service>>>>

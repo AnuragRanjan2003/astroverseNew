@@ -27,6 +27,7 @@ class MainController extends GetxController {
   RxList<Post> myPosts = <Post>[].obs;
   RxBool myPostLoading = false.obs;
 
+
   void setUser(User? user) {
     this.user.value = user;
     if (this.user.value != null) startReadingUpVotedPosts(this.user.value!.uid);

@@ -745,7 +745,10 @@ class CreateServicePortrait extends StatelessWidget {
   }
 
   Plan _findPlan(int plan, bool astro) {
-    if (!astro) return Plans.plans[0];
+    if (!astro) {
+      if (plan == 0) return Plans.plans[0];
+      return Plans.plans[plan - VisibilityPlans.all - 1];
+    }
     return Plans.astroPlans
             .firstWhereOrNull((element) => element.value == plan) ??
         Plans.astroPlans[0];

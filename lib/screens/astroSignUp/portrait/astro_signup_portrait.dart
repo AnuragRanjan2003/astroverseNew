@@ -105,6 +105,7 @@ class AstroSignUpPortrait extends StatelessWidget {
                               email.value.text,
                               "",
                               0,
+                              false,
                               "",
                               true,
                               "",

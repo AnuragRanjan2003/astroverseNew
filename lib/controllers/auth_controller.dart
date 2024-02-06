@@ -480,6 +480,7 @@ class AuthController extends GetxController {
               _crypto.encryptToBase64String(_parseValueForModel(cred.email)),
               _parseValueForModel(cred.photoURL),
               0,
+              !astro,
               location: loc,
               coins: 0,
               profileViews: 0,

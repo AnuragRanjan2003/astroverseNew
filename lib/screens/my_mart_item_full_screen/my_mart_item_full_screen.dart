@@ -2,6 +2,7 @@ import 'dart:developer';
 
 import 'package:astroverse/controllers/auth_controller.dart';
 import 'package:astroverse/controllers/service_controller.dart';
+import 'package:astroverse/models/deleted_service.dart';
 import 'package:astroverse/models/save_service.dart';
 import 'package:astroverse/models/service.dart';
 import 'package:astroverse/res/colors/project_colors.dart';
@@ -13,6 +14,7 @@ import 'package:intl/intl.dart';
 
 class MyMartItemFullScreen extends StatelessWidget {
   final SaveService ss;
+
   const MyMartItemFullScreen({super.key, required this.ss});
 
   @override
@@ -30,9 +32,11 @@ class MyMartItemFullScreen extends StatelessWidget {
         future: service.fetchService(ss.id),
         builder: (context, snapshot) {
           if (snapshot.hasData) {
-            if(snapshot.data!.isFailure){
+            if (snapshot.data!.isFailure) {
               final error = snapshot.data! as Failure<Service>;
-              return Center(child: Text(error.error),);
+              return Center(
+                child: Text(error.error),
+              );
             }
             final sb = StringBuffer();
             final item = (snapshot.data! as Success<Service>).data;
@@ -68,7 +72,9 @@ class MyMartItemFullScreen extends StatelessWidget {
                           child: Text(
                             '₹ ${item.price.toStringAsFixed(2)}',
                             style: const TextStyle(
-                                fontWeight: FontWeight.bold, fontSize: 18 , color: Colors.green),
+                                fontWeight: FontWeight.bold,
+                                fontSize: 18,
+                                color: Colors.green),
                           ),
                         ),
                         Padding(
@@ -78,7 +84,7 @@ class MyMartItemFullScreen extends StatelessWidget {
                             mainAxisAlignment: MainAxisAlignment.start,
                             children: [
                               buildChip(
-                                  (item.netStars*5).toStringAsFixed(2),
+                                  (item.netStars * 5).toStringAsFixed(2),
                                   const Icon(
                                     Icons.star,
                                     color: Colors.lightGreen,
@@ -197,10 +203,7 @@ class MyMartItemFullScreen extends StatelessWidget {
                             ],
                           ),
                         ),
-                        buildRow(
-                            'service id',
-                            item.id,
-                            Icons.numbers),
+                        buildRow('service id', item.id, Icons.numbers),
                         buildRow(
                             'seller',
                             crypto.decryptFromBase64String(item.authorName),
@@ -229,7 +232,13 @@ class MyMartItemFullScreen extends StatelessWidget {
                                     service.deletingService.isTrue)
                                 ? null
                                 : () async {
-                                    service.deleteService(ss, user.uid, (p) {
+                                    final ds = DeletedService(
+                                        id: ss.id,
+                                        date: ss.date,
+                                        name: ss.name,
+                                        imageUrl: ss.imageUrl,
+                                        status: "pending");
+                                    service.deleteService(ds, user.uid, (p) {
                                       String msg;
                                       if (p.isSuccess) {
                                         msg = "service deleted";

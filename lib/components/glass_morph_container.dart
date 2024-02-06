@@ -8,8 +8,17 @@ class GlassMorphContainer extends StatelessWidget {
   final double opacity;
   final Widget child;
   final EdgeInsets margin;
+  final bool onlyBottomRadius;
 
-  const GlassMorphContainer({super.key, required this.borderRadius, required this.blur, required this.opacity, required this.child, required this.margin});
+  const GlassMorphContainer({
+    super.key,
+    required this.borderRadius,
+    required this.blur,
+    required this.opacity,
+    required this.child,
+    required this.margin,
+    this.onlyBottomRadius = false,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -17,7 +26,11 @@ class GlassMorphContainer extends StatelessWidget {
       margin: margin,
       decoration: BoxDecoration(
           color: Colors.white.withOpacity(opacity * 0.7),
-          borderRadius: BorderRadius.all(Radius.circular(borderRadius)),
+          borderRadius: onlyBottomRadius
+              ? BorderRadius.only(
+                  bottomLeft: Radius.circular(borderRadius),
+                  bottomRight: Radius.circular(borderRadius))
+              : BorderRadius.all(Radius.circular(borderRadius)),
           border:
               Border.all(color: Colors.white.withOpacity(opacity), width: 1.5)),
       child: ClipRRect(

@@ -58,6 +58,7 @@ class PublicProfilePortrait extends StatelessWidget {
                 padding: const EdgeInsets.symmetric(horizontal: 10),
                 child: Row(
                   children: [
+                    const Spacer(flex: 1,),
                     Visibility(
                       visible: auth.user.value!.plan >=
                           Plans.plans[1].value + VisibilityPlans.all + 1,
@@ -68,45 +69,6 @@ class PublicProfilePortrait extends StatelessWidget {
                     ),
                     const Spacer(
                       flex: 1,
-                    ),
-                    Visibility(
-                      visible: auth.user.value!.plan >=
-                          Plans.plans[0].value + VisibilityPlans.all + 1,
-                      child: Expanded(
-                        flex: 7,
-                        child: Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: InkWell(
-                            onTap: () {
-                              comet.User receiver = comet.User(
-                                  uid: user.uid,
-                                  name: decryptedUserName,
-                                  avatar: user.image);
-                              Navigator.of(context).push(
-                                MaterialPageRoute(
-                                  builder: (context) =>
-                                      Messaging(receiver: receiver),
-                                ),
-                              );
-                            },
-                            child: Container(
-                              width: 80, // Set the width of the button
-                              height: 80, // Set the height of the button
-                              decoration: const BoxDecoration(
-                                shape: BoxShape
-                                    .circle, // Makes the container circular
-                                color: Colors
-                                    .lightBlue, // Set the background color of the button
-                              ),
-                              child: const Center(
-                                  child: Icon(
-                                Icons.messenger_outlined,
-                                color: Colors.white,
-                              )),
-                            ),
-                          ),
-                        ),
-                      ),
                     ),
                   ],
                 ),

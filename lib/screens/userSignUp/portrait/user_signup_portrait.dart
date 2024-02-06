@@ -101,6 +101,7 @@ class UserSignUpPortrait extends StatelessWidget {
                               email.value.text,
                               "",
                               0,
+                              true,
                               "",
                               false,
                               "",

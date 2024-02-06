@@ -94,6 +94,36 @@ class NamePlate extends StatelessWidget {
                 ),
               ],
             ),
+            Visibility(
+              visible: true,
+              child: Container(
+                padding: const EdgeInsets.symmetric(vertical: 14),
+                decoration: const BoxDecoration(color: Colors.white),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(
+                        user.activated
+                            ? Icons.check_circle_outline
+                            : Icons.error_outline_sharp,
+                        color: user.activated ? Colors.green : Colors.red),
+                    const SizedBox(
+                      width: 10,
+                    ),
+                    Text(
+                      user.activated
+                          ? "your account is active"
+                          : "your account is under activation",
+                      style: const TextStyle(
+                          color: ProjectColors.disabled,
+                          fontSize: 13,
+                          fontWeight: FontWeight.w500,
+                          overflow: TextOverflow.ellipsis),
+                    ),
+                  ],
+                ),
+              ),
+            ),
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -152,7 +182,8 @@ class NamePlate extends StatelessWidget {
                       Container(
                         decoration: const BoxDecoration(
                             color: Colors.white,
-                            borderRadius: BorderRadius.all(Radius.circular(10))),
+                            borderRadius:
+                                BorderRadius.all(Radius.circular(10))),
                         padding: const EdgeInsets.all(12),
                         child: Text(
                           user.qualifications.isNotEmpty

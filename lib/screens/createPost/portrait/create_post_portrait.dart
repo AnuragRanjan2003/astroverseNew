@@ -4,12 +4,15 @@ import 'dart:io';
 import 'package:astroverse/controllers/auth_controller.dart';
 import 'package:astroverse/controllers/create_post_controller.dart';
 import 'package:astroverse/controllers/location_controller.dart';
+import 'package:astroverse/db/plans_db.dart';
 import 'package:astroverse/res/colors/project_colors.dart';
 import 'package:astroverse/res/img/images.dart';
+import 'package:astroverse/utils/geo.dart';
 import 'package:astroverse/utils/resource.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
+import '../../../models/plan.dart';
 import '../../../models/post.dart';
 
 const _limit = 5;
@@ -19,14 +22,13 @@ class CreatePostPortrait extends StatelessWidget {
   static const _list = {
     'advanced horoscope': 0,
     'event prediction': 1,
-    'astro challenge': 2,
-    'self promotion': 3,
-    'planetary change': 4,
-    'vastu': 5,
-    'lal kitab': 6,
-    'Tantra/Mantra': 7,
-    'remedy': 8,
-    'Astro  upaay': 9,
+    'self promotion': 2,
+    'planetary change': 3,
+    'vastu': 4,
+    'lal kitab': 5,
+    'Tantra/Mantra': 6,
+    'remedy': 7,
+    'Astro  upaay': 8,
   };
 
   const CreatePostPortrait({
@@ -53,6 +55,16 @@ class CreatePostPortrait extends StatelessWidget {
       controller.formValid.value =
           body.value.text.isNotEmpty && title.value.text.isNotEmpty;
     });
+    late Plan plan;
+    if (auth.user.value!.astro) {
+      plan = Plans.astroPlans[auth.user.value!.plan];
+    } else {
+      if (auth.user.value!.plan == 0) {
+        plan = Plans.plans[0];
+      } else {
+        plan = Plans.plans[auth.user.value!.plan - 1 - VisibilityPlans.all];
+      }
+    }
 
     return Scaffold(
       body: SafeArea(
@@ -225,7 +237,7 @@ class CreatePostPortrait extends StatelessWidget {
                                 if (!validate(title, body)) return;
 
                                 if (areDatesSame(user.lastPosted)) {
-                                  if (user.postedToday >= _limit) {
+                                  if (user.postedToday >= plan.postPerDay) {
                                     ScaffoldMessenger.of(context).showSnackBar(
                                         const SnackBar(
                                             content: Text(

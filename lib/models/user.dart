@@ -12,6 +12,7 @@ class User {
   String uid;
   int plan;
   String geoHash;
+  bool activated;
   final bool astro;
   @JsonKey(fromJson: _fromJsonGeoPoint, toJson: _toJsonGeoPoint)
   GeoPoint? location;
@@ -30,6 +31,7 @@ class User {
     this.email,
     this.image,
     this.plan,
+    this.activated,
     this.uid,
     this.astro,
     this.phNo,

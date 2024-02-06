@@ -83,21 +83,6 @@ class PeopleScreenPortrait extends StatelessWidget {
                 controller: search,
                 hint: 'Search for Astrologers',
                 width: cons.maxWidth * 0.9),
-            Positioned(
-              right: 20,
-              bottom: 100,
-              child: FloatingActionButton(
-                onPressed: () {
-                  final user = auth.user.value!;
-                  Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) =>
-                              const comet.CometChatConversationsWithMessages()));
-                },
-                child: const Icon(Icons.history_toggle_off_outlined),
-              ),
-            ),
           ],
         ),
       ),

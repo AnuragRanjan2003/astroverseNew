@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:astroverse/db/db.dart';
 import 'package:astroverse/db/storage.dart';
+import 'package:astroverse/models/deleted_service.dart';
 import 'package:astroverse/models/purchase.dart';
 import 'package:astroverse/models/save_service.dart';
 import 'package:astroverse/models/service.dart';
@@ -73,7 +74,7 @@ class ServiceRepo {
   Future<Resource<Service>> fetchService(String serviceId) =>
       _db.fetchService('abc', serviceId);
 
-  Future<Resource<String>> deleteService(SaveService ss, String userId) =>
+  Future<Resource<String>> deleteService(DeletedService ss, String userId) =>
       _db.deleteService(ss, userId);
 
   fetchMoreByLocation(
