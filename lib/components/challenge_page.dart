@@ -41,16 +41,18 @@ Widget _renderChallenges(ChallengeController controller) {
     );
   } else {
     return ListView.separated(
-        itemBuilder: (context, index) => ChallengeItem(
-            challenge: controller.list[index],
-            onTap: (ch) {
-              Navigator.of(context).push(MaterialPageRoute(
-                builder: (context) => ChallengeScreen(challenge: ch),
-              ));
-            }),
+        itemBuilder: (context, index) => index == controller.list.length
+            ? const SizedBox(height: 100)
+            : ChallengeItem(
+                challenge: controller.list[index],
+                onTap: (ch) {
+                  Navigator.of(context).push(MaterialPageRoute(
+                    builder: (context) => ChallengeScreen(challenge: ch),
+                  ));
+                }),
         separatorBuilder: (context, index) => const SizedBox(
-              height: 20,
+              height: 30,
             ),
-        itemCount: controller.list.length);
+        itemCount: controller.list.length + 1);
   }
 }

@@ -8,6 +8,7 @@ typedef Json = Map<String, dynamic>;
 @JsonSerializable(anyMap: true)
 class Purchase {
   final String itemId;
+  final bool credited;
   String purchaseId;
   final String itemPrice;
   final String totalPrice;
@@ -32,6 +33,7 @@ class Purchase {
 
   Purchase(
       {required this.itemId,
+      this.credited = false,
       required this.purchaseId,
       required this.paymentId,
       required this.itemPrice,

@@ -5,6 +5,7 @@ class BackEndStrings {
   static const serviceCollection = "services";
   static const postCollection = "post";
   static const challengesCollection = "challenges";
+  static const votersCollection = "voters";
   static const upvoteCollection = "upVoted";
   static const userServiceCollection = "services";
   static const comments = "comments";

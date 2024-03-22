@@ -8,6 +8,7 @@ part of 'purchase.dart';
 
 Purchase _$PurchaseFromJson(Map json) => Purchase(
       itemId: json['itemId'] as String,
+      credited: (json['credited'] as bool?) ?? false,
       purchaseId: json['purchaseId'] as String,
       paymentId: json['paymentId'] as String,
       itemPrice: json['itemPrice'] as String,
@@ -31,6 +32,7 @@ Purchase _$PurchaseFromJson(Map json) => Purchase(
 
 Map<String, dynamic> _$PurchaseToJson(Purchase instance) => <String, dynamic>{
       'itemId': instance.itemId,
+      'credited': instance.credited,
       'purchaseId': instance.purchaseId,
       'itemPrice': instance.itemPrice,
       'totalPrice': instance.totalPrice,

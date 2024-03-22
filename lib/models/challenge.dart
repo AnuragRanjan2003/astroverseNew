@@ -17,7 +17,7 @@ class Challenge {
     required this.body,
     required this.status,
     required this.publishDate,
-    required this.totalVotes,
+    this.totalVotes = 0,
     required this.votesFor,
     required this.votesAgainst,
   });
@@ -28,7 +28,8 @@ class Challenge {
       body: json["body"] as String,
       status: json["status"] as String,
       publishDate: (json["publishDate"] as Timestamp).toDate(),
-      totalVotes: (json["totalVotes"] as num).toInt(),
+      totalVotes: (json["votesFor"] as num).toInt() +
+          (json["votesAgainst"] as num).toInt(),
       votesFor: (json["votesFor"] as num).toInt(),
       votesAgainst: (json["votesAgainst"] as num).toInt());
 
@@ -38,7 +39,6 @@ class Challenge {
         'body': body,
         'status': status,
         'publishDate': publishDate,
-        'totalVotes': totalVotes,
         'votesFor': votesFor,
         'votesAgainst': votesAgainst,
       };
