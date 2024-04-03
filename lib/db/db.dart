@@ -429,9 +429,9 @@ class Database {
       ChallengeUtils().findVoterById(challengeId, uid);
 
   Future<Resource<Json>> addVoteInChallenge(String challengeId,
-          models.User user, bool isAgainst, bool isFirstTime ,bool removeAll , int prevVote) =>
+          models.User user, int option, bool isFirstTime ,bool removeAll , int prevVote) =>
       ChallengeUtils()
-          .addVoteInChallenge(challengeId, user, isAgainst, isFirstTime ,removeAll,prevVote);
+          .addVoteInChallenge(challengeId, user, option, isFirstTime ,removeAll,prevVote);
 
   Future<void> addPostView(String id, String authorId) async {
     try {

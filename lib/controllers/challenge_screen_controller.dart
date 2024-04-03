@@ -11,17 +11,16 @@ import 'package:get/get.dart';
 class ChallengeScreenController extends GetxController {
   RxBool isLoading = false.obs;
   RxInt votedFor = (-1).obs;
-  RxInt currentVotesFor = 0.obs;
-  RxInt currentVotesAgainst = 0.obs;
+  RxList<int> currentVotes = RxList();
   RxInt currentVotesTotal = 0.obs;
   Rxn<Voter> voter = Rxn();
 
   final ChallengeRepo _repo = ChallengeRepo();
 
   initVotes(Challenge ch) {
-    currentVotesFor.value = ch.votesFor;
-    currentVotesAgainst.value = ch.votesAgainst;
-    currentVotesTotal.value = ch.totalVotes;
+    currentVotes.value = ch.optionsVotes;
+    currentVotesTotal.value =
+        ch.optionsVotes.reduce((value, element) => value + element);
   }
 
   getVoter(String challengeId, String uid) {
@@ -34,63 +33,48 @@ class ChallengeScreenController extends GetxController {
     });
   }
 
-  voteItemClicked(VoteType voteType, String challengeId) {
+  voteItemClicked(int option, String challengeId) {
     if (votedFor.value == -1) {
-      incrementVotes(voteType);
-      votedFor.value = voteType.index;
-    } else if (votedFor.value == voteType.index) {
-      decrementVotes(voteType);
+      incrementVotes(option);
+      votedFor.value = option;
+    } else if (votedFor.value == option) {
+      decrementVotes(option);
       votedFor.value = -1;
     } else {
-      incrementVotes(voteType);
-      decrementVotes(
-          voteType == VoteType.FOR ? VoteType.AGAINST : VoteType.FOR);
-      votedFor.value = voteType.index;
+      incrementVotes(option);
+      decrementVotes(votedFor.value);
+      votedFor.value = option;
     }
   }
 
-  incrementVotes(VoteType voteType) {
+  incrementVotes(int option) {
     currentVotesTotal.value = currentVotesTotal.value + 1;
-    switch (voteType) {
-      case VoteType.FOR:
-        currentVotesFor++;
-        break;
-
-      case VoteType.AGAINST:
-        currentVotesAgainst++;
-        break;
-    }
+    currentVotes[option]++;
   }
 
-  decrementVotes(VoteType voteType) {
+  decrementVotes(int option) {
     currentVotesTotal.value = currentVotesTotal.value - 1;
-    switch (voteType) {
-      case VoteType.FOR:
-        currentVotesFor--;
-        break;
-
-      case VoteType.AGAINST:
-        currentVotesAgainst--;
-        break;
-    }
+    currentVotes[option]--;
   }
 
   Future<Resource<Map<String, dynamic>>> updateVotedData(
-      String challengeId, int votedType, User user, int initVoteType) async {
-    if (votedType == -1 && initVoteType==-1) {
+      String challengeId, int option, User user, int initVote) async {
+    if (option == -1 && initVote == -1) {
       return Success({});
-    } else if(votedType==-1 && initVoteType!=-1){
-      final res = await _repo.removeChallengeVote(challengeId, user, VoteType.values[initVoteType]);
+    } else if (option == -1 && initVote != -1) {
+      final res = await _repo.removeChallengeVote(
+          challengeId, user, initVote);
       return res;
     }
     log("updating challenges{id : $challengeId }", name: "CHALLENGES");
-    Resource<Map<String, dynamic>> res;
-    if (votedType == VoteType.FOR.index) {
-      res = await _repo.voteForChallenge(challengeId, user, initVoteType == -1);
-    } else {
-      res = await _repo.voteAgainstChallenge(
-          challengeId, user, initVoteType == -1);
-    }
+    if(option==initVote) return Failure("You have voted the same option");
+    final res = await _repo.voteForOptions(challengeId, user, initVote, option);
+    // if (opt == VoteType.FOR.index) {
+    //   res = await _repo.voteForChallenge(challengeId, user, initVoteType == -1);
+    // } else {
+    //   res = await _repo.voteAgainstChallenge(
+    //       challengeId, user, initVoteType == -1);
+    // }
     return res;
   }
 }

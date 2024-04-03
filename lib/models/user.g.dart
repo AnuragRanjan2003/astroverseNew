@@ -11,7 +11,7 @@ User _$UserFromJson(Map json) => User(
       json['email'] as String,
       json['image'] as String,
       json['plan'] as int,
-      json['activated'] == null ? true : json['activated'] as bool,
+      json['activated'] == null ? false : json['activated'] as bool,
       json['uid'] as String,
       json['astro'] as bool,
       json['phNo'] as String,

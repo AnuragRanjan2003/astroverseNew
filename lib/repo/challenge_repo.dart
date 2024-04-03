@@ -10,9 +10,7 @@ class ChallengeRepo {
 
   Future<Resource<List<Challenge>>> getChallenges() => _db.fetchChallenges();
 
-  Future<Resource<Json>> voteForChallenge(
-          String challengeId, User user, bool isFirstTime) =>
-      _db.addVoteInChallenge(challengeId, user, false, isFirstTime , false ,-1);
+
 
   Future<Resource<Challenge>> getChallengeById(String id) =>
       _db.fetchChallengeById(id);
@@ -21,11 +19,15 @@ class ChallengeRepo {
       _db.findVoterById(challengeId, uid);
 
   Future<Resource<Json>> removeChallengeVote(
-          String challengeId, User user, VoteType prevVote) =>
+          String challengeId, User user, int prevVote) =>
       _db.addVoteInChallenge(
-          challengeId, user, false, false, true, prevVote.index);
+          challengeId, user, 0, false, true, prevVote);
 
-  Future<Resource<Json>> voteAgainstChallenge(String challengeId, User user,
-          bool isFirstTime) =>
-      _db.addVoteInChallenge(challengeId, user, true, isFirstTime, false, -1);
+
+
+  Future<Resource<Json>> voteForOptions(String challengeId, User user, int prevVote , int option) =>
+      _db.addVoteInChallenge(
+          challengeId, user, option, prevVote==-1, false, prevVote);
+
+
 }

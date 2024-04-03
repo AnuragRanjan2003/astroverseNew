@@ -3,7 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 
 class Voter {
   final String uid;
-  final VoteType? type;
+  final int type;
   final String name;
   final DateTime time;
 
@@ -15,7 +15,7 @@ class Voter {
 
   factory Voter.fromJson(json) => Voter(
         uid: json['uid'] as String,
-        type: voteTypeFormString(json['type'] as String),
+        type: (json['type'] as num).toInt(),
         name: json['name'] as String,
         time: (json['time'] as Timestamp).toDate(),
       );
@@ -23,7 +23,7 @@ class Voter {
   Map<String, dynamic> toJson() => {
         'name': name,
         'uid': uid,
-        'type': type == null ? "" : type!.name,
+        'type': type,
         'time': Timestamp.fromDate(time),
       };
 }

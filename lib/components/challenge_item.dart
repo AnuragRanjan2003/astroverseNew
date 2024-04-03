@@ -44,11 +44,10 @@ class ChallengeItem extends StatelessWidget {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  _dataItem(Icons.contrast, _calculateScore(challenge)),
                   _dataItem(Icons.history, toTimeDelay(challenge.publishDate)),
                   _dataItem(
                     Icons.how_to_vote,
-                    NumberParser().toSocialMediaString(challenge.totalVotes),
+                    NumberParser().toSocialMediaString(challenge.optionsVotes.reduce((value, element) => value+element)),
                   ),
                 ],
               ),
@@ -95,8 +94,5 @@ class ChallengeItem extends StatelessWidget {
     );
   }
 
-  String _calculateScore(Challenge challenge) {
-    if (challenge.totalVotes == 0) return "0";
-    return (challenge.votesFor / challenge.totalVotes).toStringAsFixed(2);
-  }
+
 }

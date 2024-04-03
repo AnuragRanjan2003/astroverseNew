@@ -22,7 +22,7 @@ void main() async {
   await dotenv.load(fileName: '.env');
   final pref = await SharedPreferences.getInstance();
   final firstTime = pref.getBool("first_time") ?? true;
-  Crypt.initialize(dotenv.get(EnvVars.cryptKey));
+  Crypt.initialize(dotenv.get(EnvVars.cryptKey), dotenv.get(EnvVars.cryptIV));
 
   final analytics = FirebaseAnalytics.instanceFor(app: app);
   analytics.logEvent(name: "login");
@@ -42,7 +42,7 @@ class MyApp extends StatelessWidget {
   static FirebaseAnalytics analytics = FirebaseAnalytics.instance;
   static FirebaseAnalyticsObserver observer =
       FirebaseAnalyticsObserver(analytics: analytics);
- 
+
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
@@ -59,7 +59,8 @@ class MyApp extends StatelessWidget {
         fontFamily: 'Poppins',
         colorScheme: ColorScheme.fromSeed(seedColor: ProjectColors.primary),
         disabledColor: ProjectColors.disabled,
-        progressIndicatorTheme: const ProgressIndicatorThemeData(color: ProjectColors.primary),
+        progressIndicatorTheme:
+            const ProgressIndicatorThemeData(color: ProjectColors.primary),
         useMaterial3: true,
       ),
     );

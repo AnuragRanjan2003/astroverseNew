@@ -34,7 +34,7 @@ class ChallengeUtils {
     try {
       final data = await _challengeCollection
           .where("status", isEqualTo: "active")
-          .orderBy("totalVotes", descending: true)
+
           .limit(5)
           .get();
       final list = <Challenge>[];
@@ -79,59 +79,87 @@ class ChallengeUtils {
   }
 
   Future<Resource<Json>> addVoteInChallenge(String challengeId, User user,
-      bool isAgainst, bool isFirstTime, bool removeAll, int prevVote) async {
+      int option, bool isFirstTime, bool removeAll, int prevVote) async {
     try {
-      final batch = FirebaseFirestore.instance.batch();
+
       log("ref : ${_challengeCollection.doc(challengeId).path}",
           name: "CHALLENGE ADD VOTE");
 
       final voter = {
         'uid': user.uid,
         'name': user.name,
-        'type': isAgainst ? VoteType.AGAINST.name : VoteType.FOR.name,
+        'type': option,
         'time': Timestamp.now()
       };
 
       if (!isFirstTime && removeAll) {
-        batch.delete(_voterCollection(challengeId).doc(user.uid));
-        batch.update(_challengeCollection.doc(challengeId), {
-          'votesFor':
-              FieldValue.increment(prevVote == VoteType.FOR.index ? -1 : 0),
-          'votesAgainst':
-              FieldValue.increment(prevVote == VoteType.AGAINST.index ? -1 : 0),
+        // batch.delete(_voterCollection(challengeId).doc(user.uid));
+        // batch.update(_challengeCollection.doc(challengeId), {
+        //   'options' : FieldValue.
+        // });
+        // await batch.commit();
+        await FirebaseFirestore.instance.runTransaction((transaction) async{
+
+            final ch = await transaction.get(_challengeCollection.doc(challengeId));
+
+            final list = ch.data()!.optionsVotes;
+            list[prevVote] = list[prevVote]-1;
+
+            transaction.delete(_voterCollection(challengeId).doc(user.uid));
+            transaction.update(_challengeCollection.doc(challengeId), {
+              'optionsVotes' : list
+            });
+
+
         });
-        await batch.commit();
         return Success(voter);
       }
-      if (!isAgainst) {
-        batch.update(
-            FirebaseFirestore.instance
-                .collection(BackEndStrings.challengesCollection)
-                .doc(challengeId),
-            {
-              'votesFor': FieldValue.increment(1),
-              'votesAgainst': FieldValue.increment(isFirstTime ? 0 : -1)
-            });
-      } else {
-        batch.update(
-            FirebaseFirestore.instance
-                .collection(BackEndStrings.challengesCollection)
-                .doc(challengeId),
-            {
-              'votesAgainst': FieldValue.increment(1),
-              'votesFor': FieldValue.increment(isFirstTime ? 0 : -1)
-            });
-      }
+      // if (!isAgainst) {
+      //   batch.update(
+      //       FirebaseFirestore.instance
+      //           .collection(BackEndStrings.challengesCollection)
+      //           .doc(challengeId),
+      //       {
+      //         'votesFor': FieldValue.increment(1),
+      //         'votesAgainst': FieldValue.increment(isFirstTime ? 0 : -1)
+      //       });
+      // } else {
+      //   batch.update(
+      //       FirebaseFirestore.instance
+      //           .collection(BackEndStrings.challengesCollection)
+      //           .doc(challengeId),
+      //       {
+      //         'votesAgainst': FieldValue.increment(1),
+      //         'votesFor': FieldValue.increment(isFirstTime ? 0 : -1)
+      //       });
+      // }
 
-      batch.set(
-          _challengeCollection
-              .doc(challengeId)
-              .collection(BackEndStrings.votersCollection)
-              .doc(user.uid),
-          voter,
-          SetOptions(merge: true));
+      await FirebaseFirestore.instance.runTransaction((transaction)  async {
+        final ch = await transaction.get(_challengeCollection.doc(challengeId));
+        final votes = ch.data()!.optionsVotes;
+        if(!isFirstTime){
+          votes[prevVote]--;
+        }
+        votes[option]++;
+        transaction.update(_challengeCollection.doc(challengeId), {
+          'optionsVotes' : votes
+        });
+        transaction.set(_challengeCollection
+            .doc(challengeId)
+            .collection(BackEndStrings.votersCollection)
+            .doc(user.uid), voter , SetOptions(merge: true));
 
-      await batch.commit();
+      });
+
+      // batch.set(
+      //     _challengeCollection
+      //         .doc(challengeId)
+      //         .collection(BackEndStrings.votersCollection)
+      //         .doc(user.uid),
+      //     voter,
+      //     SetOptions(merge: true));
+
+      // await batch.commit();
 
       return Success(voter);
     } on FirebaseException catch (e) {

@@ -3,7 +3,7 @@ import 'package:astroverse/controllers/challenge_screen_controller.dart';
 import 'package:astroverse/models/challenge.dart';
 import 'package:astroverse/models/voter.dart';
 import 'package:astroverse/res/colors/project_colors.dart';
-import 'package:astroverse/utils/vote_type_enum.dart';
+import 'package:astroverse/utils/resource.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
@@ -42,7 +42,7 @@ class _ChallengePortraitState extends State<ChallengePortrait> {
     if (p0 == null) {
       return -1;
     } else {
-      return p0.type == null ? -1 : p0.type!.index;
+      return p0.type;
     }
   }
 
@@ -84,7 +84,7 @@ class _ChallengePortraitState extends State<ChallengePortrait> {
             ),
           ),
           SliverPadding(
-            padding: const EdgeInsets.symmetric(horizontal: 20),
+            padding: const EdgeInsets.symmetric(horizontal: 20 ,vertical: 10),
             sliver: SliverList(
                 delegate: SliverChildListDelegate.fixed([
               Row(
@@ -94,16 +94,13 @@ class _ChallengePortraitState extends State<ChallengePortrait> {
                   ),
                   Expanded(
                     child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       children: [
                         _dataItem(Icons.history,
                             toTimeDelay(widget.challenge.publishDate)),
-                        _dataItem(
-                            Icons.how_to_vote,
-                            NumberFormat.compact()
-                                .format(widget.challenge.totalVotes)),
-                        _dataItem(
-                            Icons.contrast, _calculateScore(widget.challenge)),
+                        _dataItem(Icons.how_to_vote,
+                            NumberFormat.compact().format(widget.challenge.optionsVotes.reduce((value, element) => value+element))),
+
                       ],
                     ),
                   ),
@@ -133,49 +130,66 @@ class _ChallengePortraitState extends State<ChallengePortrait> {
               const SizedBox(
                 height: 10,
               ),
+
               Obx(() {
-                return VoteItem(
-                  width: MediaQuery.of(context).size.width,
-                  votes: controller.currentVotesFor.value,
-                  totalVotes: controller.currentVotesTotal.value,
-                  selected: controller.votedFor.value == VoteType.FOR.index,
-                  onTap: () {
-                    controller.voteItemClicked(
-                      VoteType.FOR,
-                      widget.challenge.id,
-                    );
-                  },
+                final votes = controller.currentVotes;
+
+                return Column(
+                  children: List.generate(
+                      widget.challenge.optionsCount,
+                      (index) => VoteItem(
+                          lable: widget.challenge.optionsName[index],
+                          selected: controller.votedFor.value == index,
+                          width: MediaQuery.of(context).size.width,
+                          votes: votes[index],
+                          totalVotes: controller.currentVotesTotal.value,
+                          onTap: () {
+                            controller.voteItemClicked(
+                                index, widget.challenge.id);
+                          })),
                 );
               }),
               const SizedBox(
                 height: 20,
               ),
-              Obx(() {
-                return VoteItem(
-                  selected: controller.votedFor.value == VoteType.AGAINST.index,
-                  width: MediaQuery.of(context).size.width,
-                  votes: controller.currentVotesAgainst.value,
-                  totalVotes: controller.currentVotesTotal.value,
-                  onTap: () {
-                    controller.voteItemClicked(
-                      VoteType.AGAINST,
-                      widget.challenge.id,
-                    );
-                  },
-                );
-              }),
+
+              // Obx(() {
+              //   return VoteItem(
+              //     selected: controller.votedFor.value ==
+              //         VoteType.AGAINST.index,
+              //     width: MediaQuery
+              //         .of(context)
+              //         .size
+              //         .width,
+              //     votes: controller.currentVotesAgainst.value,
+              //     totalVotes: controller.currentVotesTotal.value,
+              //     onTap: () {
+              //       controller.voteItemClicked(
+              //         VoteType.AGAINST,
+              //         widget.challenge.id,
+              //       );
+              //     },
+              //   );
+              // }),
               const SizedBox(
                 height: 20,
               ),
               MaterialButton(
                 onPressed: () async {
                   if (auth.user.value == null) return;
-                  await controller.updateVotedData(
+                  final res = await controller.updateVotedData(
                     widget.challenge.id,
                     controller.votedFor.value,
                     auth.user.value!,
                     _getInitialVote(controller.voter.value),
                   );
+                  if (res is Success<Map<String, dynamic>>) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text("vote updated")));
+                  } else {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text("Some error occurred")));
+                  }
                 },
                 padding: const EdgeInsets.symmetric(vertical: 16),
                 shape: const RoundedRectangleBorder(
@@ -210,10 +224,10 @@ String toTimeDelay(DateTime date) {
   return str;
 }
 
-String _calculateScore(Challenge challenge) {
-  if (challenge.totalVotes == 0) return "0";
-  return (challenge.votesFor / challenge.totalVotes).toStringAsFixed(2);
-}
+// String _calculateScore(Challenge challenge) {
+//   if (challenge.totalVotes == 0) return "0";
+//   return (challenge.votesFor / challenge.totalVotes).toStringAsFixed(2);
+// }
 
 Widget _dataItem(IconData icon, String data) {
   return Container(
@@ -246,6 +260,7 @@ Widget _dataItem(IconData icon, String data) {
 }
 
 class VoteItem extends StatelessWidget {
+  final String lable;
   final double width;
   final int votes;
   final int totalVotes;
@@ -254,6 +269,7 @@ class VoteItem extends StatelessWidget {
 
   const VoteItem(
       {super.key,
+      required this.lable,
       required this.selected,
       required this.width,
       required this.votes,
@@ -262,36 +278,49 @@ class VoteItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        width: width,
-        height: 50,
-        decoration: BoxDecoration(
-            borderRadius: const BorderRadius.all(Radius.circular(10)),
-            border: Border.all(
-              color: selected ? Colors.green : Colors.transparent,
-              width: 1.5,
-            ),
-            color: ProjectColors.greyBackground),
-        child: Stack(
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8),
+      child: GestureDetector(
+        onTap: onTap,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            AnimatedContainer(
-              width: _toVotes(votes, totalVotes) * width,
-              padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
-              decoration: const BoxDecoration(
-                  borderRadius: BorderRadius.all(Radius.circular(10)),
-                  color: Colors.black),
-              duration: const Duration(milliseconds: 200),
-            ),
-            Align(
-              alignment: Alignment.center,
-              child: Text(
-                votes.toString(),
-                style: const TextStyle(
-                    color: Colors.grey, fontWeight: FontWeight.bold),
+            Text(lable ,
+            style: const TextStyle(
+                fontWeight: FontWeight.bold, color: ProjectColors.disabled),),
+            const SizedBox(height: 10,),
+            Container(
+              width: width,
+              height: 50,
+              decoration: BoxDecoration(
+                  borderRadius: const BorderRadius.all(Radius.circular(10)),
+                  border: Border.all(
+                    color: selected ? Colors.green : Colors.transparent,
+                    width: 1.5,
+                  ),
+                  color: ProjectColors.greyBackground),
+              child: Stack(
+                children: [
+                  AnimatedContainer(
+                    width: _toVotes(votes, totalVotes) * width,
+                    padding:
+                        const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
+                    decoration: const BoxDecoration(
+                        borderRadius: BorderRadius.all(Radius.circular(10)),
+                        color: Colors.black),
+                    duration: const Duration(milliseconds: 200),
+                  ),
+                  Align(
+                    alignment: Alignment.center,
+                    child: Text(
+                      votes.toString(),
+                      style: const TextStyle(
+                          color: Colors.grey, fontWeight: FontWeight.bold),
+                    ),
+                  )
+                ],
               ),
-            )
+            ),
           ],
         ),
       ),
