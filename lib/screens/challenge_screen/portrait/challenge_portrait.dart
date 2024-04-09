@@ -84,7 +84,7 @@ class _ChallengePortraitState extends State<ChallengePortrait> {
             ),
           ),
           SliverPadding(
-            padding: const EdgeInsets.symmetric(horizontal: 20 ,vertical: 10),
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
             sliver: SliverList(
                 delegate: SliverChildListDelegate.fixed([
               Row(
@@ -98,9 +98,11 @@ class _ChallengePortraitState extends State<ChallengePortrait> {
                       children: [
                         _dataItem(Icons.history,
                             toTimeDelay(widget.challenge.publishDate)),
-                        _dataItem(Icons.how_to_vote,
-                            NumberFormat.compact().format(widget.challenge.optionsVotes.reduce((value, element) => value+element))),
-
+                        _dataItem(
+                            Icons.how_to_vote,
+                            NumberFormat.compact().format(widget
+                                .challenge.optionsVotes
+                                .reduce((value, element) => value + element))),
                       ],
                     ),
                   ),
@@ -130,7 +132,6 @@ class _ChallengePortraitState extends State<ChallengePortrait> {
               const SizedBox(
                 height: 10,
               ),
-
               Obx(() {
                 final votes = controller.currentVotes;
 
@@ -144,6 +145,8 @@ class _ChallengePortraitState extends State<ChallengePortrait> {
                           votes: votes[index],
                           totalVotes: controller.currentVotesTotal.value,
                           onTap: () {
+                            if (auth.user.value == null ||
+                                auth.user.value!.astro == false) return;
                             controller.voteItemClicked(
                                 index, widget.challenge.id);
                           })),
@@ -152,31 +155,17 @@ class _ChallengePortraitState extends State<ChallengePortrait> {
               const SizedBox(
                 height: 20,
               ),
-
-              // Obx(() {
-              //   return VoteItem(
-              //     selected: controller.votedFor.value ==
-              //         VoteType.AGAINST.index,
-              //     width: MediaQuery
-              //         .of(context)
-              //         .size
-              //         .width,
-              //     votes: controller.currentVotesAgainst.value,
-              //     totalVotes: controller.currentVotesTotal.value,
-              //     onTap: () {
-              //       controller.voteItemClicked(
-              //         VoteType.AGAINST,
-              //         widget.challenge.id,
-              //       );
-              //     },
-              //   );
-              // }),
               const SizedBox(
                 height: 20,
               ),
               MaterialButton(
                 onPressed: () async {
                   if (auth.user.value == null) return;
+                  if (auth.user.value!.astro == false) {
+                    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                        content: Text("Only astrologers can vote")));
+                    return;
+                  }
                   final res = await controller.updateVotedData(
                     widget.challenge.id,
                     controller.votedFor.value,
@@ -285,10 +274,14 @@ class VoteItem extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(lable ,
-            style: const TextStyle(
-                fontWeight: FontWeight.bold, color: ProjectColors.disabled),),
-            const SizedBox(height: 10,),
+            Text(
+              lable,
+              style: const TextStyle(
+                  fontWeight: FontWeight.bold, color: ProjectColors.disabled),
+            ),
+            const SizedBox(
+              height: 10,
+            ),
             Container(
               width: width,
               height: 50,

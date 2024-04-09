@@ -7,8 +7,13 @@ class Plan {
   final int servicesPerDay;
   final double maxServicePrice;
 
-  const Plan(this.name, this.price, this.content, this.value, this.postPerDay, this.servicesPerDay, this.maxServicePrice);
-
-
-
+  const Plan({
+    required this.name,
+    required this.price,
+    required this.content,
+    required this.value,
+    required this.postPerDay,
+    required this.servicesPerDay,
+    required this.maxServicePrice,
+  });
 }

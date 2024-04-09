@@ -273,6 +273,16 @@ class CreateServicePortrait extends StatelessWidget {
                             Icons.messenger_outline,
                             Icons.call_outlined
                           ],
+                          cancelToggle: (index) async {
+                            if (index == 0) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                      content: Text(
+                                          "feature not currently available")));
+                              return true;
+                            }
+                            return false;
+                          },
                           activeBgColor: const [ProjectColors.primary],
                           borderWidth: 5,
                           onToggle: (e) {
@@ -609,6 +619,17 @@ class CreateServicePortrait extends StatelessWidget {
                                     location = user.location!;
                                   }
 
+                                  if (double.parse(price.value.text) >
+                                          _findPlan(user.plan, user.astro)
+                                              .maxServicePrice &&
+                                      !user.featured) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                        SnackBar(
+                                            content: Text(
+                                                "Price limit for your plan is ₹${_findPlan(user.plan, user.astro).maxServicePrice}")));
+                                    return;
+                                  }
+
                                   if (service.useCurrentLocation.isTrue &&
                                       user.location != null) {
                                     location = user.location!;
@@ -659,6 +680,7 @@ class CreateServicePortrait extends StatelessWidget {
                                       views: 0,
                                       authorName: user.name,
                                       authorId: user.uid);
+                                  // TODO ("remove for when subs ae implemented ")
                                   service.postService(
                                       res,
                                       _getPriceForRange(

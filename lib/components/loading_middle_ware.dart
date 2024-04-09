@@ -1,3 +1,4 @@
+import 'dart:developer';
 import 'dart:ui';
 
 import 'package:astroverse/utils/resource.dart';
@@ -23,6 +24,7 @@ class _LoadingMiddleWareState<T>
         future: widget.asyncData,
         builder: (context, snapshot) {
           if (snapshot.hasData) {
+            log(snapshot.data.toString() , name:"LOADED DATA");
             if (snapshot.data!.isFailure) {
               return const Center(
                 child: Text("Could not find"),

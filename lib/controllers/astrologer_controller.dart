@@ -14,6 +14,7 @@ class AstrologerController extends GetxController {
   Rxn<QueryDocumentSnapshot<User>> lastForCity = Rxn();
   Rxn<QueryDocumentSnapshot<User>> lastForState = Rxn();
   Rxn<QueryDocumentSnapshot<User>> lastForAll = Rxn();
+  Rxn<QueryDocumentSnapshot<User>> lastForFeatured = Rxn();
   RxBool moreUsers = true.obs;
   RxString searchText = RxString("");
   Rx<bool> nothingToShow = false.obs;
@@ -27,6 +28,10 @@ class AstrologerController extends GetxController {
         moreUsers.value = value.data.isNotEmpty;
         for (QueryDocumentSnapshot<User> it in value.data) {
           list.add(it.data());
+          if (it.data().featured) {
+            lastForFeatured.value = value.data.last;
+            continue;
+          }
           if (it.data().plan == VisibilityPlans.locality) {
             lastForLocality.value = value.data.last;
           }
@@ -51,13 +56,20 @@ class AstrologerController extends GetxController {
     if (lastForLocality.value == null &&
         lastForCity.value == null &&
         lastForState.value == null &&
-        lastForAll.value == null) {
+        lastForAll.value == null &&
+        lastForFeatured.value == null) {
       fetchAstrologers(geoPoint, uid);
     }
     loadingMore.value = true;
     _repo
-        .fetchMoreAstrologersByLocation(uid, geoPoint, lastForLocality.value,
-            lastForCity.value, lastForState.value, lastForAll.value)
+        .fetchMoreAstrologersByLocation(
+            uid,
+            geoPoint,
+            lastForLocality.value,
+            lastForCity.value,
+            lastForState.value,
+            lastForAll.value,
+            lastForFeatured.value)
         .then((value) {
       loadingMore.value = false;
       if (value.isSuccess) {
@@ -67,6 +79,10 @@ class AstrologerController extends GetxController {
           list.add(it.data());
           if (it.data().plan == VisibilityPlans.locality) {
             lastForLocality.value = it;
+          }
+          if(it.data().featured){
+            lastForFeatured.value = it;
+            continue;
           }
           if (it.data().plan == VisibilityPlans.city) lastForCity.value = it;
           if (it.data().plan == VisibilityPlans.state) lastForState.value = it;

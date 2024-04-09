@@ -425,13 +425,18 @@ class Database {
   Future<Resource<Challenge>> fetchChallengeById(String id) =>
       ChallengeUtils().getChallengeById(id);
 
-   Future<Resource<Voter>> findVoterById(String challengeId, String uid) =>
+  Future<Resource<Voter>> findVoterById(String challengeId, String uid) =>
       ChallengeUtils().findVoterById(challengeId, uid);
 
-  Future<Resource<Json>> addVoteInChallenge(String challengeId,
-          models.User user, int option, bool isFirstTime ,bool removeAll , int prevVote) =>
-      ChallengeUtils()
-          .addVoteInChallenge(challengeId, user, option, isFirstTime ,removeAll,prevVote);
+  Future<Resource<Json>> addVoteInChallenge(
+          String challengeId,
+          models.User user,
+          int option,
+          bool isFirstTime,
+          bool removeAll,
+          int prevVote) =>
+      ChallengeUtils().addVoteInChallenge(
+          challengeId, user, option, isFirstTime, removeAll, prevVote);
 
   Future<void> addPostView(String id, String authorId) async {
     try {
@@ -481,6 +486,7 @@ class Database {
           .createGeoQuery(
               _userCollection, VisibilityPlans.localityRadius, userLocation)
           .where("activated", isEqualTo: true)
+          .where("featured", isEqualTo: false)
           .where('plan', isEqualTo: VisibilityPlans.locality)
           .where('astro', isEqualTo: true)
           .limit(_limit);
@@ -489,6 +495,7 @@ class Database {
           .createGeoQuery(
               _userCollection, VisibilityPlans.cityRadius, userLocation)
           .where("activated", isEqualTo: true)
+          .where("featured", isEqualTo: false)
           .where('astro', isEqualTo: true)
           .where('plan', isEqualTo: VisibilityPlans.city)
           .limit(_limit);
@@ -497,18 +504,42 @@ class Database {
           .createGeoQuery(
               _userCollection, VisibilityPlans.stateRadius, userLocation)
           .where("activated", isEqualTo: true)
+          .where("featured", isEqualTo: false)
           .where('astro', isEqualTo: true)
           .where('plan', isEqualTo: VisibilityPlans.state)
           .limit(_limit);
+      final Query<models.User> queryAll = _userCollection
+          .where('astro', isEqualTo: true)
+          .where("featured", isEqualTo: false)
+          .where("activated", isEqualTo: true)
+          .where('plan', isEqualTo: VisibilityPlans.all)
+          .limit(_limit);
 
-      final resLocality = await queryLocality.get();
-      final resCity = await queryCity.get();
-      final resState = await queryState.get();
+      final Query<models.User> queryFeatured = _userCollection
+          .where("activated", isEqualTo: true)
+          .where('astro', isEqualTo: true)
+          .where("featured", isEqualTo: true);
+
+      final results = await Future.wait([
+        queryLocality.get(),
+        queryCity.get(),
+        queryState.get(),
+        queryAll.get(),
+        queryFeatured.get()
+      ]);
+
+      final resLocality = results[0];
+      final resCity = results[1];
+      final resState = results[2];
+      final resAll = results[3];
+      final resFeatured = results[4];
 
       final List<QueryDocumentSnapshot<models.User>> data = [];
+      data.addOtherPeople(currentUid, resFeatured.docs);
       data.addOtherPeople(currentUid, resLocality.docs);
       data.addOtherPeople(currentUid, resCity.docs);
       data.addOtherPeople(currentUid, resState.docs);
+      data.addOtherPeople(currentUid, resAll.docs);
       return Success(data);
     } on FirebaseException catch (e) {
       return Failure<List<QueryDocumentSnapshot<models.User>>>(
@@ -524,6 +555,7 @@ class Database {
           QueryDocumentSnapshot<models.User>? lastForCity,
           QueryDocumentSnapshot<models.User>? lastForState,
           QueryDocumentSnapshot<models.User>? lastForAll,
+          QueryDocumentSnapshot<models.User>? lastForFeatured,
           String currentUid,
           GeoPoint userLocation) async {
     try {
@@ -575,7 +607,14 @@ class Database {
         final resAll = await queryAll.get();
         data.addOtherPeople(currentUid, resAll.docs);
       }
-
+      if (lastForFeatured != null) {
+        final Query<models.User> queryFeatured = _userCollection
+            .where("activated", isEqualTo: true)
+            .where('astro', isEqualTo: true)
+            .where("featured", isEqualTo: true);
+        final resCity = await queryFeatured.get();
+        data.addOtherPeople(currentUid, resCity.docs);
+      }
       return Success(data);
     } on FirebaseException catch (e) {
       return Failure<List<QueryDocumentSnapshot<models.User>>>(

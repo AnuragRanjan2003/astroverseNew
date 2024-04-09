@@ -26,12 +26,14 @@ class AstrologerRepo {
     QueryDocumentSnapshot<User>? lastForCity,
     QueryDocumentSnapshot<User>? lastForState,
     QueryDocumentSnapshot<User>? lastForAll,
+    QueryDocumentSnapshot<User>? lastForFeatured,
   ) =>
           _db.fetchMoreAstrologersByLocation(
             lastForLocality,
             lastForCity,
             lastForState,
             lastForAll,
+            lastForFeatured,
             currentUid,
             userLocation,
           );

@@ -1,5 +1,6 @@
 import 'dart:developer';
 
+import 'package:astroverse/components/locked_call_button.dart';
 import 'package:astroverse/components/person_items.dart';
 import 'package:astroverse/components/person_posts.dart';
 import 'package:astroverse/components/see_more_profile_bottom_sheet.dart';
@@ -11,13 +12,11 @@ import 'package:astroverse/models/user.dart';
 import 'package:astroverse/res/colors/project_colors.dart';
 import 'package:astroverse/res/img/images.dart';
 import 'package:astroverse/res/textStyles/text_styles.dart';
-import 'package:astroverse/screens/messaging.dart';
 import 'package:astroverse/utils/crypt.dart';
 import 'package:astroverse/utils/geo.dart';
 import 'package:astroverse/utils/hero_tag.dart';
 import 'package:astroverse/utils/num_parser.dart';
 import 'package:astroverse/utils/zego_cloud_services.dart';
-import 'package:cometchat_chat_uikit/cometchat_chat_uikit.dart' as comet;
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
@@ -58,15 +57,17 @@ class PublicProfilePortrait extends StatelessWidget {
                 padding: const EdgeInsets.symmetric(horizontal: 10),
                 child: Row(
                   children: [
-                    const Spacer(flex: 1,),
-                    Visibility(
-                      visible: auth.user.value!.plan >=
-                          Plans.plans[1].value + VisibilityPlans.all + 1,
-                      child: Expanded(
+                    const Spacer(
+                      flex: 1,
+                    ),
+                    if (auth.user.value!.plan >=
+                        Plans.plans[1].value + VisibilityPlans.all + 1)
+                      Expanded(
                           flex: 7,
                           child: zegoService.callButton(
-                              user.uid, decryptedUserName)),
-                    ),
+                              user.uid, decryptedUserName))
+                    else
+                      const LockedCallButton(),
                     const Spacer(
                       flex: 1,
                     ),
@@ -91,7 +92,6 @@ class PublicProfilePortrait extends StatelessWidget {
                   const SizedBox(
                     height: 15,
                   ),
-
                   Builder(builder: (context) {
                     return Obx(() => OutlinedButton(
                         onPressed: public.info.value == null
@@ -119,25 +119,32 @@ class PublicProfilePortrait extends StatelessWidget {
                   Obx(() {
                     final info = public.info.value;
                     if (info == null) return _buildDatesColumnShimmer();
-                   return Row(
-                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                     children: [
-                       _buildChip(Icons.shopping_bag_outlined, info.servicesSold.toString(),Colors.green ),
-                       _buildChip(Icons.data_exploration_outlined, info.posts.toString(),Colors.blue ),
-                       _buildChip(Icons.remove_red_eye_outlined, user.profileViews.toString(),Colors.grey ),
-                       _buildChip(Icons.star_border, user.featured?"Yes":"No",Colors.pink ),
-                     ],
-                   );
+                    return Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
+                        _buildChip(Icons.shopping_bag_outlined,
+                            info.servicesSold.toString(), Colors.green),
+                        _buildChip(Icons.data_exploration_outlined,
+                            info.posts.toString(), Colors.blue),
+                        _buildChip(Icons.remove_red_eye_outlined,
+                            user.profileViews.toString(), Colors.grey),
+                        _buildChip(Icons.star_border,
+                            user.featured ? "Yes" : "No", Colors.pink),
+                      ],
+                    );
                   }),
                 ],
               ),
             ),
             const TabBar(
               tabs: [
-                Tab(text: 'posts',),
+                Tab(
+                  text: 'posts',
+                ),
                 Tab(text: 'services'),
               ],
-              indicatorColor: ProjectColors.primary,labelColor: ProjectColors.primary,
+              indicatorColor: ProjectColors.primary,
+              labelColor: ProjectColors.primary,
             ),
             Expanded(
                 child: TabBarView(

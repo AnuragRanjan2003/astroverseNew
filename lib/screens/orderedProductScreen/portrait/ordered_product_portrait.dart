@@ -812,12 +812,12 @@ class _OrderedProductPortraitState extends State<OrderedProductPortrait> {
 
   Widget actionButton(Purchase purchase, Crypt crypto,
       ZegoCloudServices zegoService, BuildContext context) {
-    if (purchase.deliveryMethod == 2) {
+    if (purchase.deliveryMethod == 1) {
       return Container(
           child: zegoService.callButton(purchase.sellerId,
               crypto.decryptFromBase64String(purchase.sellerName)));
     }
-    if (purchase.deliveryMethod == 1) {
+    if (purchase.deliveryMethod == 0) {
       comet.User receiver = comet.User(
           uid: purchase.sellerId,
           name: crypto.decryptFromBase64String(purchase.sellerName));
