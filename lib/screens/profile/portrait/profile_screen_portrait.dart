@@ -1,10 +1,13 @@
-import 'package:astroverse/components/buy_coins.dart';
 import 'package:astroverse/components/name_plate.dart';
+import 'package:astroverse/components/upgrade_features_bottom_sheet.dart';
+import 'package:astroverse/components/upgrade_range_bottomsheet.dart';
 import 'package:astroverse/controllers/auth_controller.dart';
+import 'package:astroverse/controllers/revenue_cat_controller.dart';
+import 'package:astroverse/db/plans_db.dart';
 import 'package:astroverse/res/colors/project_colors.dart';
 import 'package:astroverse/res/img/images.dart';
 import 'package:astroverse/screens/ask/ask_screen.dart';
-import 'package:astroverse/utils/num_parser.dart';
+import 'package:astroverse/utils/geo.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:shimmer/shimmer.dart';
@@ -64,7 +67,8 @@ class ProfileScreenPortrait extends StatelessWidget {
                     },
                     onLogOut: () {
                       auth.logOut(
-                        () {
+                        () async {
+                          await Get.find<RevenueCatController>().logout();
                           Navigator.of(context).pushAndRemoveUntil(
                               MaterialPageRoute(
                                 builder: (context) => const AskScreen(),
@@ -90,8 +94,10 @@ class ProfileScreenPortrait extends StatelessWidget {
               child: GestureDetector(
                 onTap: () {
                   Scaffold.of(context).showBottomSheet(
-                      (context) => const BuyCoinsSheet(),
-                      constraints: BoxConstraints(maxHeight: Get.height * 0.8));
+                    (context) => auth.user.value!.astro
+                        ? UpgradeRangeBottomSheet(user: auth.user.value!)
+                        : UpgradeFeaturesBottomSheet(user: auth.user.value!),
+                  );
                 },
                 child: Container(
                   margin:
@@ -107,17 +113,6 @@ class ProfileScreenPortrait extends StatelessWidget {
                     spacing: 5,
                     crossAxisAlignment: WrapCrossAlignment.center,
                     children: [
-                      Obx(() {
-                        return Text(
-                          auth.user.value == null
-                              ? "XX"
-                              : NumberParser()
-                                  .toSocialMediaString(auth.user.value!.coins),
-                          style: const TextStyle(
-                              fontWeight: FontWeight.w600,
-                              color: ProjectColors.disabled),
-                        );
-                      }),
                       const CircleAvatar(
                         radius: 14,
                         backgroundColor: Colors.transparent,
@@ -126,6 +121,30 @@ class ProfileScreenPortrait extends StatelessWidget {
                           fit: BoxFit.fill,
                         ),
                       ),
+                      Obx(() {
+                        return Text(
+                          auth.user.value == null
+                              ? "XX"
+                              : auth.user.value!.astro
+                                  ? Plans.astroPlans
+                                      .firstWhere((element) =>
+                                          element.value ==
+                                          auth.user.value!.plan)
+                                      .name
+                                  : auth.user.value!.plan == 0
+                                      ? " Free"
+                                      : Plans.plans
+                                          .firstWhere((element) =>
+                                              element.value ==
+                                              auth.user.value!.plan -
+                                                  VisibilityPlans.all -
+                                                  1)
+                                          .name,
+                          style: const TextStyle(
+                              fontWeight: FontWeight.w600,
+                              color: ProjectColors.disabled),
+                        );
+                      }),
                     ],
                   ),
                 ),

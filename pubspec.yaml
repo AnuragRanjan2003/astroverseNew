@@ -71,6 +71,7 @@ dependencies:
   shortid: ^0.1.2
   url_launcher: ^6.2.3
   rive: 0.11.11
+  purchases_flutter: ^6.27.0
 
 dev_dependencies:
   flutter_test:

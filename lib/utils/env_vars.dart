@@ -7,4 +7,5 @@ class EnvVars {
   static const String razorPaySecret = "RAZORPAYSECRET";
   static const String cryptKey = "CRYPTKEY";
   static const String cryptIV = "CRYPTIV";
+  static const String rcApiKey = "REVENUE_CAT_API_KEY";
 }

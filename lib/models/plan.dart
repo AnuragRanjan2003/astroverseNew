@@ -1,5 +1,6 @@
 class Plan {
   final String name;
+  final String identifier;
   final int price;
   final String content;
   final int value;
@@ -9,6 +10,7 @@ class Plan {
 
   const Plan({
     required this.name,
+    required this.identifier,
     required this.price,
     required this.content,
     required this.value,

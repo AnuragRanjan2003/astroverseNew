@@ -1,3 +1,4 @@
+import 'package:astroverse/controllers/revenue_cat_controller.dart';
 import 'package:astroverse/firebase_options.dart';
 import 'package:astroverse/res/colors/project_colors.dart';
 import 'package:astroverse/routes/routes.dart';
@@ -14,12 +15,14 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:zego_uikit_prebuilt_call/zego_uikit_prebuilt_call.dart';
 
 void main() async {
+  await dotenv.load(fileName: '.env');
   final navigatorKey = GlobalKey<NavigatorState>();
+  await Get.put(RevenueCatController())
+      .initialize(true, dotenv.get(EnvVars.rcApiKey));
   WidgetsFlutterBinding.ensureInitialized();
   final app = await Firebase.initializeApp(
       options: DefaultFirebaseOptions.currentPlatform);
 
-  await dotenv.load(fileName: '.env');
   final pref = await SharedPreferences.getInstance();
   final firstTime = pref.getBool("first_time") ?? true;
   Crypt.initialize(dotenv.get(EnvVars.cryptKey), dotenv.get(EnvVars.cryptIV));

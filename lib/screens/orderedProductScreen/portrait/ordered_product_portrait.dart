@@ -242,7 +242,7 @@ class _OrderedProductPortraitState extends State<OrderedProductPortrait> {
                           mainAxisAlignment: MainAxisAlignment.start,
                           children: [
                             buildChip(
-                                (item.netStars*5).toStringAsFixed(2),
+                                (item.netStars * 5).toStringAsFixed(2),
                                 const Icon(
                                   Icons.star,
                                   color: Colors.lightGreen,
@@ -743,7 +743,9 @@ class _OrderedProductPortraitState extends State<OrderedProductPortrait> {
               ],
             ),
           ),
-          order.purchase.value!.review == null
+          order.purchase.value!.review == null &&
+                  (!order.purchase.value!.active ||
+                      order.purchase.value!.delivered)
               ? Align(
                   alignment: Alignment.bottomCenter,
                   child: AskReviewBottomSheet(purchase: order.purchase.value!),
@@ -814,6 +816,7 @@ class _OrderedProductPortraitState extends State<OrderedProductPortrait> {
       ZegoCloudServices zegoService, BuildContext context) {
     if (purchase.deliveryMethod == 1) {
       return Container(
+          margin: EdgeInsets.only(bottom: 40),
           child: zegoService.callButton(purchase.sellerId,
               crypto.decryptFromBase64String(purchase.sellerName)));
     }

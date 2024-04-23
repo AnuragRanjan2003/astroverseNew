@@ -1,5 +1,10 @@
+import 'dart:developer';
+
 import 'package:astroverse/components/glass_morph_container.dart';
 import 'package:astroverse/controllers/auth_controller.dart';
+import 'package:astroverse/controllers/revenue_cat_controller.dart';
+import 'package:astroverse/db/plans_db.dart';
+import 'package:astroverse/models/plan.dart';
 import 'package:astroverse/models/user.dart' as m;
 import 'package:astroverse/res/colors/project_colors.dart';
 import 'package:astroverse/res/textStyles/text_styles.dart';
@@ -8,6 +13,7 @@ import 'package:astroverse/screens/peopleScreen/portrait/people_screen_portrait.
 import 'package:astroverse/screens/profile/profile_screen.dart';
 import 'package:astroverse/screens/purchasesScreen/purchases_screen.dart';
 import 'package:astroverse/utils/crypt.dart';
+import 'package:astroverse/utils/geo.dart';
 import 'package:astroverse/utils/resource.dart';
 import 'package:astroverse/utils/zego_cloud_services.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -34,6 +40,7 @@ class MainScreenPortrait extends StatefulWidget {
 class _MainScreenPortraitState extends State<MainScreenPortrait> {
   late AuthController auth;
   late ZegoUIKitPrebuiltCallController? callController;
+  late RevenueCatController rcController;
 
   @override
   Widget build(BuildContext context) {
@@ -181,6 +188,7 @@ class _MainScreenPortraitState extends State<MainScreenPortrait> {
   @override
   void initState() {
     auth = Get.find();
+    rcController = Get.find();
     var user = auth.user.value;
     callController = ZegoUIKitPrebuiltCallController();
     if (user == null) {
@@ -197,6 +205,39 @@ class _MainScreenPortraitState extends State<MainScreenPortrait> {
     } else {
       ZegoCloudServices().initCallInvitationService(user.uid,
           Crypt().decryptFromBase64String(user.name), callController, context);
+      rcController.logIn(user.uid, (customerInfo) {
+        log("customerInfo changed", name: " CUSTOMER INFO");
+        final $entitlements = customerInfo.entitlements.active.keys.toList();
+        if (user.astro) {
+          Plan highestEntitlementPlan = Plans.astroPlans[0];
+          for (int i = Plans.astroPlans.length - 1; i >= 0; i--) {
+            if ($entitlements.contains(Plans.astroPlans[i].identifier)) {
+              highestEntitlementPlan = Plans.astroPlans[i];
+              break;
+            }
+          }
+          if (highestEntitlementPlan.value == user.plan) return;
+          auth.updateRangeForUser(user.uid, highestEntitlementPlan.value, 0,
+              (p0) {
+            log("user info updated", name: " CUSTOMER INFO");
+          });
+        } else {
+          Plan highestEntitlementPlan = Plans.plans[0];
+          for (int i = Plans.plans.length - 1; i >= 0; i--) {
+            if ($entitlements.contains(Plans.plans[i].identifier)) {
+              highestEntitlementPlan = Plans.plans[i];
+              break;
+            }
+          }
+          if (highestEntitlementPlan.value + VisibilityPlans.all + 1 ==
+                  user.plan ||
+              (highestEntitlementPlan.value == 0 && user.plan == 0)) return;
+          auth.updateRangeForUser(user.uid,
+              highestEntitlementPlan.value + VisibilityPlans.all + 1, 0, (p0) {
+            log("user info updated", name: " CUSTOMER INFO");
+          });
+        }
+      });
     }
     super.initState();
   }

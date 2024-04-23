@@ -1,7 +1,7 @@
 import 'dart:developer';
 
-import 'package:astroverse/components/plan_item.dart';
 import 'package:astroverse/controllers/auth_controller.dart';
+import 'package:astroverse/controllers/revenue_cat_controller.dart';
 import 'package:astroverse/db/plans_db.dart';
 import 'package:astroverse/models/plan.dart';
 import 'package:astroverse/res/colors/project_colors.dart';
@@ -20,7 +20,10 @@ class UpgradeRangeBottomSheet extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final AuthController auth = Get.find();
+    final RevenueCatController rcController = Get.find();
     auth.selectedUpgradePlan.value = -1;
+    rcController.getProductsForAstrologer();
+
     return Container(
       color: Colors.white,
       padding: const EdgeInsets.only(top: 20, left: 20, right: 20),
@@ -35,24 +38,19 @@ class UpgradeRangeBottomSheet extends StatelessWidget {
             const SizedBox(
               height: 20,
             ),
-            ...List.generate(
-                Plans.astroPlans.sublist(1).length,
-                (index) => Plans.astroPlans.sublist(1)[index].value > user.plan
-                    ? Obx(() => PlanItem(
-                        plan: Plans.astroPlans.sublist(1)[index],
-                        selected: auth.selectedUpgradePlan.value,
-                        onChange: (p) {
-                          auth.selectedUpgradePlan.value = p.value;
-                        }))
-                    : Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 5),
-                        child: PlanItem(
-                          plan: Plans.plans.sublist(1)[index],
-                          selected: -1,
-                          taken: true,
-                          onChange: (p) {},
-                        ),
-                      )),
+            Obx(() {
+              final _products = rcController.products.value;
+              return Column(
+                children: List.generate(
+                    _products.length,
+                    (index) => ListTile(
+                          title: Text(_products[index].title),
+                          onTap: () {
+                            auth.selectedUpgradePlan.value = index;
+                          },
+                        )),
+              );
+            }),
             const SizedBox(
               height: 10,
             ),
@@ -69,25 +67,13 @@ class UpgradeRangeBottomSheet extends StatelessWidget {
                             (p) => auth.selectedUpgradePlan.value == p.value);
                       }
                       return MaterialButton(
-                        onPressed: validate(auth)
+                        onPressed: validate(auth) || plan == null
                             ? null
-                            : () {
-                                auth.updateRangeForUser(
-                                    user.uid, plan!.value, plan.price, (p0) {
-                                  if (p0.isSuccess) {
-                                    auth.selectedUpgradePlan.value = -1;
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                        const SnackBar(
-                                            content: Text(
-                                                "range upgraded successfully")));
-                                  } else {
-                                    auth.selectedUpgradePlan.value = -1;
-                                    p0 as Failure<Json>;
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                        SnackBar(content: Text(p0.error)));
-                                  }
-                                  Navigator.pop(context);
-                                });
+                            : () async {
+                                await rcController.purchaseProduct(
+                                    rcController.products[
+                                        auth.selectedUpgradePlan.value],
+                                    updateDb(auth, plan!, context));
                               },
                         disabledColor: ProjectColors.disabled,
                         disabledTextColor: Colors.white,
@@ -130,5 +116,21 @@ class UpgradeRangeBottomSheet extends StatelessWidget {
         auth.upgradingPlan.isTrue;
     log("$x", name: "VALIDATE");
     return x;
+  }
+
+  updateDb(AuthController auth, Plan plan, BuildContext context) {
+    auth.updateRangeForUser(user.uid, plan!.value, plan.price, (p0) {
+      if (p0.isSuccess) {
+        auth.selectedUpgradePlan.value = -1;
+        ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text("range upgraded successfully")));
+      } else {
+        auth.selectedUpgradePlan.value = -1;
+        p0 as Failure<Json>;
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(p0.error)));
+      }
+      Navigator.pop(context);
+    });
   }
 }

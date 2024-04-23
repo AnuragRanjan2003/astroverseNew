@@ -1,7 +1,8 @@
 import 'dart:developer';
 
-import 'package:astroverse/components/plan_item.dart';
+import 'package:astroverse/components/product_item.dart';
 import 'package:astroverse/controllers/auth_controller.dart';
+import 'package:astroverse/controllers/revenue_cat_controller.dart';
 import 'package:astroverse/db/plans_db.dart';
 import 'package:astroverse/models/plan.dart';
 import 'package:astroverse/models/user.dart';
@@ -26,6 +27,7 @@ class UpgradeFeaturesBottomSheet extends StatefulWidget {
 class _UpgradeFeaturesBottomSheetState
     extends State<UpgradeFeaturesBottomSheet> {
   late AuthController auth;
+  late RevenueCatController rcController;
 
   @override
   Widget build(BuildContext context) {
@@ -43,28 +45,22 @@ class _UpgradeFeaturesBottomSheetState
             const SizedBox(
               height: 20,
             ),
-            ...List.generate(
-                Plans.plans.sublist(1).length,
-                (index) => Plans.plans.sublist(1)[index].value + VisibilityPlans.all + 1 >
-                        widget.user.plan
-                    ? Obx(() => Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 5),
-                          child: PlanItem(
-                              plan: Plans.plans.sublist(1)[index],
-                              selected: auth.selectedUpgradeFeatures.value,
-                              onChange: (p) {
-                                auth.selectedUpgradeFeatures.value = p.value;
-                              }),
-                        ))
-                    : Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 5),
-                        child: PlanItem(
-                          plan: Plans.plans.sublist(1)[index],
-                          selected: -1,
-                          taken: true,
-                          onChange: (p) {},
-                        ),
-                      )),
+            Obx(() {
+              final _products = rcController.products.value;
+              return Column(
+                children: List.generate(
+                    _products.length,
+                    (index) => ProductItem(
+                          product: _products[index],
+                          index: index,
+                          taken: auth.user.value!.plan==Plans.plans[1].value + VisibilityPlans.all+1 ,
+                          selected: auth.selectedUpgradeFeatures.value,
+                          onChange: (p) {
+                            auth.selectedUpgradeFeatures.value = index;
+                          },
+                        )),
+              );
+            }),
             const SizedBox(
               height: 10,
             ),
@@ -81,26 +77,13 @@ class _UpgradeFeaturesBottomSheetState
                             auth.selectedUpgradeFeatures.value == p.value);
                       }
                       return MaterialButton(
-                        onPressed: validate(auth)
+                        onPressed: _validate(auth) || plan == null
                             ? null
-                            : () {
-                                auth.updateRangeForUser(
-                                    widget.user.uid,
-                                    plan!.value + VisibilityPlans.all + 1,
-                                    plan.price, (p0) {
-                                  if (p0.isSuccess) {
-                                    auth.selectedUpgradePlan.value = -1;
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                        const SnackBar(
-                                            content: Text(
-                                                "plan upgraded successfully")));
-                                  } else {
-                                    auth.selectedUpgradePlan.value = -1;
-                                    p0 as Failure<Json>;
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                        SnackBar(content: Text(p0.error)));
-                                  }
-                                  Navigator.pop(context);
+                            : () async {
+                                await rcController.purchaseProduct(
+                                    rcController.products[auth
+                                        .selectedUpgradeFeatures.value], () {
+                                  _updateDatabase(plan!);
                                 });
                               },
                         disabledColor: ProjectColors.disabled,
@@ -134,21 +117,37 @@ class _UpgradeFeaturesBottomSheetState
     );
   }
 
-  validate(AuthController auth) {
-    final x = (auth.selectedUpgradeFeatures.value == -1 ||
-            widget.user.coins <
-                Plans.plans
-                    .singleWhere(
-                        (p) => auth.selectedUpgradeFeatures.value == p.value)
-                    .price) ||
+  _validate(AuthController auth) {
+    final x = (auth.selectedUpgradeFeatures.value == -1) ||
         auth.upgradingFeatures.isTrue;
     log("$x", name: "VALIDATE");
     return x;
   }
 
+  _updateDatabase(Plan plan) {
+    auth.updateRangeForUser(
+        widget.user.uid, plan!.value + VisibilityPlans.all + 1, 0, (p0) {
+      if (p0.isSuccess) {
+        auth.selectedUpgradePlan.value = -1;
+        ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text("plan upgraded successfully")));
+      } else {
+        auth.selectedUpgradePlan.value = -1;
+        p0 as Failure<Json>;
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(p0.error)));
+      }
+      Navigator.pop(context);
+    });
+  }
+
   @override
   void initState() {
     auth = Get.find();
+    rcController = Get.find();
+
+    rcController.getProductsForUsers();
+
     auth.selectedUpgradeFeatures.value = -1;
     super.initState();
   }
